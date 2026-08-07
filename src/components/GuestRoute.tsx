@@ -4,7 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 
 /**
  * Componente inverso a ProtectedRoute.
- * Si el usuario YA está autenticado, lo redirige a /inicio.
+ * Si el usuario YA está autenticado, lo redirige a /dashboard.
  * Así no puede volver al login escribiendo "/" en la URL.
  */
 export default function GuestRoute({ children }: { children: React.ReactNode }) {
@@ -20,7 +20,7 @@ export default function GuestRoute({ children }: { children: React.ReactNode }) 
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/inicio" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;

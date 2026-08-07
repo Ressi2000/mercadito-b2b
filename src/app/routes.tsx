@@ -1,6 +1,7 @@
 // src/app/routes.tsx
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import LoginPage from "../pages/auth/LoginPage";
+import DashboardPage from "../pages/dashboard/DashboardPage";
 import EmpresasPage from "../pages/empresas/EmpresasPage";
 import CatalogoPage from "../pages/catalogo/CatalogoPage";
 import CarritoPage from "../pages/carrito/CarritoPage";
@@ -34,6 +35,8 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
+      { path: "/dashboard",    element: <DashboardPage /> },
+
       // /inicio en lugar de /empresas — más amigable para el usuario
       { path: "/inicio",       element: <EmpresasPage /> },
       { path: "/catalogo/:empresaId", element: <CatalogoPage /> },
@@ -45,8 +48,8 @@ export const router = createBrowserRouter([
       // Redirigir /empresas a /inicio por compatibilidad
       { path: "/empresas",     element: <Navigate to="/inicio" replace /> },
 
-      // Cualquier ruta desconocida dentro del área protegida → inicio
-      { path: "*",             element: <Navigate to="/inicio" replace /> },
+      // Cualquier ruta desconocida dentro del área protegida → dashboard
+      { path: "*",             element: <Navigate to="/dashboard" replace /> },
     ],
   },
 ]);

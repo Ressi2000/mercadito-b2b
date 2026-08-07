@@ -23,7 +23,7 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginForm) => {
     try {
       await login(data);
-      navigate("/empresas");
+      navigate("/dashboard");
     } catch {
       // El error ya está manejado en el contexto
     }
