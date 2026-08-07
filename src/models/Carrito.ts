@@ -1,13 +1,24 @@
+// src/models/Carrito.ts
+
 export interface CarritoItem {
-  materialId: number;
+  id: number;         // negativo = temporal optimista, positivo = confirmado en BD
+  material_id: number;
   nombre: string;
+  codigo: string;
+  foto?: string | null;
   cantidad: number;
-  precioUnitario: number;
+  precio_unitario: number;
   subtotal: number;
+  unidad_medida?: string;
+  moneda?: string;
 }
 
 export interface Carrito {
-  empresaId: number;
+  id: number | null;  // null = carrito aún no creado en BD (vacío por primera vez)
+  codigo_pedido_web: string | null;
+  mercancia_id: number;
+  nombre_mercancia?: string;
+  estado: "draft" | "confirmado" | "procesado" | "rechazado";
+  total_estimado: number;
   items: CarritoItem[];
-  total: number;
 }

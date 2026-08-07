@@ -30,25 +30,63 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-full max-w-md animate-slide-up">
-      <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-2xl shadow-brand-slate-900/10 border border-white/20 overflow-hidden">
-        
-        {/* Header */}
-        <div className="relative bg-gradient-to-br from-brand-teal-500 to-brand-teal-600 px-8 pt-12 pb-8">
-          <div className="text-center text-white">
-            <h1 className="text-3xl font-bold mb-2 tracking-tight">
-              B2B Minerals
-            </h1>
-            <p className="text-brand-teal-100 text-sm font-medium">
-              Portal de pedidos empresariales
-            </p>
+    <div className="w-full space-y-6 animate-slide-up">
+
+      {/* ── Card principal ── */}
+      <div
+        className="rounded-2xl overflow-hidden"
+        style={{
+          background: "rgba(255, 255, 255, 0.06)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          border: "1px solid rgba(255, 255, 255, 0.10)",
+          boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)",
+        }}
+      >
+
+        {/* ── Header del card ── */}
+        <div className="relative px-8 pt-10 pb-8 text-center overflow-hidden">
+
+          {/* Línea de acento superior */}
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-brand-teal-500 to-transparent opacity-70" />
+
+          {/* Ícono mineral */}
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-5"
+            style={{
+              background: "rgba(13, 148, 136, 0.15)",
+              border: "1px solid rgba(13, 148, 136, 0.30)",
+            }}
+          >
+            <svg
+              className="w-7 h-7 text-brand-teal-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"
+              />
+            </svg>
           </div>
+
+          <h1 className="text-2xl font-bold text-white tracking-tight">
+            B2B Minerals
+          </h1>
+          <p className="text-sm text-brand-slate-400 mt-1">
+            Portal de pedidos empresariales
+          </p>
         </div>
 
-        {/* Form */}
-        <div className="px-8 pt-8 pb-10">
+        {/* Separador */}
+        <div className="mx-8 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+
+        {/* ── Formulario ── */}
+        <div className="px-8 pt-7 pb-10">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            
+
             <Input
               type="email"
               placeholder="correo@empresa.com"
@@ -72,17 +110,24 @@ export default function LoginPage() {
                 required: "La contraseña es requerida",
                 minLength: {
                   value: 6,
-                  message: "La contraseña debe tener al menos 6 caracteres",
+                  message: "Mínimo 6 caracteres",
                 },
               })}
             />
 
             {/* Error global */}
             {error && (
-              <div className="p-4 rounded-xl bg-red-50 border border-red-200 animate-slide-up">
-                <p className="text-sm text-red-800 font-medium">
-                  {error}
-                </p>
+              <div
+                className="flex items-start gap-3 p-4 rounded-xl animate-slide-up"
+                style={{
+                  background: "rgba(239, 68, 68, 0.10)",
+                  border: "1px solid rgba(239, 68, 68, 0.25)",
+                }}
+              >
+                <svg className="w-4 h-4 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+                <p className="text-sm text-red-300 font-medium">{error}</p>
               </div>
             )}
 
@@ -90,7 +135,7 @@ export default function LoginPage() {
               type="submit"
               variant="primary"
               isLoading={loading}
-              className="w-full mt-6"
+              className="w-full !mt-7"
             >
               Iniciar Sesión
             </Button>
@@ -99,11 +144,11 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <div className="mt-8 text-center">
-        <p className="text-xs text-brand-slate-500">
-          © {new Date().getFullYear()} Gesindoni. Todos los derechos reservados.
-        </p>
-      </div>
+      {/* ── Footer ── */}
+      <p className="text-center text-xs text-brand-slate-600">
+        © {new Date().getFullYear()} Gesindoni. Todos los derechos reservados.
+      </p>
+
     </div>
   );
 }

@@ -1,5 +1,9 @@
 export interface Empresa {
   id: number;
-  nombre: string;
-  imagen?: string;
+  nombre_mercancia: string;
+  OrgVentaId: string;
+  foto: {
+    id: number;
+    foto: string;
+  }[];
 }

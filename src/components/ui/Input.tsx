@@ -1,40 +1,81 @@
-import { forwardRef, type InputHTMLAttributes } from "react";
+import {
+  forwardRef,
+  type InputHTMLAttributes,
+  type ReactNode,
+} from "react";
 import clsx from "clsx";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
+  helperText?: string;
+  leftIcon?: ReactNode;
+  rightIcon?: ReactNode;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, className, ...props }, ref) => {
+  (
+    {
+      label,
+      error,
+      helperText,
+      leftIcon,
+      rightIcon,
+      className,
+      id,
+      ...props
+    },
+    ref
+  ) => {
     return (
-      <div className="space-y-1.5">
+      <div className="space-y-2 w-full">
         {label && (
-          <label className="block text-sm font-medium text-brand-slate-700">
+          <label
+            htmlFor={id}
+            className="block text-sm font-medium text-brand-slate-100"
+          >
             {label}
           </label>
         )}
-        <input
-          ref={ref}
-          className={clsx(
-            "w-full px-4 py-3.5 rounded-xl border transition-all duration-200",
-            "bg-white/50 backdrop-blur-sm",
-            "text-brand-slate-900 placeholder:text-brand-slate-400",
-            "focus:outline-none focus:ring-2 focus:ring-brand-teal-500/50 focus:border-brand-teal-500",
-            "hover:border-brand-slate-400",
-            error
-              ? "border-red-300 focus:ring-red-500/50 focus:border-red-500"
-              : "border-brand-slate-200",
-            className
+
+        <div className="relative">
+          {leftIcon && (
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-slate-400">
+              {leftIcon}
+            </div>
           )}
-          {...props}
-        />
-        {error && (
-          <p className="text-sm text-red-600 animate-slide-up">
-            {error}
-          </p>
-        )}
+
+          <input
+            ref={ref}
+            id={id}
+            className={clsx(
+              "w-full rounded-xl border bg-white/70 backdrop-blur-md",
+              "px-4 py-3 text-sm transition-all duration-200",
+              "focus:outline-none focus:ring-2 focus:ring-brand-teal-500 focus:border-transparent",
+              "disabled:opacity-50 disabled:cursor-not-allowed",
+              leftIcon && "pl-11",
+              rightIcon && "pr-11",
+              error
+                ? "border-red-400 focus:ring-red-400"
+                : "border-brand-slate-300",
+              className
+            )}
+            aria-invalid={!!error}
+            {...props}
+          />
+
+          {rightIcon && (
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-brand-slate-400">
+              {rightIcon}
+            </div>
+          )}
+        </div>
+
+        {error ? (
+          <p className="text-sm text-red-500">{error}</p>
+        ) : helperText ? (
+          <p className="text-sm text-brand-slate-500">{helperText}</p>
+        ) : null}
       </div>
     );
   }

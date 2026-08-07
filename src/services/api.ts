@@ -7,23 +7,29 @@ const api = axios.create({
   withCredentials: true,
   withXSRFToken: true,
   headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
-  }
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  },
 });
 
-// 🔥 Interceptor global
+// Rutas que pueden recibir 401 de forma legítima (no redirigir)
+const AUTH_ROUTES = ["/mercadito/auth/ping", "/mercadito/login"];
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.clear();
+    const url = error.config?.url ?? "";
+    const is401 = error.response?.status === 401;
+    const isAuthRoute = AUTH_ROUTES.some((r) => url.includes(r));
+
+    // Solo redirigir al login si es 401 en rutas protegidas (no en ping/login)
+    if (is401 && !isAuthRoute) {
+      localStorage.removeItem("mercadito_user");
       router.navigate("/");
     }
 
     return Promise.reject(error);
   }
 );
-
 
 export default api;
