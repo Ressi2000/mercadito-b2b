@@ -8,7 +8,7 @@ export default function ProtectedRoute({ children }: any) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-slate-600">Verificando sesión...</p>
+        <p className="text-brand-neutral-600">Verificando sesión...</p>
       </div>
     );
   }

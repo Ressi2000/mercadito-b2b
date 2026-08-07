@@ -3,12 +3,12 @@ import { Outlet } from "react-router-dom";
 
 export default function AuthLayout() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-neutral-900 via-brand-neutral-800 to-brand-neutral-900 relative overflow-hidden">
 
       {/* ── Orbes flotantes ── */}
       <div
         className="absolute w-[500px] h-[500px] rounded-full opacity-20 blur-3xl animate-orb-1"
-        style={{ background: "radial-gradient(circle, #0d9488, transparent 70%)", top: "-10%", left: "-10%" }}
+        style={{ background: "radial-gradient(circle, #dc2626, transparent 70%)", top: "-10%", left: "-10%" }}
       />
       <div
         className="absolute w-[400px] h-[400px] rounded-full opacity-15 blur-3xl animate-orb-2"
@@ -16,7 +16,7 @@ export default function AuthLayout() {
       />
       <div
         className="absolute w-[300px] h-[300px] rounded-full opacity-10 blur-3xl animate-orb-3"
-        style={{ background: "radial-gradient(circle, #14b8a6, transparent 70%)", top: "50%", right: "20%" }}
+        style={{ background: "radial-gradient(circle, #ef4444, transparent 70%)", top: "50%", right: "20%" }}
       />
 
       {/* ── Grid pattern sutil ── */}
@@ -42,7 +42,7 @@ export default function AuthLayout() {
       ].map((p, i) => (
         <span
           key={i}
-          className="absolute rounded-full bg-teal-400 animate-pulse"
+          className="absolute rounded-full bg-brand-primary-400 animate-pulse"
           style={{
             width: p.size,
             height: p.size,

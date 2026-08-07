@@ -48,17 +48,17 @@ export default function LoginPage() {
         <div className="relative px-8 pt-10 pb-8 text-center overflow-hidden">
 
           {/* Línea de acento superior */}
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-brand-teal-500 to-transparent opacity-70" />
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-brand-primary-500 to-transparent opacity-70" />
 
           {/* Ícono mineral */}
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-5"
             style={{
-              background: "rgba(13, 148, 136, 0.15)",
-              border: "1px solid rgba(13, 148, 136, 0.30)",
+              background: "rgba(220, 38, 38, 0.15)",
+              border: "1px solid rgba(220, 38, 38, 0.30)",
             }}
           >
             <svg
-              className="w-7 h-7 text-brand-teal-400"
+              className="w-7 h-7 text-brand-primary-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -73,9 +73,9 @@ export default function LoginPage() {
           </div>
 
           <h1 className="text-2xl font-bold text-white tracking-tight">
-            B2B Minerals
+            GesClientes
           </h1>
-          <p className="text-sm text-brand-slate-400 mt-1">
+          <p className="text-sm text-brand-neutral-400 mt-1">
             Portal de pedidos empresariales
           </p>
         </div>
@@ -145,8 +145,8 @@ export default function LoginPage() {
       </div>
 
       {/* ── Footer ── */}
-      <p className="text-center text-xs text-brand-slate-600">
-        © {new Date().getFullYear()} Gesindoni. Todos los derechos reservados.
+      <p className="text-center text-xs text-brand-neutral-600">
+        © {new Date().getFullYear()} Sindoni. Todos los derechos reservados.
       </p>
 
     </div>

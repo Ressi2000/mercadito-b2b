@@ -20,11 +20,11 @@ export default function Button({
 
   const variants = {
     primary:
-      "bg-brand-teal-600 text-white hover:bg-brand-teal-700 active:scale-[0.98] shadow-lg shadow-brand-teal-600/30 hover:shadow-xl hover:shadow-brand-teal-600/40",
+      "bg-brand-primary-600 text-white hover:bg-brand-primary-700 active:scale-[0.98] shadow-lg shadow-brand-primary-600/30 hover:shadow-xl hover:shadow-brand-primary-600/40",
     secondary:
-      "bg-brand-slate-100 text-brand-slate-900 hover:bg-brand-slate-200 active:scale-[0.98]",
+      "bg-brand-neutral-100 text-brand-neutral-900 hover:bg-brand-neutral-200 active:scale-[0.98]",
     ghost:
-      "bg-transparent text-brand-slate-700 hover:bg-brand-slate-100 active:scale-[0.98]",
+      "bg-transparent text-brand-neutral-700 hover:bg-brand-neutral-100 active:scale-[0.98]",
   };
 
   return (

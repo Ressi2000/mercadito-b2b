@@ -14,7 +14,7 @@ export default function GuestRoute({ children }: { children: React.ReactNode }) 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <span className="w-6 h-6 border-2 border-brand-teal-400 border-t-transparent rounded-full animate-spin" />
+        <span className="w-6 h-6 border-2 border-brand-primary-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }

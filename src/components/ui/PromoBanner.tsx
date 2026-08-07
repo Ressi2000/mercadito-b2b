@@ -27,11 +27,11 @@ export default function PromoBanner({
           className="absolute inset-0 w-full h-full object-cover"
         />
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-r from-brand-slate-900 via-brand-slate-800 to-brand-teal-900" />
+        <div className="absolute inset-0 bg-gradient-to-r from-brand-neutral-900 via-brand-neutral-800 to-brand-primary-900" />
       )}
 
       {/* Overlay oscuro para legibilidad */}
-      <div className="absolute inset-0 bg-gradient-to-r from-brand-slate-900/90 via-brand-slate-900/60 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-brand-neutral-900/90 via-brand-neutral-900/60 to-transparent" />
 
       {/* Grid pattern sutil */}
       <div
@@ -48,7 +48,7 @@ export default function PromoBanner({
       {/* Orbe decorativo teal */}
       <div
         className="absolute -right-10 -top-10 w-48 h-48 rounded-full opacity-20 blur-3xl pointer-events-none"
-        style={{ background: "radial-gradient(circle, #0d9488, transparent 70%)" }}
+        style={{ background: "radial-gradient(circle, #dc2626, transparent 70%)" }}
       />
 
       {/* Orbe decorativo amber */}
@@ -62,8 +62,8 @@ export default function PromoBanner({
 
         <div className="space-y-2 max-w-xl">
           {/* Tag */}
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-teal-400 uppercase tracking-widest">
-            <span className="w-1.5 h-1.5 rounded-full bg-brand-teal-400 animate-pulse" />
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-primary-400 uppercase tracking-widest">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-primary-400 animate-pulse" />
             {tag}
           </span>
 
@@ -73,7 +73,7 @@ export default function PromoBanner({
           </h2>
 
           {/* Subtítulo */}
-          <p className="text-sm text-brand-slate-300 leading-relaxed">
+          <p className="text-sm text-brand-neutral-300 leading-relaxed">
             {subtitle}
           </p>
         </div>
@@ -81,7 +81,7 @@ export default function PromoBanner({
         {/* CTA */}
         <a
           href={ctaHref}
-          className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-teal-500/20 hover:bg-brand-teal-500/30 border border-brand-teal-500/40 hover:border-brand-teal-400/60 text-brand-teal-300 hover:text-white text-sm font-semibold transition-all duration-200 backdrop-blur-sm"
+          className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-primary-500/20 hover:bg-brand-primary-500/30 border border-brand-primary-500/40 hover:border-brand-primary-400/60 text-brand-primary-300 hover:text-white text-sm font-semibold transition-all duration-200 backdrop-blur-sm"
         >
           {ctaText}
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -92,7 +92,7 @@ export default function PromoBanner({
       </div>
 
       {/* Línea de acento inferior */}
-      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-brand-teal-500 to-transparent opacity-50" />
+      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-brand-primary-500 to-transparent opacity-50" />
 
     </div>
   );

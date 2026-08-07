@@ -32,7 +32,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={id}
-            className="block text-sm font-medium text-brand-slate-100"
+            className="block text-sm font-medium text-brand-neutral-100"
           >
             {label}
           </label>
@@ -40,7 +40,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
         <div className="relative">
           {leftIcon && (
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-slate-400">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-neutral-400">
               {leftIcon}
             </div>
           )}
@@ -51,13 +51,13 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             className={clsx(
               "w-full rounded-xl border bg-white/70 backdrop-blur-md",
               "px-4 py-3 text-sm transition-all duration-200",
-              "focus:outline-none focus:ring-2 focus:ring-brand-teal-500 focus:border-transparent",
+              "focus:outline-none focus:ring-2 focus:ring-brand-primary-500 focus:border-transparent",
               "disabled:opacity-50 disabled:cursor-not-allowed",
               leftIcon && "pl-11",
               rightIcon && "pr-11",
               error
                 ? "border-red-400 focus:ring-red-400"
-                : "border-brand-slate-300",
+                : "border-brand-neutral-300",
               className
             )}
             aria-invalid={!!error}
@@ -65,7 +65,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           />
 
           {rightIcon && (
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-brand-slate-400">
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-brand-neutral-400">
               {rightIcon}
             </div>
           )}
@@ -74,7 +74,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {error ? (
           <p className="text-sm text-red-500">{error}</p>
         ) : helperText ? (
-          <p className="text-sm text-brand-slate-500">{helperText}</p>
+          <p className="text-sm text-brand-neutral-500">{helperText}</p>
         ) : null}
       </div>
     );

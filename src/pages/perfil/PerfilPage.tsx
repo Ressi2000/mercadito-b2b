@@ -14,7 +14,7 @@ import Input from "../../components/ui/Input";
 // ── Skeleton ─────────────────────────────────────────────────────────
 function SkeletonBlock({ className = "" }: { className?: string }) {
   return (
-    <div className={`animate-pulse bg-brand-slate-200 rounded-lg ${className}`} />
+    <div className={`animate-pulse bg-brand-neutral-200 rounded-lg ${className}`} />
   );
 }
 
@@ -48,13 +48,13 @@ function InfoField({
 }) {
   return (
     <div className="space-y-1">
-      <p className="text-xs font-semibold text-brand-slate-400 uppercase tracking-widest">
+      <p className="text-xs font-semibold text-brand-neutral-400 uppercase tracking-widest">
         {label}
       </p>
       <div className="flex items-center gap-2">
-        {icon && <span className="text-brand-teal-500 shrink-0">{icon}</span>}
-        <p className="text-sm font-medium text-brand-slate-800 break-words">
-          {value || <span className="text-brand-slate-300 italic">Sin información</span>}
+        {icon && <span className="text-brand-primary-500 shrink-0">{icon}</span>}
+        <p className="text-sm font-medium text-brand-neutral-800 break-words">
+          {value || <span className="text-brand-neutral-300 italic">Sin información</span>}
         </p>
       </div>
     </div>
@@ -76,14 +76,14 @@ function Section({
   return (
     <div className="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl overflow-hidden">
       {/* Header de sección */}
-      <div className="px-6 py-4 border-b border-brand-slate-100 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-brand-teal-500/10 border border-brand-teal-500/20 flex items-center justify-center text-brand-teal-500">
+      <div className="px-6 py-4 border-b border-brand-neutral-100 flex items-center gap-3">
+        <div className="w-9 h-9 rounded-xl bg-brand-primary-500/10 border border-brand-primary-500/20 flex items-center justify-center text-brand-primary-500">
           {icon}
         </div>
         <div>
-          <h2 className="text-base font-bold text-brand-slate-900">{title}</h2>
+          <h2 className="text-base font-bold text-brand-neutral-900">{title}</h2>
           {subtitle && (
-            <p className="text-xs text-brand-slate-400 mt-0.5">{subtitle}</p>
+            <p className="text-xs text-brand-neutral-400 mt-0.5">{subtitle}</p>
           )}
         </div>
       </div>
@@ -217,8 +217,8 @@ export default function PerfilPage() {
     return (
       <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
         <div className="space-y-1">
-          <div className="h-7 bg-brand-slate-200 rounded-lg w-48 animate-pulse" />
-          <div className="h-4 bg-brand-slate-100 rounded w-72 animate-pulse mt-2" />
+          <div className="h-7 bg-brand-neutral-200 rounded-lg w-48 animate-pulse" />
+          <div className="h-4 bg-brand-neutral-100 rounded w-72 animate-pulse mt-2" />
         </div>
         <PerfilSkeleton />
       </div>
@@ -251,18 +251,18 @@ export default function PerfilPage() {
 
       {/* ── Encabezado de página ── */}
       <div>
-        <h1 className="text-2xl font-bold text-brand-slate-900">Mi Perfil</h1>
-        <p className="text-sm text-brand-slate-500 mt-1">
+        <h1 className="text-2xl font-bold text-brand-neutral-900">Mi Perfil</h1>
+        <p className="text-sm text-brand-neutral-500 mt-1">
           Consulta tu información de cliente y gestiona el acceso al portal.
         </p>
       </div>
 
       {/* ── Hero: tarjeta de usuario ── */}
-      <div className="relative bg-gradient-to-r from-brand-slate-900 via-brand-slate-800 to-brand-slate-900 rounded-2xl overflow-hidden shadow-2xl">
+      <div className="relative bg-gradient-to-r from-brand-neutral-900 via-brand-neutral-800 to-brand-neutral-900 rounded-2xl overflow-hidden shadow-2xl">
         {/* Decoraciones */}
         <div
           className="absolute -top-8 -left-8 w-40 h-40 rounded-full opacity-20 blur-3xl pointer-events-none"
-          style={{ background: "radial-gradient(circle, #0d9488, transparent 70%)" }}
+          style={{ background: "radial-gradient(circle, #dc2626, transparent 70%)" }}
         />
         <div
           className="absolute -bottom-6 right-20 w-32 h-32 rounded-full opacity-15 blur-2xl pointer-events-none"
@@ -279,10 +279,10 @@ export default function PerfilPage() {
         <div className="relative flex items-center gap-5 px-8 py-6">
           {/* Avatar grande */}
           <div className="shrink-0 relative">
-            <div className="w-16 h-16 rounded-2xl bg-brand-teal-500/20 border-2 border-brand-teal-500/40 text-brand-teal-300 flex items-center justify-center font-bold text-2xl">
+            <div className="w-16 h-16 rounded-2xl bg-brand-primary-500/20 border-2 border-brand-primary-500/40 text-brand-primary-300 flex items-center justify-center font-bold text-2xl">
               {inicial}
             </div>
-            <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-brand-teal-400 rounded-full border-2 border-brand-slate-900" />
+            <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-brand-primary-400 rounded-full border-2 border-brand-neutral-900" />
           </div>
 
           {/* Info básica */}
@@ -290,10 +290,10 @@ export default function PerfilPage() {
             <h2 className="text-lg font-bold text-white leading-tight truncate">
               {cliente?.razon_social_cliente ?? "—"}
             </h2>
-            <p className="text-sm text-brand-teal-300 mt-0.5">{user?.email}</p>
+            <p className="text-sm text-brand-primary-300 mt-0.5">{user?.email}</p>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
               {cliente?.codigo_cliente && (
-                <span className="text-xs text-brand-slate-400 flex items-center gap-1">
+                <span className="text-xs text-brand-neutral-400 flex items-center gap-1">
                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 8.25h15m-16.5 7.5h15m-1.8-13.5l-3.9 19.5m-2.1-19.5l-3.9 19.5" />
                   </svg>
@@ -301,7 +301,7 @@ export default function PerfilPage() {
                 </span>
               )}
               {cliente?.rif_cliente && (
-                <span className="text-xs text-brand-slate-400 flex items-center gap-1">
+                <span className="text-xs text-brand-neutral-400 flex items-center gap-1">
                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z" />
                   </svg>
@@ -309,7 +309,7 @@ export default function PerfilPage() {
                 </span>
               )}
               {perfil?.usuario.last_login && (
-                <span className="text-xs text-brand-slate-400 flex items-center gap-1">
+                <span className="text-xs text-brand-neutral-400 flex items-center gap-1">
                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -326,8 +326,8 @@ export default function PerfilPage() {
 
           {/* Badge estado */}
           <div className="shrink-0">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-teal-500/20 border border-brand-teal-500/30 text-brand-teal-300 text-xs font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-brand-teal-400" />
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-primary-500/20 border border-brand-primary-500/30 text-brand-primary-300 text-xs font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-primary-400" />
               Activo
             </span>
           </div>
@@ -372,17 +372,17 @@ export default function PerfilPage() {
             {contactos.map((c, i) => (
               <div
                 key={c.ContactoId ?? i}
-                className="flex items-center gap-4 p-4 rounded-xl bg-brand-slate-50 border border-brand-slate-100"
+                className="flex items-center gap-4 p-4 rounded-xl bg-brand-neutral-50 border border-brand-neutral-100"
               >
-                <div className="w-9 h-9 rounded-xl bg-brand-teal-100 border border-brand-teal-200 flex items-center justify-center shrink-0">
-                  <span className="text-sm font-bold text-brand-teal-600">
+                <div className="w-9 h-9 rounded-xl bg-brand-primary-100 border border-brand-primary-200 flex items-center justify-center shrink-0">
+                  <span className="text-sm font-bold text-brand-primary-600">
                     {c.Nombres?.charAt(0)?.toUpperCase() ?? "?"}
                   </span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-brand-slate-800">{c.Nombres}</p>
+                  <p className="text-sm font-semibold text-brand-neutral-800">{c.Nombres}</p>
                   {c.Telefono && (
-                    <p className="text-xs text-brand-slate-500 mt-0.5 flex items-center gap-1">
+                    <p className="text-xs text-brand-neutral-500 mt-0.5 flex items-center gap-1">
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
                       </svg>
@@ -391,7 +391,7 @@ export default function PerfilPage() {
                   )}
                 </div>
                 {c.ContactoId && (
-                  <span className="text-xs text-brand-slate-300 shrink-0">#{c.ContactoId}</span>
+                  <span className="text-xs text-brand-neutral-300 shrink-0">#{c.ContactoId}</span>
                 )}
               </div>
             ))}
@@ -419,32 +419,32 @@ export default function PerfilPage() {
                 porcentaje > 85
                   ? "bg-red-400"
                   : porcentaje > 60
-                  ? "bg-brand-amber-400"
-                  : "bg-brand-teal-400";
+                  ? "bg-brand-accent-400"
+                  : "bg-brand-primary-400";
 
               return (
                 <div
                   key={cr.mercancia_id ?? i}
-                  className="p-4 rounded-xl bg-brand-slate-50 border border-brand-slate-100 space-y-3"
+                  className="p-4 rounded-xl bg-brand-neutral-50 border border-brand-neutral-100 space-y-3"
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <p className="text-sm font-bold text-brand-slate-800">
+                    <p className="text-sm font-bold text-brand-neutral-800">
                       {cr.nombre_mercancia ?? `Empresa #${cr.mercancia_id}`}
                     </p>
-                    <span className="text-xs font-semibold text-brand-slate-500 shrink-0">
+                    <span className="text-xs font-semibold text-brand-neutral-500 shrink-0">
                       {cr.MonultPago}
                     </span>
                   </div>
 
                   {/* Barra de uso de crédito */}
                   <div>
-                    <div className="flex justify-between text-xs text-brand-slate-500 mb-1.5">
+                    <div className="flex justify-between text-xs text-brand-neutral-500 mb-1.5">
                       <span>Crédito utilizado</span>
                       <span className="font-semibold">
                         {porcentaje.toFixed(0)}%
                       </span>
                     </div>
-                    <div className="w-full h-2 bg-brand-slate-200 rounded-full overflow-hidden">
+                    <div className="w-full h-2 bg-brand-neutral-200 rounded-full overflow-hidden">
                       <div
                         className={`h-2 rounded-full transition-all duration-500 ${colorBarra}`}
                         style={{ width: `${porcentaje}%` }}
@@ -454,16 +454,16 @@ export default function PerfilPage() {
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     <div>
-                      <p className="text-xs text-brand-slate-400">Límite</p>
-                      <p className="text-sm font-semibold text-brand-slate-700">
+                      <p className="text-xs text-brand-neutral-400">Límite</p>
+                      <p className="text-sm font-semibold text-brand-neutral-700">
                         {limite.toLocaleString("es-VE", {
                           minimumFractionDigits: 2,
                         })}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-brand-slate-400">Utilizado</p>
-                      <p className="text-sm font-semibold text-brand-slate-700">
+                      <p className="text-xs text-brand-neutral-400">Utilizado</p>
+                      <p className="text-sm font-semibold text-brand-neutral-700">
                         {usado.toLocaleString("es-VE", {
                           minimumFractionDigits: 2,
                         })}
@@ -471,8 +471,8 @@ export default function PerfilPage() {
                     </div>
                     {cr.ImpultPago != null && (
                       <div>
-                        <p className="text-xs text-brand-slate-400">Últ. Pago</p>
-                        <p className="text-sm font-semibold text-brand-slate-700">
+                        <p className="text-xs text-brand-neutral-400">Últ. Pago</p>
+                        <p className="text-sm font-semibold text-brand-neutral-700">
                           {cr.ImpultPago.toLocaleString("es-VE", {
                             minimumFractionDigits: 2,
                           })}
@@ -482,9 +482,9 @@ export default function PerfilPage() {
                   </div>
 
                   {cr.FecultPago && (
-                    <p className="text-xs text-brand-slate-400">
+                    <p className="text-xs text-brand-neutral-400">
                       Último pago:{" "}
-                      <span className="font-medium text-brand-slate-600">
+                      <span className="font-medium text-brand-neutral-600">
                         {new Date(cr.FecultPago).toLocaleDateString("es-VE", {
                           day: "2-digit",
                           month: "long",
@@ -512,19 +512,19 @@ export default function PerfilPage() {
       >
         <div className="space-y-4">
           {/* Email — solo lectura, cambia el admin */}
-          <div className="flex items-center gap-4 p-4 rounded-xl bg-brand-slate-50 border border-brand-slate-100">
-            <div className="w-9 h-9 rounded-xl bg-brand-slate-200 flex items-center justify-center shrink-0">
-              <svg className="w-4 h-4 text-brand-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <div className="flex items-center gap-4 p-4 rounded-xl bg-brand-neutral-50 border border-brand-neutral-100">
+            <div className="w-9 h-9 rounded-xl bg-brand-neutral-200 flex items-center justify-center shrink-0">
+              <svg className="w-4 h-4 text-brand-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-brand-slate-400 uppercase tracking-widest">
+              <p className="text-xs font-semibold text-brand-neutral-400 uppercase tracking-widest">
                 Correo de acceso
               </p>
-              <p className="text-sm font-medium text-brand-slate-800 mt-0.5">{user?.email}</p>
+              <p className="text-sm font-medium text-brand-neutral-800 mt-0.5">{user?.email}</p>
             </div>
-            <span className="shrink-0 text-xs text-brand-slate-400 bg-brand-slate-100 border border-brand-slate-200 px-2.5 py-1 rounded-full">
+            <span className="shrink-0 text-xs text-brand-neutral-400 bg-brand-neutral-100 border border-brand-neutral-200 px-2.5 py-1 rounded-full">
               Administrado por el sistema
             </span>
           </div>
@@ -540,15 +540,15 @@ export default function PerfilPage() {
 
           {/* Formulario de cambio de contraseña */}
           {!showPasswordForm ? (
-            <div className="flex items-center gap-4 p-4 rounded-xl bg-brand-slate-50 border border-brand-slate-100">
-              <div className="w-9 h-9 rounded-xl bg-brand-slate-200 flex items-center justify-center shrink-0">
-                <svg className="w-4 h-4 text-brand-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <div className="flex items-center gap-4 p-4 rounded-xl bg-brand-neutral-50 border border-brand-neutral-100">
+              <div className="w-9 h-9 rounded-xl bg-brand-neutral-200 flex items-center justify-center shrink-0">
+                <svg className="w-4 h-4 text-brand-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
                 </svg>
               </div>
               <div className="flex-1">
-                <p className="text-xs font-semibold text-brand-slate-400 uppercase tracking-widest">Contraseña</p>
-                <p className="text-sm font-medium text-brand-slate-800 mt-0.5">••••••••</p>
+                <p className="text-xs font-semibold text-brand-neutral-400 uppercase tracking-widest">Contraseña</p>
+                <p className="text-sm font-medium text-brand-neutral-800 mt-0.5">••••••••</p>
               </div>
               <Button
                 variant="secondary"
@@ -561,9 +561,9 @@ export default function PerfilPage() {
           ) : (
             <form
               onSubmit={handleSubmit(onSubmitPassword)}
-              className="p-5 rounded-xl border border-brand-teal-200 bg-brand-teal-50/30 space-y-4"
+              className="p-5 rounded-xl border border-brand-primary-200 bg-brand-primary-50/30 space-y-4"
             >
-              <p className="text-sm font-semibold text-brand-slate-700">
+              <p className="text-sm font-semibold text-brand-neutral-700">
                 Cambiar contraseña
               </p>
 
@@ -582,7 +582,7 @@ export default function PerfilPage() {
                     <button
                       type="button"
                       onClick={() => setShowCurrentPw((v) => !v)}
-                      className="text-brand-slate-400 hover:text-brand-slate-600 transition-colors"
+                      className="text-brand-neutral-400 hover:text-brand-neutral-600 transition-colors"
                     >
                       <EyeIcon open={showCurrentPw} />
                     </button>
@@ -609,7 +609,7 @@ export default function PerfilPage() {
                     <button
                       type="button"
                       onClick={() => setShowNewPw((v) => !v)}
-                      className="text-brand-slate-400 hover:text-brand-slate-600 transition-colors"
+                      className="text-brand-neutral-400 hover:text-brand-neutral-600 transition-colors"
                     >
                       <EyeIcon open={showNewPw} />
                     </button>
@@ -634,7 +634,7 @@ export default function PerfilPage() {
                     <button
                       type="button"
                       onClick={() => setShowConfirmPw((v) => !v)}
-                      className="text-brand-slate-400 hover:text-brand-slate-600 transition-colors"
+                      className="text-brand-neutral-400 hover:text-brand-neutral-600 transition-colors"
                     >
                       <EyeIcon open={showConfirmPw} />
                     </button>
@@ -667,7 +667,7 @@ export default function PerfilPage() {
       </Section>
 
       {/* Nota de solo lectura */}
-      <p className="text-xs text-brand-slate-400 text-center pb-4">
+      <p className="text-xs text-brand-neutral-400 text-center pb-4">
         La información de empresa es administrada por el sistema. Para cambios, contacta a tu ejecutivo de cuenta.
       </p>
     </div>

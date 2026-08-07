@@ -12,14 +12,14 @@ import { useCarrito } from "../../contexts/CarritoContext";
 function ProductSkeleton() {
   return (
     <div className="rounded-2xl bg-white/60 border border-white/20 shadow-xl p-6 space-y-4 animate-pulse">
-      <div className="h-44 rounded-xl bg-brand-slate-200" />
+      <div className="h-44 rounded-xl bg-brand-neutral-200" />
       <div className="space-y-2">
-        <div className="h-4 bg-brand-slate-200 rounded w-3/4" />
-        <div className="h-3 bg-brand-slate-100 rounded w-1/3" />
+        <div className="h-4 bg-brand-neutral-200 rounded w-3/4" />
+        <div className="h-3 bg-brand-neutral-100 rounded w-1/3" />
       </div>
-      <div className="flex justify-between items-center pt-2 border-t border-brand-slate-100">
-        <div className="h-6 bg-brand-slate-200 rounded w-1/3" />
-        <div className="h-9 bg-brand-slate-100 rounded-xl w-24" />
+      <div className="flex justify-between items-center pt-2 border-t border-brand-neutral-100">
+        <div className="h-6 bg-brand-neutral-200 rounded w-1/3" />
+        <div className="h-9 bg-brand-neutral-100 rounded-xl w-24" />
       </div>
     </div>
   );
@@ -77,7 +77,7 @@ export default function CatalogoPage() {
         <div className="flex flex-col gap-1">
           <button
             onClick={() => navigate("/inicio")}
-            className="flex items-center gap-1.5 text-xs font-semibold text-brand-teal-600 hover:text-brand-teal-700 uppercase tracking-widest transition-colors duration-200 w-fit"
+            className="flex items-center gap-1.5 text-xs font-semibold text-brand-primary-600 hover:text-brand-primary-700 uppercase tracking-widest transition-colors duration-200 w-fit"
           >
             <svg
               className="w-3.5 h-3.5"
@@ -92,17 +92,17 @@ export default function CatalogoPage() {
           </button>
 
           <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold text-brand-slate-900">Catálogo de Productos</h1>
+            <h1 className="text-3xl font-bold text-brand-neutral-900">Catálogo de Productos</h1>
             {/* Indicador de refresco silencioso — no interrumpe al usuario */}
             {refreshing && (
-              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-teal-50 border border-brand-teal-100 text-[11px] font-medium text-brand-teal-600 animate-fade-in">
-                <span className="w-2.5 h-2.5 rounded-full border-2 border-brand-teal-400 border-t-transparent animate-spin" />
+              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-primary-50 border border-brand-primary-100 text-[11px] font-medium text-brand-primary-600 animate-fade-in">
+                <span className="w-2.5 h-2.5 rounded-full border-2 border-brand-primary-400 border-t-transparent animate-spin" />
                 Actualizando
               </span>
             )}
           </div>
 
-          <p className="text-brand-slate-500 mt-1">
+          <p className="text-brand-neutral-500 mt-1">
             Agrega productos a tu pedido directamente desde aquí.
           </p>
         </div>
@@ -157,9 +157,9 @@ export default function CatalogoPage() {
 
         /* Estado vacío */
         <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-brand-slate-100 flex items-center justify-center">
+          <div className="w-16 h-16 rounded-2xl bg-brand-neutral-100 flex items-center justify-center">
             <svg
-              className="w-8 h-8 text-brand-slate-400"
+              className="w-8 h-8 text-brand-neutral-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -168,7 +168,7 @@ export default function CatalogoPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 15.803a7.5 7.5 0 0 0 10.607 0z" />
             </svg>
           </div>
-          <p className="text-brand-slate-500 font-medium">
+          <p className="text-brand-neutral-500 font-medium">
             {search
               ? `Sin resultados para "${search}"`
               : "No hay productos disponibles."}
@@ -176,7 +176,7 @@ export default function CatalogoPage() {
           {search && (
             <button
               onClick={() => setSearch("")}
-              className="text-sm text-brand-teal-600 hover:text-brand-teal-700 font-medium transition-colors"
+              className="text-sm text-brand-primary-600 hover:text-brand-primary-700 font-medium transition-colors"
             >
               Limpiar búsqueda
             </button>
@@ -188,14 +188,14 @@ export default function CatalogoPage() {
         /* Grid de productos */
         <>
           <div className="flex items-center justify-between -mt-4">
-            <p className="text-sm text-brand-slate-400">
+            <p className="text-sm text-brand-neutral-400">
               {filteredMateriales.length}{" "}
               {filteredMateriales.length === 1 ? "producto encontrado" : "productos encontrados"}
             </p>
             {/* Indicador de carga del carrito — solo informativo, no bloquea */}
             {loadingCarrito && (
-              <p className="text-xs text-brand-slate-400 flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full border-2 border-brand-slate-300 border-t-transparent animate-spin" />
+              <p className="text-xs text-brand-neutral-400 flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full border-2 border-brand-neutral-300 border-t-transparent animate-spin" />
                 Cargando carrito…
               </p>
             )}

@@ -45,14 +45,14 @@ function CarritoItemRow({ item }: { item: CarritoItem }) {
   };
 
   return (
-    <div className="flex items-center gap-5 py-5 border-b border-brand-slate-100 last:border-0 animate-fade-in">
+    <div className="flex items-center gap-5 py-5 border-b border-brand-neutral-100 last:border-0 animate-fade-in">
 
-      <div className="w-16 h-16 rounded-xl overflow-hidden bg-brand-slate-100 shrink-0">
+      <div className="w-16 h-16 rounded-xl overflow-hidden bg-brand-neutral-100 shrink-0">
         {item.foto ? (
           <img src={item.foto} alt={item.nombre} className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-brand-slate-100 to-brand-slate-200">
-            <span className="text-lg font-bold text-brand-teal-600">
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-brand-neutral-100 to-brand-neutral-200">
+            <span className="text-lg font-bold text-brand-primary-600">
               {item.nombre?.charAt(0).toUpperCase()}
             </span>
           </div>
@@ -60,13 +60,13 @@ function CarritoItemRow({ item }: { item: CarritoItem }) {
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-brand-slate-900 truncate">{item.nombre}</p>
-        <p className="text-xs text-brand-slate-400 font-mono">{item.codigo}</p>
-        <p className="text-xs text-brand-slate-500 mt-0.5">
+        <p className="text-sm font-semibold text-brand-neutral-900 truncate">{item.nombre}</p>
+        <p className="text-xs text-brand-neutral-400 font-mono">{item.codigo}</p>
+        <p className="text-xs text-brand-neutral-500 mt-0.5">
           {item.moneda ?? "$"} {item.precio_unitario.toFixed(2)} / {item.unidad_medida ?? "und"}
         </p>
         {isSyncing && (
-          <p className="text-[10px] text-brand-teal-400 font-medium mt-0.5 animate-pulse">
+          <p className="text-[10px] text-brand-primary-400 font-medium mt-0.5 animate-pulse">
             Guardando…
           </p>
         )}
@@ -76,29 +76,29 @@ function CarritoItemRow({ item }: { item: CarritoItem }) {
         <button
           onClick={handleMenos}
           disabled={item.cantidad <= 1}
-          className="w-8 h-8 rounded-lg bg-brand-slate-100 hover:bg-brand-slate-200 disabled:opacity-40 flex items-center justify-center transition-colors duration-150 active:scale-95"
+          className="w-8 h-8 rounded-lg bg-brand-neutral-100 hover:bg-brand-neutral-200 disabled:opacity-40 flex items-center justify-center transition-colors duration-150 active:scale-95"
         >
-          <svg className="w-4 h-4 text-brand-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <svg className="w-4 h-4 text-brand-neutral-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
           </svg>
         </button>
 
-        <span className="w-10 text-center text-sm font-semibold text-brand-slate-900 tabular-nums">
+        <span className="w-10 text-center text-sm font-semibold text-brand-neutral-900 tabular-nums">
           {item.cantidad}
         </span>
 
         <button
           onClick={handleMas}
-          className="w-8 h-8 rounded-lg bg-brand-slate-100 hover:bg-brand-slate-200 disabled:opacity-40 flex items-center justify-center transition-colors duration-150 active:scale-95"
+          className="w-8 h-8 rounded-lg bg-brand-neutral-100 hover:bg-brand-neutral-200 disabled:opacity-40 flex items-center justify-center transition-colors duration-150 active:scale-95"
         >
-          <svg className="w-4 h-4 text-brand-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <svg className="w-4 h-4 text-brand-neutral-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
         </button>
       </div>
 
       <div className="text-right shrink-0 w-28">
-        <p className="text-base font-bold text-brand-slate-900 tabular-nums">
+        <p className="text-base font-bold text-brand-neutral-900 tabular-nums">
           {item.moneda ?? "$"} {item.subtotal.toFixed(2)}
         </p>
       </div>
@@ -108,7 +108,7 @@ function CarritoItemRow({ item }: { item: CarritoItem }) {
         className="shrink-0 w-8 h-8 rounded-lg hover:bg-red-50 flex items-center justify-center transition-colors duration-150 group disabled:opacity-40"
         title="Eliminar producto"
       >
-        <svg className="w-4 h-4 text-brand-slate-400 group-hover:text-red-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg className="w-4 h-4 text-brand-neutral-400 group-hover:text-red-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
         </svg>
       </button>
@@ -120,14 +120,14 @@ function CarritoSkeleton() {
   return (
     <div className="space-y-4">
       {[1, 2, 3].map((n) => (
-        <div key={n} className="flex items-center gap-5 py-5 border-b border-brand-slate-100 animate-pulse">
-          <div className="w-16 h-16 rounded-xl bg-brand-slate-200 shrink-0" />
+        <div key={n} className="flex items-center gap-5 py-5 border-b border-brand-neutral-100 animate-pulse">
+          <div className="w-16 h-16 rounded-xl bg-brand-neutral-200 shrink-0" />
           <div className="flex-1 space-y-2">
-            <div className="h-4 bg-brand-slate-200 rounded w-2/3" />
-            <div className="h-3 bg-brand-slate-100 rounded w-1/4" />
+            <div className="h-4 bg-brand-neutral-200 rounded w-2/3" />
+            <div className="h-3 bg-brand-neutral-100 rounded w-1/4" />
           </div>
-          <div className="w-24 h-8 bg-brand-slate-100 rounded-lg" />
-          <div className="w-20 h-6 bg-brand-slate-200 rounded" />
+          <div className="w-24 h-8 bg-brand-neutral-100 rounded-lg" />
+          <div className="w-20 h-6 bg-brand-neutral-200 rounded" />
         </div>
       ))}
     </div>
@@ -166,16 +166,16 @@ export default function CarritoPage() {
       <div className="flex flex-col gap-1">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-xs font-semibold text-brand-teal-600 hover:text-brand-teal-700 uppercase tracking-widest transition-colors duration-200 w-fit"
+          className="flex items-center gap-1.5 text-xs font-semibold text-brand-primary-600 hover:text-brand-primary-700 uppercase tracking-widest transition-colors duration-200 w-fit"
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
           </svg>
           Volver
         </button>
-        <h1 className="text-3xl font-bold text-brand-slate-900">Mi Carrito</h1>
+        <h1 className="text-3xl font-bold text-brand-neutral-900">Mi Carrito</h1>
         {carrito?.codigo_pedido_web && (
-          <p className="text-xs text-brand-slate-400 font-mono">
+          <p className="text-xs text-brand-neutral-400 font-mono">
             Pedido: {carrito.codigo_pedido_web}
           </p>
         )}
@@ -200,12 +200,12 @@ export default function CarritoPage() {
         <CarritoSkeleton />
       ) : !carrito || carrito.items.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-brand-slate-100 flex items-center justify-center">
-            <svg className="w-8 h-8 text-brand-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <div className="w-16 h-16 rounded-2xl bg-brand-neutral-100 flex items-center justify-center">
+            <svg className="w-8 h-8 text-brand-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
             </svg>
           </div>
-          <p className="text-brand-slate-500 font-medium">Tu carrito está vacío.</p>
+          <p className="text-brand-neutral-500 font-medium">Tu carrito está vacío.</p>
           <Button variant="primary" onClick={() => navigate("/inicio")}>
             Explorar empresas
           </Button>
@@ -219,18 +219,18 @@ export default function CarritoPage() {
           </div>
 
           <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-6 space-y-5 sticky top-8">
-            <h2 className="text-lg font-semibold text-brand-slate-900">Resumen del pedido</h2>
+            <h2 className="text-lg font-semibold text-brand-neutral-900">Resumen del pedido</h2>
             <div className="space-y-3 text-sm">
-              <div className="flex justify-between text-brand-slate-600">
+              <div className="flex justify-between text-brand-neutral-600">
                 <span>Productos ({carrito.items.length})</span>
                 <span className="tabular-nums">
                   {carrito.items[0]?.moneda ?? "$"} {carrito.total_estimado.toFixed(2)}
                 </span>
               </div>
-              <div className="h-px bg-brand-slate-100" />
-              <div className="flex justify-between font-bold text-brand-slate-900 text-base">
+              <div className="h-px bg-brand-neutral-100" />
+              <div className="flex justify-between font-bold text-brand-neutral-900 text-base">
                 <span>Total estimado</span>
-                <span className="text-brand-teal-600 tabular-nums">
+                <span className="text-brand-primary-600 tabular-nums">
                   {carrito.items[0]?.moneda ?? "$"} {carrito.total_estimado.toFixed(2)}
                 </span>
               </div>
@@ -240,14 +240,14 @@ export default function CarritoPage() {
             </Button>
             <button
               onClick={() => navigate(-1)}
-              className="w-full text-sm text-brand-slate-500 hover:text-brand-teal-600 transition-colors duration-200 font-medium"
+              className="w-full text-sm text-brand-neutral-500 hover:text-brand-primary-600 transition-colors duration-200 font-medium"
             >
               Seguir comprando
             </button>
-            <div className="pt-2 border-t border-brand-slate-100">
+            <div className="pt-2 border-t border-brand-neutral-100">
               <button
                 onClick={handleVaciar}
-                className="w-full text-xs text-brand-slate-400 hover:text-red-500 transition-colors duration-200"
+                className="w-full text-xs text-brand-neutral-400 hover:text-red-500 transition-colors duration-200"
               >
                 Vaciar carrito
               </button>
