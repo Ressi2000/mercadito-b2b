@@ -13,6 +13,12 @@ const STATUS_CONFIG = {
     text: "text-amber-700",
     dot: "bg-amber-400",
   },
+  aprobado_vendedor: {
+    label: "Aprobado por vendedor",
+    bg: "bg-blue-100",
+    text: "text-blue-700",
+    dot: "bg-blue-500",
+  },
   aprobado: {
     label: "Aprobado",
     bg: "bg-green-100",
@@ -24,6 +30,12 @@ const STATUS_CONFIG = {
     bg: "bg-red-100",
     text: "text-red-700",
     dot: "bg-red-500",
+  },
+  modificado: {
+    label: "Modificado",
+    bg: "bg-orange-100",
+    text: "text-orange-700",
+    dot: "bg-orange-500",
   },
 } as const;
 
@@ -144,6 +156,47 @@ function DetallePedidoModal({
             </div>
           )}
 
+          {/* Vendedor / número SAP */}
+          {(pedido.vendedor || pedido.pedido_sap) && (
+            <div className="flex flex-wrap gap-3">
+              {pedido.vendedor && (
+                <div className="flex-1 min-w-[140px] p-3 rounded-xl bg-brand-neutral-50">
+                  <p className="text-xs font-semibold text-brand-neutral-500 mb-0.5">Vendedor</p>
+                  <p className="text-sm text-brand-neutral-800">{pedido.vendedor}</p>
+                </div>
+              )}
+              {pedido.pedido_sap && (
+                <div className="flex-1 min-w-[140px] p-3 rounded-xl bg-brand-neutral-50">
+                  <p className="text-xs font-semibold text-brand-neutral-500 mb-0.5">N.° pedido SAP</p>
+                  <p className="text-sm text-brand-neutral-800 font-mono">{pedido.pedido_sap}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Historial de estados */}
+          {pedido.historial && pedido.historial.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-brand-neutral-500 mb-2">Seguimiento</p>
+              <div className="space-y-2.5">
+                {pedido.historial.map((h, i) => (
+                  <div key={i} className="flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-brand-primary-400 mt-1.5 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs text-brand-neutral-700">
+                        <span className="font-semibold">{STATUS_CONFIG[h.status_nuevo as keyof typeof STATUS_CONFIG]?.label ?? h.status_nuevo}</span>
+                        {" · "}
+                        <span className="text-brand-neutral-400 capitalize">{h.actor_tipo}</span>
+                      </p>
+                      {h.motivo && <p className="text-xs text-brand-neutral-500 mt-0.5">{h.motivo}</p>}
+                      <p className="text-[10px] text-brand-neutral-400 mt-0.5">{h.fecha}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Total */}
           <div className="flex items-center justify-between pt-1">
             <span className="text-sm font-semibold text-brand-neutral-700">Total</span>
@@ -245,8 +298,10 @@ export default function PedidosPage() {
   const contadores = {
     todos: pedidos.length,
     pendiente: pedidos.filter((p) => p.status === "pendiente").length,
+    aprobado_vendedor: pedidos.filter((p) => p.status === "aprobado_vendedor").length,
     aprobado: pedidos.filter((p) => p.status === "aprobado").length,
     rechazado: pedidos.filter((p) => p.status === "rechazado").length,
+    modificado: pedidos.filter((p) => p.status === "modificado").length,
   };
 
   return (
@@ -280,7 +335,7 @@ export default function PedidosPage() {
       {/* ── Filtros ── */}
       {!loading && pedidos.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {(["todos", "pendiente", "aprobado", "rechazado"] as const).map((s) => (
+          {(["todos", "pendiente", "aprobado_vendedor", "aprobado", "rechazado", "modificado"] as const).map((s) => (
             <button
               key={s}
               onClick={() => setFiltroStatus(s)}

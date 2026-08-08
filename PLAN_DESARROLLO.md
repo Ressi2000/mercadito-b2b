@@ -17,13 +17,13 @@
 | Catálogo por empresa | Completo (búsqueda + categoría real + rango de precio + orden) | `/catalogo/:empresaId` |
 | Carrito multi-empresa | Completo | `/carrito` |
 | Confirmación 3 pasos | Completo | `/confirmacion` |
-| Historial de pedidos | Completo (ver, filtrar por estado) | `/pedidos` |
+| Historial de pedidos | Completo (ver, filtrar por estado, seguimiento de aprobación vendedor→admin, N.° SAP) | `/pedidos` |
 | Perfil | Completo (datos, créditos, cambio password) | `/perfil` |
 | Identidad visual | Completo — rebrand a **GesRutas Auto**, paleta navy/dorado/tricolor italiano extraída del empaque real | — |
 | Cuentas/Facturas | UI con candado "Próximamente" — sin backend (Fase 4) | — |
 | Pagos | UI con candado "Próximamente" — sin backend (Fase 4) | — |
 | Reclamos | **No existe** (Fase 5) | — |
-| Notificaciones | Ícono en header, sin datos reales — pendiente backend (Fase 1.4) | — |
+| Notificaciones | Completo — campana conectada a datos reales (contexto con polling, dropdown, marcar leída/todas) | — |
 
 ### GesRutasApi (Backend — Laravel 11)
 
@@ -35,14 +35,14 @@
 | Catálogo con precios B3 | Completo (1 endpoint) |
 | Perfil (datos, contactos, créditos) | Completo (2 endpoints) |
 | Empresas por cliente | Completo (1 endpoint) |
-| Aprobación/rechazo de pedidos web | **No existe** (solo el modelo tiene status enum) |
+| Aprobación/rechazo de pedidos web | Completo — status extendido (pendiente/aprobado_vendedor/aprobado/rechazado/modificado), historial, notificación interna hacia Plus |
 | Dashboard agregado | Completo — `GET /mercadito/dashboard` |
 | Visitas comerciales para cliente | Completo — `GET /mercadito/visitas?tipo=ultimas\|proxima` |
 | Tasa BCV | Completo — `GET /mercadito/tasa-bcv` (lee `table_dolar_bcv`, sincronizada por Plus) |
 | Facturas/Cuentas por cobrar | **No existe** (datos en SAP, sin modelo local) |
 | Pagos | **No existe** |
 | Reclamos | **No existe** |
-| Notificaciones a clientes | **No existe** (trait `Notifiable` sin uso) |
+| Notificaciones a clientes | Completo — tabla `notificaciones_cliente` + endpoints (`index`, `marcarLeida`, `marcarTodasLeidas`) + endpoint interno recibido desde Plus |
 | Categorías de materiales | Completo — relación real vía `materiales_categoria` (se corrigió `Materiales::categoriaAsociada()`, la relación original `categoria()` estaba rota) |
 
 ### GesRutasPlus (Admin — Laravel 10)
@@ -56,8 +56,8 @@
 | Gestión de clientes | Completo (CRUD, mapa, importación) |
 | Visitas comerciales | Completo (FormVisita, Itinerario) |
 | Gestión de ClienteWebUser | **No existe** |
-| Bandeja de pedidos de clientes | **No existe** |
-| Indicador de origen de pedido | **No existe** |
+| Bandeja de pedidos de clientes | Completo — flujo vendedor → admin, aprobar/rechazar (SweetAlert2), registro manual de N.° SAP, notifica al cliente vía GesRutasApi |
+| Indicador de origen de pedido | Completo — campo `origen` (móvil/escritorio/cliente) en `pedidos_web` |
 | Módulo de reclamos | **No existe** |
 
 ---
@@ -70,12 +70,15 @@
 - ✅ Endpoints backend: `/mercadito/dashboard`, `/mercadito/tasa-bcv`, `/mercadito/visitas`
 - ✅ Filtros del catálogo: categoría (relación real `materiales_categoria`), rango de precio (slider doble), orden
 - ✅ Rebrand completo: **GesRutas Auto**, paleta navy/dorado extraída del empaque real Sindoni, tipografía Bricolage Grotesque, franja tricolor italiana (sidebar + cards principales del dashboard y perfil)
-- ✅ Campana de notificaciones en el header (ícono ubicado, sin backend — ver pendientes)
+- ✅ Bandeja de pedidos de clientes en GesRutasPlus: flujo de dos filtros vendedor → admin (`PedidosWebController`, `PedidoWebService`), historial de estados, registro manual de N.° SAP
+- ✅ Indicador de origen del pedido (`origen`: móvil/escritorio/cliente) en `pedidos_web`
+- ✅ Notificaciones reales al cliente: tabla `notificaciones_cliente`, endpoint interno Plus→Api (token compartido), endpoints cliente (`index`/`marcarLeida`/`marcarTodasLeidas`), campana del header conectada (`NotificacionContext` con polling cada 60s, `NotificacionDropdown`)
+- ✅ `PedidosPage` actualizada con los nuevos estados (`aprobado_vendedor`, `modificado`) y detalle de pedido con vendedor/N.° SAP/seguimiento
 
-**Pendiente (siguiente bloque grande):**
-- ⬜ Bandeja de pedidos de clientes en GesRutasPlus (flujo vendedor → admin → SAP)
-- ⬜ Indicador de origen del pedido (móvil/escritorio/cliente)
-- ⬜ Notificaciones reales al cliente (tabla `notificaciones_cliente`, endpoint, conectar la campana ya ubicada en el header)
+**Pendiente:**
+- ⬜ Envío automático a SAP tras aprobación admin (por ahora es manual, registrando el N.° de pedido a mano — ver decisión en el código de `PedidoWebService::registrarSap`)
+- ⬜ Gestión de `ClienteWebUser` desde GesRutasPlus (alta/edición de credenciales del portal)
+- ⬜ Módulo de reclamos (Fase 5)
 
 ---
 
