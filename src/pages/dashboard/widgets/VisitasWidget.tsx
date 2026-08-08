@@ -1,4 +1,5 @@
 import Card from "../../../components/ui/Card";
+import TricolorEdge from "./TricolorEdge";
 import type { VisitaComercial, ProximaVisita } from "../../../models/Dashboard";
 
 interface VisitasWidgetProps {
@@ -17,8 +18,9 @@ function formatFecha(fecha: string) {
 
 export default function VisitasWidget({ ultimas, proxima, loading }: VisitasWidgetProps) {
   return (
-    <Card variant="default" className="space-y-5">
-      <h2 className="text-base font-semibold text-brand-neutral-900">Visitas comerciales</h2>
+    <Card variant="default" className="relative overflow-hidden space-y-5">
+      <TricolorEdge />
+      <h2 className="text-base font-display font-bold text-brand-neutral-900">Visitas comerciales</h2>
 
       {loading ? (
         <div className="space-y-3 animate-pulse">

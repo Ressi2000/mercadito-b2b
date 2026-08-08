@@ -66,7 +66,7 @@ export default function EmpresasPage() {
       {/* Encabezado */}
       <div className="flex flex-col gap-1">
         <p className="text-xs font-semibold text-brand-primary-600 uppercase tracking-widest">Inicio</p>
-        <h1 className="text-3xl font-bold text-brand-neutral-900">Selecciona una Empresa</h1>
+        <h1 className="text-3xl font-display font-extrabold text-brand-neutral-900">Selecciona una Empresa</h1>
         <p className="text-brand-neutral-500 mt-1">Empresas habilitadas para tu cuenta.</p>
       </div>
 

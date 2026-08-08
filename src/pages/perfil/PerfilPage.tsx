@@ -251,7 +251,7 @@ export default function PerfilPage() {
 
       {/* ── Encabezado de página ── */}
       <div>
-        <h1 className="text-2xl font-bold text-brand-neutral-900">Mi Perfil</h1>
+        <h1 className="text-2xl font-display font-extrabold text-brand-neutral-900">Mi Perfil</h1>
         <p className="text-sm text-brand-neutral-500 mt-1">
           Consulta tu información de cliente y gestiona el acceso al portal.
         </p>
@@ -262,11 +262,11 @@ export default function PerfilPage() {
         {/* Decoraciones */}
         <div
           className="absolute -top-8 -left-8 w-40 h-40 rounded-full opacity-20 blur-3xl pointer-events-none"
-          style={{ background: "radial-gradient(circle, #dc2626, transparent 70%)" }}
+          style={{ background: "radial-gradient(circle, #d4a72c, transparent 70%)" }}
         />
         <div
           className="absolute -bottom-6 right-20 w-32 h-32 rounded-full opacity-15 blur-2xl pointer-events-none"
-          style={{ background: "radial-gradient(circle, #f59e0b, transparent 70%)" }}
+          style={{ background: "radial-gradient(circle, #eabf56, transparent 70%)" }}
         />
         <div
           className="absolute inset-0 opacity-[0.03] pointer-events-none"

@@ -258,7 +258,7 @@ export default function PedidosPage() {
           <p className="text-xs font-semibold text-brand-primary-600 uppercase tracking-widest">
             Historial
           </p>
-          <h1 className="text-3xl font-bold text-brand-neutral-900">Mis Pedidos</h1>
+          <h1 className="text-3xl font-display font-extrabold text-brand-neutral-900">Mis Pedidos</h1>
           <p className="text-brand-neutral-500 mt-1">Consulta el estado de tus pedidos.</p>
         </div>
 
@@ -286,7 +286,7 @@ export default function PedidosPage() {
               onClick={() => setFiltroStatus(s)}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                 filtroStatus === s
-                  ? "bg-brand-primary-600 text-white shadow-md"
+                  ? "bg-brand-primary-600 text-brand-neutral-900 shadow-md"
                   : "bg-white/70 text-brand-neutral-600 hover:bg-brand-primary-50 hover:text-brand-primary-700 border border-white/20 backdrop-blur-xl shadow-sm"
               }`}
             >

@@ -173,7 +173,7 @@ export default function CarritoPage() {
           </svg>
           Volver
         </button>
-        <h1 className="text-3xl font-bold text-brand-neutral-900">Mi Carrito</h1>
+        <h1 className="text-3xl font-display font-extrabold text-brand-neutral-900">Mi Carrito</h1>
         {carrito?.codigo_pedido_web && (
           <p className="text-xs text-brand-neutral-400 font-mono">
             Pedido: {carrito.codigo_pedido_web}

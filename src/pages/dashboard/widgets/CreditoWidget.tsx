@@ -1,4 +1,5 @@
 import Card from "../../../components/ui/Card";
+import TricolorEdge from "./TricolorEdge";
 import type { CreditoResumen } from "../../../models/Dashboard";
 
 interface CreditoWidgetProps {
@@ -8,9 +9,10 @@ interface CreditoWidgetProps {
 
 export default function CreditoWidget({ creditos, loading }: CreditoWidgetProps) {
   return (
-    <Card variant="default" className="space-y-5">
+    <Card variant="default" className="relative overflow-hidden space-y-5">
+      <TricolorEdge />
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-brand-neutral-900">Estado de cuenta</h2>
+        <h2 className="text-base font-display font-bold text-brand-neutral-900">Estado de cuenta</h2>
         <span className="text-xs font-medium text-brand-neutral-400">Crédito disponible por empresa</span>
       </div>
 

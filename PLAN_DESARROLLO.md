@@ -1,4 +1,4 @@
-# GesClientes — Plan de Desarrollo
+# GesRutas Auto — Plan de Desarrollo
 
 > Hoja de ruta técnica para evolucionar el portal B2B de Sindoni desde su estado actual (catálogo + carrito + pedidos) hacia una plataforma completa de autogestión para clientes.
 
@@ -6,7 +6,7 @@
 
 ## Estado Actual del Ecosistema
 
-### GesClientes (Frontend — React 19 + TypeScript + Vite + Tailwind)
+### GesRutas Auto (Frontend — React 19 + TypeScript + Vite + Tailwind)
 
 | Módulo | Estado | Ruta |
 |--------|--------|------|
@@ -73,7 +73,7 @@
 
 ```
 ┌─ Header ──────────────────────────────────────────────┐
-│ [≡] GesClientes          🔔 Notificaciones  [Avatar] │
+│ [≡] GesRutas Auto          🔔 Notificaciones  [Avatar] │
 └───────────────────────────────────────────────────────┘
 ┌─ Sidebar ─┐ ┌─ Content ─────────────────────────────┐
 │ Dashboard  │ │                                       │
@@ -272,7 +272,7 @@ Necesario verificar:
 **Flujo de aprobación de pedidos de clientes (dos filtros)**:
 
 ```
-Cliente (GesClientes)          Vendedor (GesRutasPlus)         Admin (GesRutasPlus)
+Cliente (GesRutas Auto)          Vendedor (GesRutasPlus)         Admin (GesRutasPlus)
 ─────────────────────          ───────────────────────         ────────────────────
 Crea pedido web         →      Ve en bandeja vendedor    →     Ve en bandeja admin
 status: pendiente              Puede: revisar, editar,        Puede: aprobar → SAP
@@ -292,7 +292,7 @@ Los pedidos necesitan distinguirse visualmente según su origen:
 |--------|---------------|-------|-------------|
 | Móvil (app vendedor) | `PM-` | 📱 | Azul |
 | Escritorio (panel admin) | `PE-` | 🖥️ | Gris |
-| Cliente (GesClientes) | `PC-` | 🌐 | Verde |
+| Cliente (GesRutas Auto) | `PC-` | 🌐 | Verde |
 
 #### Backend GesRutasApi — Cambios
 
@@ -357,7 +357,7 @@ GesRutasPlus (cambio de estado)
     → Crear registro en tabla notificaciones_cliente
     → (Futuro: push notification, email, websocket)
 
-GesClientes (frontend)
+GesRutas Auto (frontend)
   → GET /mercadito/notificaciones (polling cada 60s o WebSocket)
   → Campana en header con badge de count
   → Dropdown con lista de notificaciones
@@ -399,7 +399,7 @@ GesClientes (frontend)
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│ [≡]  GesClientes                    🔔(3)  Usuario ▾ [foto] │
+│ [≡]  GesRutas Auto                    🔔(3)  Usuario ▾ [foto] │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -450,7 +450,7 @@ GesClientes (frontend)
 
 ## Fase 3: Perfil del Cliente
 
-### 3.1 Perfil mejorado en GesClientes
+### 3.1 Perfil mejorado en GesRutas Auto
 
 **Estado actual**: Muestra email, datos básicos, créditos por empresa, cambio de contraseña.
 
@@ -482,7 +482,7 @@ GesClientes (frontend)
 
 ### 3.2 Gestión de clientes web en GesRutasPlus
 
-**Nuevo módulo** en el panel admin para crear y administrar usuarios del portal GesClientes.
+**Nuevo módulo** en el panel admin para crear y administrar usuarios del portal GesRutas Auto.
 
 #### Funcionalidades
 
@@ -598,7 +598,7 @@ CREATE TABLE pagos_cliente (
 ### 5.1 Arquitectura del sistema de tickets
 
 ```
-┌─ GesClientes ─────────┐     ┌─ GesRutasApi ──────┐     ┌─ GesRutasPlus ─────────┐
+┌─ GesRutas Auto ─────────┐     ┌─ GesRutasApi ──────┐     ┌─ GesRutasPlus ─────────┐
 │                        │     │                    │     │                        │
 │ Crear reclamo          │────▸│ API Reclamos       │◂────│ Bandeja de reclamos    │
 │ Ver mis reclamos       │     │ Almacenar archivos │     │ Gestión y escalamiento │
@@ -742,7 +742,7 @@ GET    /mercadito/reclamos/categorias         → Listar categorías activas
 | `resources/views/reclamos/show.blade.php` | Detalle: timeline de comentarios, evidencias, historial de estados, acciones |
 | Permisos | `ver_reclamos`, `gestionar_reclamos`, `escalar_reclamos` |
 
-### 5.7 Frontend GesClientes
+### 5.7 Frontend GesRutas Auto
 
 | Archivo | Descripción |
 |---------|-------------|
@@ -788,7 +788,7 @@ GET    /mercadito/reclamos/categorias         → Listar categorías activas
 | 3 | ~4 controllers/views | `routes/web.php`, seeds de permisos | 0 |
 | 5 | ~6 controllers/views | `routes/web.php`, seeds de permisos | 0 (migraciones viven en Api) |
 
-### GesClientes (Frontend)
+### GesRutas Auto (Frontend)
 
 | Fase | Archivos nuevos | Archivos modificados | Componentes UI nuevos |
 |------|----------------|---------------------|-----------------------|

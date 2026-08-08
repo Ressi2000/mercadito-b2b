@@ -9,6 +9,7 @@ import CreditoWidget from "./widgets/CreditoWidget";
 import MapaWidget from "./widgets/MapaWidget";
 import VisitasWidget from "./widgets/VisitasWidget";
 import ProximamenteWidget from "./widgets/ProximamenteWidget";
+import TricolorEdge from "./widgets/TricolorEdge";
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 
@@ -17,6 +18,10 @@ const statusStyles: Record<string, string> = {
   aprobado: "bg-green-100 text-green-700",
   rechazado: "bg-red-100 text-red-700",
 };
+
+const SKYLINE_BG = `url("data:image/svg+xml;utf8,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="560" height="160" viewBox="0 0 560 160"><g fill="none" stroke="white" stroke-width="1.5"><rect x="20" y="60" width="40" height="100"/><rect x="70" y="90" width="30" height="70"/><rect x="110" y="40" width="50" height="120"/><circle cx="135" cy="60" r="14"/><rect x="170" y="100" width="25" height="60"/><rect x="210" y="70" width="45" height="90"/><rect x="270" y="95" width="30" height="65"/><rect x="310" y="50" width="55" height="110"/><rect x="380" y="85" width="35" height="75"/><rect x="430" y="65" width="40" height="95"/><rect x="480" y="100" width="25" height="60"/><rect x="515" y="80" width="30" height="80"/></g></svg>'
+)}")`;
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -51,16 +56,41 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* Encabezado */}
-      <div className="flex flex-col gap-1">
-        <p className="text-xs font-semibold text-brand-primary-600 uppercase tracking-widest">Dashboard</p>
-        <h1 className="text-3xl font-bold text-brand-neutral-900">Hola, {primerNombre}</h1>
-        <p className="text-brand-neutral-500 mt-1">Resumen de tu cuenta con Sindoni.</p>
+      {/* Hero */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-neutral-900 via-brand-neutral-800 to-brand-neutral-900 px-6 sm:px-9 py-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        <div
+          className="absolute inset-0 opacity-10 pointer-events-none bg-no-repeat"
+          style={{ backgroundImage: SKYLINE_BG, backgroundPosition: "right -40px bottom -10px", backgroundSize: "560px" }}
+        />
+        <div
+          className="absolute top-4 -right-14 w-56 text-center py-1.5 text-[11px] font-display font-extrabold tracking-wider text-brand-neutral-900 shadow-lg"
+          style={{
+            background: "linear-gradient(135deg, #f2cf6e, #d4a72c 55%, #a5791a)",
+            transform: "rotate(35deg)",
+          }}
+        >
+          NUEVA IMAGEN
+        </div>
+
+        <div className="relative">
+          <p className="text-xs font-semibold text-brand-primary-300 uppercase tracking-widest">Dashboard</p>
+          <h1 className="text-3xl font-display font-extrabold text-white mt-1">Hola, {primerNombre}</h1>
+          <p className="text-brand-neutral-300 mt-1">Resumen de tu cuenta con Sindoni.</p>
+        </div>
+
+        <Button
+          variant="primary"
+          className="relative shrink-0"
+          onClick={() => navigate("/inicio")}
+        >
+          Nuevo pedido →
+        </Button>
       </div>
 
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <StatCard
+          featured
           label="Pedidos abiertos"
           value={loading ? "—" : String(dashboard?.pedidos_abiertos ?? 0)}
           hint="En espera de aprobación"
@@ -110,9 +140,10 @@ export default function DashboardPage() {
           <CreditoWidget creditos={dashboard?.creditos ?? []} loading={loading} />
 
           {/* Último pedido */}
-          <Card variant="default" className="space-y-4">
+          <Card variant="default" className="relative overflow-hidden space-y-4">
+            <TricolorEdge />
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-semibold text-brand-neutral-900">Último pedido</h2>
+              <h2 className="text-base font-display font-bold text-brand-neutral-900">Último pedido</h2>
               <Button variant="ghost" className="!px-3 !py-1.5 text-sm" onClick={() => navigate("/pedidos")}>
                 Ver todos
               </Button>

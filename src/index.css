@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Bricolage+Grotesque:wght@600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -13,8 +13,8 @@
 
   body {
     font-family: 'Inter', system-ui, sans-serif;
-    color: #1c1917;
-    /* neutral-900 */
+    color: #0a1a35;
+    /* neutral-900 (navy) */
   }
 
   /* Smooth scroll behavior */
@@ -29,18 +29,18 @@
   }
 
   ::-webkit-scrollbar-track {
-    background-color: #f5f5f4;
+    background-color: #e8ecf5;
     /* neutral-100 */
   }
 
   ::-webkit-scrollbar-thumb {
-    background-color: #d6d3d0;
+    background-color: #c7cee0;
     /* neutral-300 */
     border-radius: 9999px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background-color: #a8a29e;
+    background-color: #9aa6c2;
     /* neutral-400 */
   }
 }
@@ -56,7 +56,7 @@
   }
 
   .glass-dark {
-    background-color: rgba(28, 25, 23, 0.7);
+    background-color: rgba(10, 26, 53, 0.7);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -67,7 +67,7 @@
     background-clip: text;
     -webkit-background-clip: text;
     color: transparent;
-    background-image: linear-gradient(to right, #dc2626, #991b1b);
+    background-image: linear-gradient(to right, #eabf56, #a5791a);
   }
 
   /* Focus visible (accesibilidad) */
@@ -77,9 +77,22 @@
   }
 
   .focus-ring:focus-visible {
-    outline: 2px solid #ef4444;
+    outline: 2px solid #d4a72c;
     outline-offset: 2px;
     border-radius: 0.5rem;
+  }
+
+  /* Franja tricolor italiana — guiño a la cinta "Qualità e tradizione"
+     del empaque Sindoni. Uso puntual: bajo el wordmark, en cards clave. */
+  .tricolor-stripe {
+    display: flex;
+    height: 3px;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .tricolor-stripe > span {
+    flex: 1;
   }
 
   /* Slider de rango doble (filtro de precio) — dos <input type="range">
@@ -101,7 +114,7 @@
     width: 16px;
     height: 16px;
     border-radius: 9999px;
-    background: #dc2626;
+    background: #d4a72c;
     border: 2px solid #ffffff;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
     cursor: grab;
@@ -122,7 +135,7 @@
     width: 16px;
     height: 16px;
     border-radius: 9999px;
-    background: #dc2626;
+    background: #d4a72c;
     border: 2px solid #ffffff;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
     cursor: grab;

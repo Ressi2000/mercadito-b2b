@@ -127,7 +127,7 @@ export default function Sidebar({ collapsed, mobileOpen, onCloseMobile, onExpand
       {/* Logo */}
       <button
         onClick={() => handleNavigate("/dashboard")}
-        className="flex items-center gap-3 px-4 h-16 shrink-0 group"
+        className="flex items-center gap-3 px-4 pt-4 pb-3 shrink-0 group"
       >
         <div className="w-9 h-9 rounded-xl bg-brand-primary-500/20 border border-brand-primary-500/30 flex items-center justify-center shrink-0">
           <svg className="w-5 h-5 text-brand-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -136,13 +136,23 @@ export default function Sidebar({ collapsed, mobileOpen, onCloseMobile, onExpand
         </div>
         {!isCollapsedDesktop && (
           <div className="text-left overflow-hidden">
-            <h1 className="text-sm font-semibold text-white leading-tight tracking-wide group-hover:text-brand-primary-300 transition-colors whitespace-nowrap">
-              GesClientes
+            <h1 className="text-sm font-display font-extrabold text-white leading-tight tracking-tight group-hover:text-brand-primary-300 transition-colors whitespace-nowrap">
+              GesRutas Auto
             </h1>
             <p className="text-[11px] text-brand-primary-400 leading-tight whitespace-nowrap">Portal empresarial</p>
           </div>
         )}
       </button>
+
+      {!isCollapsedDesktop && (
+        <div className="px-4 pb-3">
+          <div className="tricolor-stripe w-11">
+            <span style={{ background: "#009246" }} />
+            <span style={{ background: "#f2f2f2" }} />
+            <span style={{ background: "#ce2b37" }} />
+          </div>
+        </div>
+      )}
 
       {/* Nav items */}
       <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1">

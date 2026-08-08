@@ -26,10 +26,10 @@ function PasoResumen({
       {/* Encabezado */}
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-full bg-brand-primary-500 text-white flex items-center justify-center text-sm font-bold">1</div>
+          <div className="w-7 h-7 rounded-full bg-brand-primary-500 text-brand-neutral-900 flex items-center justify-center text-sm font-bold">1</div>
           <p className="text-xs font-semibold text-brand-primary-600 uppercase tracking-widest">Paso 1 de 2</p>
         </div>
-        <h1 className="text-3xl font-bold text-brand-neutral-900">Resumen del pedido</h1>
+        <h1 className="text-3xl font-display font-extrabold text-brand-neutral-900">Resumen del pedido</h1>
         <p className="text-brand-neutral-500">Revisa los productos antes de confirmar.</p>
       </div>
 
@@ -169,10 +169,10 @@ function PasoConfirmacion({
       {/* Encabezado */}
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-full bg-brand-primary-500 text-white flex items-center justify-center text-sm font-bold">2</div>
+          <div className="w-7 h-7 rounded-full bg-brand-primary-500 text-brand-neutral-900 flex items-center justify-center text-sm font-bold">2</div>
           <p className="text-xs font-semibold text-brand-primary-600 uppercase tracking-widest">Paso 2 de 2</p>
         </div>
-        <h1 className="text-3xl font-bold text-brand-neutral-900">Confirmar pedido</h1>
+        <h1 className="text-3xl font-display font-extrabold text-brand-neutral-900">Confirmar pedido</h1>
         <p className="text-brand-neutral-500">Esta acción no se puede deshacer.</p>
       </div>
 

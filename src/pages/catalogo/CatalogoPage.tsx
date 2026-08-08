@@ -159,7 +159,7 @@ export default function CatalogoPage() {
           </button>
 
           <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold text-brand-neutral-900">Catálogo de Productos</h1>
+            <h1 className="text-3xl font-display font-extrabold text-brand-neutral-900">Catálogo de Productos</h1>
             {/* Indicador de refresco silencioso — no interrumpe al usuario */}
             {refreshing && (
               <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-primary-50 border border-brand-primary-100 text-[11px] font-medium text-brand-primary-600 animate-fade-in">

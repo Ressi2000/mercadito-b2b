@@ -1,4 +1,5 @@
 import Card from "../../../components/ui/Card";
+import TricolorEdge from "./TricolorEdge";
 import type { UbicacionCliente } from "../../../models/Dashboard";
 
 interface MapaWidgetProps {
@@ -17,8 +18,9 @@ export default function MapaWidget({ ubicacion, loading }: MapaWidgetProps) {
     : null;
 
   return (
-    <Card variant="default" className="space-y-4">
-      <h2 className="text-base font-semibold text-brand-neutral-900">Ubicación</h2>
+    <Card variant="default" className="relative overflow-hidden space-y-4">
+      <TricolorEdge />
+      <h2 className="text-base font-display font-bold text-brand-neutral-900">Ubicación</h2>
 
       {loading ? (
         <div className="h-52 rounded-xl bg-brand-neutral-100 animate-pulse" />

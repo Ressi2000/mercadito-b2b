@@ -53,8 +53,8 @@ export default function LoginPage() {
           {/* Ícono mineral */}
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-5"
             style={{
-              background: "rgba(220, 38, 38, 0.15)",
-              border: "1px solid rgba(220, 38, 38, 0.30)",
+              background: "rgba(212, 167, 44, 0.16)",
+              border: "1px solid rgba(212, 167, 44, 0.35)",
             }}
           >
             <svg
@@ -72,8 +72,8 @@ export default function LoginPage() {
             </svg>
           </div>
 
-          <h1 className="text-2xl font-bold text-white tracking-tight">
-            GesClientes
+          <h1 className="text-2xl font-display font-extrabold text-white tracking-tight">
+            GesRutas Auto
           </h1>
           <p className="text-sm text-brand-neutral-400 mt-1">
             Portal de pedidos empresariales
