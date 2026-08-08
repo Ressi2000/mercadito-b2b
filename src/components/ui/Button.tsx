@@ -20,7 +20,7 @@ export default function Button({
 
   const variants = {
     primary:
-      "bg-brand-primary-600 text-brand-neutral-900 hover:bg-brand-primary-700 active:scale-[0.98] shadow-lg shadow-brand-primary-600/30 hover:shadow-xl hover:shadow-brand-primary-600/40",
+      "bg-gradient-to-br from-brand-primary-300 via-brand-primary-500 to-brand-primary-700 text-brand-neutral-900 hover:from-brand-primary-200 hover:via-brand-primary-400 hover:to-brand-primary-600 active:scale-[0.98] shadow-lg shadow-brand-primary-600/35 hover:shadow-xl hover:shadow-brand-primary-500/45",
     secondary:
       "bg-brand-neutral-100 text-brand-neutral-900 hover:bg-brand-neutral-200 active:scale-[0.98]",
     ghost:

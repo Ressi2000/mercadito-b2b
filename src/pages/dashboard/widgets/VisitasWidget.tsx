@@ -1,5 +1,5 @@
 import Card from "../../../components/ui/Card";
-import TricolorEdge from "./TricolorEdge";
+import TricolorEdge from "../../../components/ui/TricolorEdge";
 import type { VisitaComercial, ProximaVisita } from "../../../models/Dashboard";
 
 interface VisitasWidgetProps {

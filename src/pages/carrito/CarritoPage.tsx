@@ -219,7 +219,7 @@ export default function CarritoPage() {
           </div>
 
           <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-6 space-y-5 sticky top-8">
-            <h2 className="text-lg font-semibold text-brand-neutral-900">Resumen del pedido</h2>
+            <h2 className="text-lg font-display font-bold text-brand-neutral-900">Resumen del pedido</h2>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between text-brand-neutral-600">
                 <span>Productos ({carrito.items.length})</span>

@@ -53,8 +53,8 @@ export default function LoginPage() {
           {/* Ícono mineral */}
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-5"
             style={{
-              background: "rgba(212, 167, 44, 0.16)",
-              border: "1px solid rgba(212, 167, 44, 0.35)",
+              background: "rgba(242, 169, 0, 0.18)",
+              border: "1px solid rgba(242, 169, 0, 0.4)",
             }}
           >
             <svg

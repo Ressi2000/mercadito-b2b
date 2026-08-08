@@ -11,18 +11,19 @@
 | Módulo | Estado | Ruta |
 |--------|--------|------|
 | Login | Completo | `/` |
+| Sidebar + Header modular | Completo (colapsable, drawer móvil, campana de notificaciones sin backend aún) | — |
+| Dashboard | Completo (hero, KPIs, crédito, último pedido, mapa, visitas) | `/dashboard` |
 | Selección de empresa | Completo | `/inicio` |
-| Catálogo por empresa | Completo (solo filtro texto) | `/catalogo/:empresaId` |
+| Catálogo por empresa | Completo (búsqueda + categoría real + rango de precio + orden) | `/catalogo/:empresaId` |
 | Carrito multi-empresa | Completo | `/carrito` |
 | Confirmación 3 pasos | Completo | `/confirmacion` |
 | Historial de pedidos | Completo (ver, filtrar por estado) | `/pedidos` |
 | Perfil | Completo (datos, créditos, cambio password) | `/perfil` |
-| Dashboard | **No existe** | — |
-| Sidebar/navegación modular | **No existe** (solo header) | — |
-| Cuentas/Facturas | **No existe** | — |
-| Pagos | **No existe** | — |
-| Reclamos | **No existe** | — |
-| Notificaciones | **No existe** | — |
+| Identidad visual | Completo — rebrand a **GesRutas Auto**, paleta navy/dorado/tricolor italiano extraída del empaque real | — |
+| Cuentas/Facturas | UI con candado "Próximamente" — sin backend (Fase 4) | — |
+| Pagos | UI con candado "Próximamente" — sin backend (Fase 4) | — |
+| Reclamos | **No existe** (Fase 5) | — |
+| Notificaciones | Ícono en header, sin datos reales — pendiente backend (Fase 1.4) | — |
 
 ### GesRutasApi (Backend — Laravel 11)
 
@@ -35,14 +36,14 @@
 | Perfil (datos, contactos, créditos) | Completo (2 endpoints) |
 | Empresas por cliente | Completo (1 endpoint) |
 | Aprobación/rechazo de pedidos web | **No existe** (solo el modelo tiene status enum) |
-| Dashboard agregado | **No existe** |
-| Visitas comerciales para cliente | **No existe** (datos existen en DB, sin endpoint) |
-| Tasa BCV | **No existe** (job de sync existe en Plus) |
+| Dashboard agregado | Completo — `GET /mercadito/dashboard` |
+| Visitas comerciales para cliente | Completo — `GET /mercadito/visitas?tipo=ultimas\|proxima` |
+| Tasa BCV | Completo — `GET /mercadito/tasa-bcv` (lee `table_dolar_bcv`, sincronizada por Plus) |
 | Facturas/Cuentas por cobrar | **No existe** (datos en SAP, sin modelo local) |
 | Pagos | **No existe** |
 | Reclamos | **No existe** |
 | Notificaciones a clientes | **No existe** (trait `Notifiable` sin uso) |
-| Categorías de materiales | Modelo existe (`CategoriaMateriales`), relación en `Materiales` |
+| Categorías de materiales | Completo — relación real vía `materiales_categoria` (se corrigió `Materiales::categoriaAsociada()`, la relación original `categoria()` estaba rota) |
 
 ### GesRutasPlus (Admin — Laravel 10)
 
@@ -61,9 +62,26 @@
 
 ---
 
+## Progreso — Fase 1
+
+**Completo:**
+- ✅ Sidebar colapsable + Header (`Sidebar.tsx`, `Header.tsx`, `MainLayout.tsx`, `useSidebar.ts`)
+- ✅ Dashboard con hero, KPIs, estado de cuenta, último pedido, mapa, visitas (`DashboardPage.tsx` + `widgets/`)
+- ✅ Endpoints backend: `/mercadito/dashboard`, `/mercadito/tasa-bcv`, `/mercadito/visitas`
+- ✅ Filtros del catálogo: categoría (relación real `materiales_categoria`), rango de precio (slider doble), orden
+- ✅ Rebrand completo: **GesRutas Auto**, paleta navy/dorado extraída del empaque real Sindoni, tipografía Bricolage Grotesque, franja tricolor italiana (sidebar + cards principales del dashboard y perfil)
+- ✅ Campana de notificaciones en el header (ícono ubicado, sin backend — ver pendientes)
+
+**Pendiente (siguiente bloque grande):**
+- ⬜ Bandeja de pedidos de clientes en GesRutasPlus (flujo vendedor → admin → SAP)
+- ⬜ Indicador de origen del pedido (móvil/escritorio/cliente)
+- ⬜ Notificaciones reales al cliente (tabla `notificaciones_cliente`, endpoint, conectar la campana ya ubicada en el header)
+
+---
+
 ## Fase 1: Dashboard, Sidebar y Mejoras de Pedidos
 
-### 1.1 Sidebar y Navegación
+### 1.1 Sidebar y Navegación — ✅ Implementado
 
 **Problema**: El header actual tiene navegación plana (Pedidos, Carrito, Perfil, Logout). No escala para múltiples módulos.
 
@@ -113,7 +131,7 @@ Cuentas y Pagos aparecen en el sidebar pero deshabilitados con tooltip "Próxima
 
 ---
 
-### 1.2 Dashboard
+### 1.2 Dashboard — ✅ Implementado
 
 **Página principal** que muestra un resumen ejecutivo del cliente.
 
@@ -225,7 +243,7 @@ Para el widget de mapa, opciones:
 
 ---
 
-### 1.3 Filtros del Catálogo
+### 1.3 Filtros del Catálogo — ✅ Implementado
 
 **Problema**: Solo existe búsqueda por texto. No hay filtro por categoría ni rango de precio.
 

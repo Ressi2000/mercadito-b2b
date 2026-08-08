@@ -8,15 +8,15 @@ export default function AuthLayout() {
       {/* ── Orbes flotantes ── */}
       <div
         className="absolute w-[500px] h-[500px] rounded-full opacity-20 blur-3xl animate-orb-1"
-        style={{ background: "radial-gradient(circle, #d4a72c, transparent 70%)", top: "-10%", left: "-10%" }}
+        style={{ background: "radial-gradient(circle, #f2a900, transparent 70%)", top: "-10%", left: "-10%" }}
       />
       <div
         className="absolute w-[400px] h-[400px] rounded-full opacity-15 blur-3xl animate-orb-2"
-        style={{ background: "radial-gradient(circle, #eabf56, transparent 70%)", bottom: "-5%", right: "-5%" }}
+        style={{ background: "radial-gradient(circle, #ffd24d, transparent 70%)", bottom: "-5%", right: "-5%" }}
       />
       <div
         className="absolute w-[300px] h-[300px] rounded-full opacity-10 blur-3xl animate-orb-3"
-        style={{ background: "radial-gradient(circle, #deab3c, transparent 70%)", top: "50%", right: "20%" }}
+        style={{ background: "radial-gradient(circle, #ffbe0b, transparent 70%)", top: "50%", right: "20%" }}
       />
 
       {/* ── Grid pattern sutil ── */}

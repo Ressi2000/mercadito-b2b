@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../../contexts/AuthContext";
+import TricolorEdge from "../../components/ui/TricolorEdge";
 import {
   getPerfil,
   cambiarPassword,
@@ -81,7 +82,7 @@ function Section({
           {icon}
         </div>
         <div>
-          <h2 className="text-base font-bold text-brand-neutral-900">{title}</h2>
+          <h2 className="text-base font-display font-bold text-brand-neutral-900">{title}</h2>
           {subtitle && (
             <p className="text-xs text-brand-neutral-400 mt-0.5">{subtitle}</p>
           )}
@@ -259,14 +260,15 @@ export default function PerfilPage() {
 
       {/* ── Hero: tarjeta de usuario ── */}
       <div className="relative bg-gradient-to-r from-brand-neutral-900 via-brand-neutral-800 to-brand-neutral-900 rounded-2xl overflow-hidden shadow-2xl">
+        <TricolorEdge className="z-10" />
         {/* Decoraciones */}
         <div
           className="absolute -top-8 -left-8 w-40 h-40 rounded-full opacity-20 blur-3xl pointer-events-none"
-          style={{ background: "radial-gradient(circle, #d4a72c, transparent 70%)" }}
+          style={{ background: "radial-gradient(circle, #f2a900, transparent 70%)" }}
         />
         <div
           className="absolute -bottom-6 right-20 w-32 h-32 rounded-full opacity-15 blur-2xl pointer-events-none"
-          style={{ background: "radial-gradient(circle, #eabf56, transparent 70%)" }}
+          style={{ background: "radial-gradient(circle, #ffd24d, transparent 70%)" }}
         />
         <div
           className="absolute inset-0 opacity-[0.03] pointer-events-none"
@@ -287,7 +289,7 @@ export default function PerfilPage() {
 
           {/* Info básica */}
           <div className="flex-1 min-w-0">
-            <h2 className="text-lg font-bold text-white leading-tight truncate">
+            <h2 className="text-lg font-display font-bold text-white leading-tight truncate">
               {cliente?.razon_social_cliente ?? "—"}
             </h2>
             <p className="text-sm text-brand-primary-300 mt-0.5">{user?.email}</p>
@@ -419,7 +421,7 @@ export default function PerfilPage() {
                 porcentaje > 85
                   ? "bg-red-400"
                   : porcentaje > 60
-                  ? "bg-brand-accent-400"
+                  ? "bg-amber-400"
                   : "bg-brand-primary-400";
 
               return (

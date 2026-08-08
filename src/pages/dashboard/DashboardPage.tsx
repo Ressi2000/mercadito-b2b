@@ -9,7 +9,7 @@ import CreditoWidget from "./widgets/CreditoWidget";
 import MapaWidget from "./widgets/MapaWidget";
 import VisitasWidget from "./widgets/VisitasWidget";
 import ProximamenteWidget from "./widgets/ProximamenteWidget";
-import TricolorEdge from "./widgets/TricolorEdge";
+import TricolorEdge from "../../components/ui/TricolorEdge";
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 
@@ -65,7 +65,7 @@ export default function DashboardPage() {
         <div
           className="absolute top-4 -right-14 w-56 text-center py-1.5 text-[11px] font-display font-extrabold tracking-wider text-brand-neutral-900 shadow-lg"
           style={{
-            background: "linear-gradient(135deg, #f2cf6e, #d4a72c 55%, #a5791a)",
+            background: "linear-gradient(135deg, #ffe588, #f2a900 55%, #b37a00)",
             transform: "rotate(35deg)",
           }}
         >

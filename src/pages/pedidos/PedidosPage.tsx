@@ -9,9 +9,9 @@ import Button from "../../components/ui/Button";
 const STATUS_CONFIG = {
   pendiente: {
     label: "Pendiente",
-    bg: "bg-brand-accent-100",
-    text: "text-brand-accent-700",
-    dot: "bg-brand-accent-400",
+    bg: "bg-amber-100",
+    text: "text-amber-700",
+    dot: "bg-amber-400",
   },
   aprobado: {
     label: "Aprobado",
@@ -74,7 +74,7 @@ function DetallePedidoModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-brand-neutral-100">
           <div>
-            <h3 className="text-lg font-bold text-brand-neutral-900">
+            <h3 className="text-lg font-display font-bold text-brand-neutral-900">
               Pedido {pedido.codigo_pedido_web}
             </h3>
             <p className="text-xs text-brand-neutral-400 mt-0.5">{pedido.fecha} · {pedido.empresa}</p>
@@ -292,7 +292,7 @@ export default function PedidosPage() {
             >
               <span className="capitalize">{s === "todos" ? "Todos" : STATUS_CONFIG[s].label}</span>
               <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${
-                filtroStatus === s ? "bg-white/20 text-white" : "bg-brand-neutral-100 text-brand-neutral-500"
+                filtroStatus === s ? "bg-brand-neutral-900/10 text-brand-neutral-900" : "bg-brand-neutral-100 text-brand-neutral-500"
               }`}>
                 {contadores[s]}
               </span>

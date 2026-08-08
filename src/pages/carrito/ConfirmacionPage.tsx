@@ -106,7 +106,7 @@ function PasoResumen({
               </div>
               <div className="flex justify-between">
                 <span className="text-brand-neutral-500">Estado</span>
-                <span className="px-2 py-0.5 rounded-full bg-brand-accent-100 text-brand-accent-700 text-xs font-semibold">
+                <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold">
                   En revisión
                 </span>
               </div>
@@ -215,7 +215,7 @@ function PasoConfirmacion({
         {/* Aviso */}
         <div
           className="flex items-start gap-3 p-4 rounded-xl"
-          style={{ background: "rgba(13,148,136,0.08)", border: "1px solid rgba(13,148,136,0.20)" }}
+          style={{ background: "rgba(242,169,0,0.08)", border: "1px solid rgba(242,169,0,0.20)" }}
         >
           <svg className="w-4 h-4 text-brand-primary-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
@@ -266,7 +266,7 @@ function PasoExito({ codigo }: { codigo: string }) {
         </div>
 
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-brand-neutral-900">¡Pedido enviado!</h2>
+          <h2 className="text-2xl font-display font-extrabold text-brand-neutral-900">¡Pedido enviado!</h2>
           <p className="text-brand-neutral-500">Tu pedido fue recibido y está pendiente de aprobación.</p>
         </div>
 
