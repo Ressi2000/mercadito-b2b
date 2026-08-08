@@ -1,11 +1,20 @@
 // src/pages/catalogo/CatalogoPage.tsx
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Input from "../../components/ui/Input";
 import ProductCard from "./ProductCard";
+import FiltrosCatalogo, { type FiltrosState } from "./FiltrosCatalogo";
 import { useCatalogo } from "../../contexts/CatalogoContext";
 import { useCarrito } from "../../contexts/CarritoContext";
+import type { MaterialCategoria } from "../../models/Material";
+
+const FILTROS_INICIALES: FiltrosState = {
+  categoriaId: null,
+  precioMin: "",
+  precioMax: "",
+  orden: "relevancia",
+};
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 
@@ -47,6 +56,7 @@ export default function CatalogoPage() {
   } = useCarrito();
 
   const [search, setSearch] = useState("");
+  const [filtros, setFiltros] = useState<FiltrosState>(FILTROS_INICIALES);
 
   useEffect(() => {
     if (!empresaIdNum) return;
@@ -63,11 +73,56 @@ export default function CatalogoPage() {
   }, [empresaIdNum]); // eslint-disable-line react-hooks/exhaustive-deps
   // Nota: [] intencional — solo re-ejecutar si cambia la empresa
 
-  const filteredMateriales = materiales.filter(
-    (m) =>
-      m.TextoMaterial.toLowerCase().includes(search.toLowerCase()) ||
-      m.MaterialId.toLowerCase().includes(search.toLowerCase())
-  );
+  // Categorías disponibles a partir de los materiales cargados
+  const categorias = useMemo(() => {
+    const mapa = new Map<number, MaterialCategoria>();
+    materiales.forEach((m) => {
+      if (m.categoria) mapa.set(m.categoria.id, m.categoria);
+    });
+    return Array.from(mapa.values()).sort((a, b) => a.nombre.localeCompare(b.nombre));
+  }, [materiales]);
+
+  const filtrosActivos =
+    filtros.categoriaId !== null || filtros.precioMin !== "" || filtros.precioMax !== "" || filtros.orden !== "relevancia";
+
+  const limpiarFiltros = () => setFiltros(FILTROS_INICIALES);
+
+  const filteredMateriales = useMemo(() => {
+    const min = filtros.precioMin !== "" ? Number(filtros.precioMin) : null;
+    const max = filtros.precioMax !== "" ? Number(filtros.precioMax) : null;
+
+    let resultado = materiales.filter((m) => {
+      const coincideBusqueda =
+        m.TextoMaterial.toLowerCase().includes(search.toLowerCase()) ||
+        m.MaterialId.toLowerCase().includes(search.toLowerCase());
+      if (!coincideBusqueda) return false;
+
+      if (filtros.categoriaId !== null && m.categoria?.id !== filtros.categoriaId) return false;
+
+      const precio = m.PrecioNeto ?? null;
+      if (min !== null && (precio === null || precio < min)) return false;
+      if (max !== null && (precio === null || precio > max)) return false;
+
+      return true;
+    });
+
+    switch (filtros.orden) {
+      case "nombre_asc":
+        resultado = [...resultado].sort((a, b) => a.TextoMaterial.localeCompare(b.TextoMaterial));
+        break;
+      case "nombre_desc":
+        resultado = [...resultado].sort((a, b) => b.TextoMaterial.localeCompare(a.TextoMaterial));
+        break;
+      case "precio_asc":
+        resultado = [...resultado].sort((a, b) => (a.PrecioNeto ?? 0) - (b.PrecioNeto ?? 0));
+        break;
+      case "precio_desc":
+        resultado = [...resultado].sort((a, b) => (b.PrecioNeto ?? 0) - (a.PrecioNeto ?? 0));
+        break;
+    }
+
+    return resultado;
+  }, [materiales, search, filtros]);
 
   return (
     <div className="space-y-10 animate-fade-in">
@@ -116,6 +171,15 @@ export default function CatalogoPage() {
           />
         </div>
       </div>
+
+      {/* ── Filtros ── */}
+      <FiltrosCatalogo
+        categorias={categorias}
+        filtros={filtros}
+        onChange={setFiltros}
+        activo={filtrosActivos}
+        onLimpiar={limpiarFiltros}
+      />
 
       {/* ── Error ── */}
       {error && (
@@ -171,14 +235,19 @@ export default function CatalogoPage() {
           <p className="text-brand-neutral-500 font-medium">
             {search
               ? `Sin resultados para "${search}"`
-              : "No hay productos disponibles."}
+              : filtrosActivos
+                ? "Ningún producto coincide con los filtros aplicados."
+                : "No hay productos disponibles."}
           </p>
-          {search && (
+          {(search || filtrosActivos) && (
             <button
-              onClick={() => setSearch("")}
+              onClick={() => {
+                setSearch("");
+                limpiarFiltros();
+              }}
               className="text-sm text-brand-primary-600 hover:text-brand-primary-700 font-medium transition-colors"
             >
-              Limpiar búsqueda
+              Limpiar búsqueda y filtros
             </button>
           )}
         </div>
