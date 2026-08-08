@@ -11,8 +11,8 @@ import type { MaterialCategoria } from "../../models/Material";
 
 const FILTROS_INICIALES: FiltrosState = {
   categoriaId: null,
-  precioMin: "",
-  precioMax: "",
+  precioMin: null,
+  precioMax: null,
   orden: "relevancia",
 };
 
@@ -82,14 +82,26 @@ export default function CatalogoPage() {
     return Array.from(mapa.values()).sort((a, b) => a.nombre.localeCompare(b.nombre));
   }, [materiales]);
 
+  // Rango de precios disponible en el catálogo cargado
+  const bounds = useMemo(() => {
+    const precios = materiales.map((m) => m.PrecioNeto).filter((p): p is number => typeof p === "number");
+    if (precios.length === 0) return { min: 0, max: 0 };
+    return { min: Math.floor(Math.min(...precios)), max: Math.ceil(Math.max(...precios)) };
+  }, [materiales]);
+
+  const moneda = materiales.find((m) => m.MonedaId)?.MonedaId ?? "USD";
+
   const filtrosActivos =
-    filtros.categoriaId !== null || filtros.precioMin !== "" || filtros.precioMax !== "" || filtros.orden !== "relevancia";
+    filtros.categoriaId !== null ||
+    (filtros.precioMin !== null && filtros.precioMin > bounds.min) ||
+    (filtros.precioMax !== null && filtros.precioMax < bounds.max) ||
+    filtros.orden !== "relevancia";
 
   const limpiarFiltros = () => setFiltros(FILTROS_INICIALES);
 
   const filteredMateriales = useMemo(() => {
-    const min = filtros.precioMin !== "" ? Number(filtros.precioMin) : null;
-    const max = filtros.precioMax !== "" ? Number(filtros.precioMax) : null;
+    const min = filtros.precioMin;
+    const max = filtros.precioMax;
 
     let resultado = materiales.filter((m) => {
       const coincideBusqueda =
@@ -179,6 +191,8 @@ export default function CatalogoPage() {
         onChange={setFiltros}
         activo={filtrosActivos}
         onLimpiar={limpiarFiltros}
+        bounds={bounds}
+        moneda={moneda}
       />
 
       {/* ── Error ── */}

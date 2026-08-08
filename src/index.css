@@ -81,6 +81,52 @@
     outline-offset: 2px;
     border-radius: 0.5rem;
   }
+
+  /* Slider de rango doble (filtro de precio) — dos <input type="range">
+     superpuestos; solo el thumb captura el puntero para poder arrastrar
+     cada extremo de forma independiente. */
+  .range-thumb {
+    height: 1.5rem;
+    margin: 0;
+  }
+
+  .range-thumb::-webkit-slider-runnable-track {
+    -webkit-appearance: none;
+    background: transparent;
+  }
+
+  .range-thumb::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    pointer-events: auto;
+    width: 16px;
+    height: 16px;
+    border-radius: 9999px;
+    background: #dc2626;
+    border: 2px solid #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    cursor: grab;
+    margin-top: 0;
+  }
+
+  .range-thumb::-webkit-slider-thumb:active {
+    cursor: grabbing;
+  }
+
+  .range-thumb::-moz-range-track {
+    background: transparent;
+    border: none;
+  }
+
+  .range-thumb::-moz-range-thumb {
+    pointer-events: auto;
+    width: 16px;
+    height: 16px;
+    border-radius: 9999px;
+    background: #dc2626;
+    border: 2px solid #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    cursor: grab;
+  }
 }
 
 /* ── AuthLayout animations ── */

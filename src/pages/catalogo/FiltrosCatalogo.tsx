@@ -1,12 +1,13 @@
 // src/pages/catalogo/FiltrosCatalogo.tsx
 import type { MaterialCategoria } from "../../models/Material";
+import RangoPrecio from "./RangoPrecio";
 
 export type OrdenCatalogo = "relevancia" | "nombre_asc" | "nombre_desc" | "precio_asc" | "precio_desc";
 
 export interface FiltrosState {
   categoriaId: number | null;
-  precioMin: string;
-  precioMax: string;
+  precioMin: number | null;
+  precioMax: number | null;
   orden: OrdenCatalogo;
 }
 
@@ -16,18 +17,17 @@ interface FiltrosCatalogoProps {
   onChange: (filtros: FiltrosState) => void;
   activo: boolean;
   onLimpiar: () => void;
+  bounds: { min: number; max: number };
+  moneda?: string;
 }
 
 const selectClass =
   "w-full rounded-xl border border-brand-neutral-300 bg-white/70 backdrop-blur-md px-3.5 py-2.5 text-sm text-brand-neutral-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-primary-500 focus:border-transparent";
 
-const numberClass =
-  "w-full rounded-xl border border-brand-neutral-300 bg-white/70 backdrop-blur-md px-3.5 py-2.5 text-sm text-brand-neutral-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-primary-500 focus:border-transparent";
-
-export default function FiltrosCatalogo({ categorias, filtros, onChange, activo, onLimpiar }: FiltrosCatalogoProps) {
+export default function FiltrosCatalogo({ categorias, filtros, onChange, activo, onLimpiar, bounds, moneda }: FiltrosCatalogoProps) {
   return (
     <div className="rounded-2xl border border-brand-neutral-200 bg-white/60 backdrop-blur-md p-4 sm:p-5">
-      <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-end gap-5">
         {/* Categoría */}
         <div className="flex-1 min-w-0 space-y-1.5">
           <label htmlFor="filtro-categoria" className="block text-xs font-semibold text-brand-neutral-500 uppercase tracking-wide">
@@ -47,35 +47,18 @@ export default function FiltrosCatalogo({ categorias, filtros, onChange, activo,
         </div>
 
         {/* Rango de precio */}
-        <div className="flex gap-3 sm:w-56 shrink-0">
-          <div className="flex-1 space-y-1.5">
-            <label htmlFor="filtro-precio-min" className="block text-xs font-semibold text-brand-neutral-500 uppercase tracking-wide">
-              Precio mín.
-            </label>
-            <input
-              id="filtro-precio-min"
-              type="number"
-              min={0}
-              placeholder="0"
-              className={numberClass}
-              value={filtros.precioMin}
-              onChange={(e) => onChange({ ...filtros, precioMin: e.target.value })}
-            />
-          </div>
-          <div className="flex-1 space-y-1.5">
-            <label htmlFor="filtro-precio-max" className="block text-xs font-semibold text-brand-neutral-500 uppercase tracking-wide">
-              Precio máx.
-            </label>
-            <input
-              id="filtro-precio-max"
-              type="number"
-              min={0}
-              placeholder="Sin límite"
-              className={numberClass}
-              value={filtros.precioMax}
-              onChange={(e) => onChange({ ...filtros, precioMax: e.target.value })}
-            />
-          </div>
+        <div className="sm:w-64 shrink-0 space-y-1.5">
+          <label className="block text-xs font-semibold text-brand-neutral-500 uppercase tracking-wide">
+            Rango de precio
+          </label>
+          <RangoPrecio
+            min={bounds.min}
+            max={bounds.max}
+            valueMin={filtros.precioMin ?? bounds.min}
+            valueMax={filtros.precioMax ?? bounds.max}
+            onChange={(min, max) => onChange({ ...filtros, precioMin: min, precioMax: max })}
+            moneda={moneda}
+          />
         </div>
 
         {/* Orden */}
