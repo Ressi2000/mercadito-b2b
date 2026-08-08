@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
-import PromoBanner from "../../components/ui/PromoBanner";
 import { getEmpresasByCliente } from "../../services/empresaService";
 import { useCarrito } from "../../contexts/CarritoContext";
 import type { Empresa } from "../../models/Empresa";
@@ -70,15 +69,6 @@ export default function EmpresasPage() {
         <h1 className="text-3xl font-bold text-brand-neutral-900">Selecciona una Empresa</h1>
         <p className="text-brand-neutral-500 mt-1">Empresas habilitadas para tu cuenta.</p>
       </div>
-
-      {/* Banner */}
-      <PromoBanner
-        tag="Novedad"
-        title="Nuevas colecciones disponibles esta temporada"
-        subtitle="Explora el catálogo actualizado de tus empresas y realiza tus pedidos."
-        ctaText="Ver novedades"
-        ctaHref="#"
-      />
 
       {/* Grid */}
       {loading ? (
