@@ -58,7 +58,7 @@ export default function Button({
           <span>Cargando...</span>
         </span>
       ) : (
-        children
+        <span className="flex items-center justify-center gap-2">{children}</span>
       )}
     </button>
   );
