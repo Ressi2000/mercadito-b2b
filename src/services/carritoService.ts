@@ -12,7 +12,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import api from "./api";
-import type { Carrito, CarritoItem } from "../models/Carrito";
+import type { Carrito, CarritoItem, DesgloseCarrito } from "../models/Carrito";
 
 // Respuesta del nuevo agregarItem del backend
 interface AgregarItemResponse {
@@ -21,6 +21,12 @@ interface AgregarItemResponse {
   codigo_pedido_web: string;
   total_estimado: number;
   mercancia_id: number;
+  desglose: DesgloseCarrito | null;
+}
+
+export interface TotalesCarrito {
+  total_estimado: number;
+  desglose: DesgloseCarrito | null;
 }
 
 export async function getCarrito(empresaId: number): Promise<Carrito> {
@@ -43,12 +49,14 @@ export async function agregarItem(
 export async function actualizarCantidad(
   itemId: number,
   cantidad: number
-): Promise<void> {
-  await api.patch(`/mercadito/carrito/items/${itemId}`, { cantidad });
+): Promise<TotalesCarrito> {
+  const response = await api.patch(`/mercadito/carrito/items/${itemId}`, { cantidad });
+  return response.data.data;
 }
 
-export async function eliminarItem(itemId: number): Promise<void> {
-  await api.delete(`/mercadito/carrito/items/${itemId}`);
+export async function eliminarItem(itemId: number): Promise<TotalesCarrito> {
+  const response = await api.delete(`/mercadito/carrito/items/${itemId}`);
+  return response.data.data;
 }
 
 export async function vaciarCarrito(empresaId: number): Promise<void> {
@@ -62,7 +70,10 @@ export interface ActualizadorDebounced {
   cancelAll: () => void;
 }
 
-export function crearActualizadorDebounced(delayMs = 600): ActualizadorDebounced {
+export function crearActualizadorDebounced(
+  delayMs = 600,
+  onSuccess?: (itemId: number, totales: TotalesCarrito) => void
+): ActualizadorDebounced {
   const timers: Record<number, ReturnType<typeof setTimeout>> = {};
 
   const schedule = (itemId: number, cantidad: number) => {
@@ -70,7 +81,8 @@ export function crearActualizadorDebounced(delayMs = 600): ActualizadorDebounced
     timers[itemId] = setTimeout(async () => {
       delete timers[itemId];
       try {
-        await actualizarCantidad(itemId, cantidad);
+        const totales = await actualizarCantidad(itemId, cantidad);
+        onSuccess?.(itemId, totales);
       } catch {
         if (import.meta.env.DEV) {
           console.warn(`[carritoService] Error sincronizando ítem ${itemId}`);

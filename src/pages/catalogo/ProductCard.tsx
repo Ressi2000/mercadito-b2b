@@ -31,10 +31,14 @@ function ImagePlaceholder({ nombre }: { nombre: string }) {
 }
 
 export default function ProductCard({ material, empresaId, style }: ProductCardProps) {
-  const { carrito, carritosPorEmpresa, agregar, actualizarLocal, eliminar } = useCarrito();
+  const { carrito, carritosPorEmpresa, agregar, actualizarLocal, eliminar, sincronizarTotales } = useCarrito();
   const [agregando, setAgregando] = useState(false);
 
-  const updater = useRef(crearActualizadorDebounced(500));
+  const updater = useRef(
+    crearActualizadorDebounced(500, (_, totales) => {
+      sincronizarTotales(empresaId, totales.total_estimado, totales.desglose);
+    })
+  );
   useEffect(() => () => updater.current.cancelAll(), []);
 
   const tienePrecio = material.PrecioNeto !== undefined && material.PrecioNeto !== null;

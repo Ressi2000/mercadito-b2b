@@ -17,10 +17,14 @@ import { crearActualizadorDebounced } from "../../services/carritoService";
 import Button from "../../components/ui/Button";
 import type { CarritoItem } from "../../models/Carrito";
 
-function CarritoItemRow({ item }: { item: CarritoItem }) {
-  const { actualizarLocal, eliminar, loadingItemId } = useCarrito();
+function CarritoItemRow({ item, empresaId }: { item: CarritoItem; empresaId: number }) {
+  const { actualizarLocal, eliminar, loadingItemId, sincronizarTotales } = useCarrito();
 
-  const updater = useRef(crearActualizadorDebounced(500));
+  const updater = useRef(
+    crearActualizadorDebounced(500, (_, totales) => {
+      sincronizarTotales(empresaId, totales.total_estimado, totales.desglose);
+    })
+  );
   useEffect(() => () => updater.current.cancelAll(), []);
 
   const isSyncing = loadingItemId === item.id;
@@ -225,7 +229,7 @@ export default function CarritoPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           <div className="lg:col-span-2 bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 px-6">
             {carrito.items.map((item) => (
-              <CarritoItemRow key={item.id} item={item} />
+              <CarritoItemRow key={item.id} item={item} empresaId={carrito.mercancia_id} />
             ))}
           </div>
 

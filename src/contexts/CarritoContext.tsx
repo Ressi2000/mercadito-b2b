@@ -27,7 +27,7 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
-import type { Carrito, CarritoItem } from "../models/Carrito";
+import type { Carrito, CarritoItem, DesgloseCarrito } from "../models/Carrito";
 import {
   getCarrito,
   agregarItem,
@@ -51,6 +51,7 @@ interface CarritoContextType {
   setCarritoActivo: (empresaId: number) => void;
   agregar: (empresaId: number, material_id: number, cantidad?: number, materialSnapshot?: Partial<CarritoItem>) => Promise<void>;
   actualizarLocal: (itemId: number, cantidad: number) => void;
+  sincronizarTotales: (empresaId: number, total_estimado: number, desglose: DesgloseCarrito | null) => void;
   eliminar: (itemId: number) => Promise<void>;
   vaciar: (empresaId: number) => Promise<void>;
   clearCarrito: () => void;
@@ -324,6 +325,7 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
             id: resp.carrito_id,
             codigo_pedido_web: resp.codigo_pedido_web,
             total_estimado: resp.total_estimado,
+            desglose: resp.desglose,
             items,
           };
         };
@@ -364,11 +366,31 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  // ── sincronizarTotales ────────────────────────────────────────────────────
+  // Aplica un total_estimado/desglose recién calculado por el backend (tras
+  // agregar/actualizar/eliminar un ítem) al carrito en memoria, para que el
+  // resumen fiscal nunca quede desactualizado respecto al servidor.
+
+  const sincronizarTotales = useCallback(
+    (empresaId: number, total_estimado: number, desglose: DesgloseCarrito | null) => {
+      setCarrito((prev) =>
+        prev && prev.mercancia_id === empresaId ? { ...prev, total_estimado, desglose } : prev
+      );
+      setCarritosPorEmpresa((prev) =>
+        prev[empresaId] ? { ...prev, [empresaId]: { ...prev[empresaId], total_estimado, desglose } } : prev
+      );
+    },
+    []
+  );
+
   // ── eliminar ──────────────────────────────────────────────────────────────
 
   const eliminar = useCallback(async (itemId: number) => {
     const prevCarrito = carritoRef.current;
     const prevMap = carritosPorEmpresaRef.current;
+    const empresaId = Object.keys(prevMap)
+      .map(Number)
+      .find((k) => prevMap[k].items.some((i) => i.id === itemId));
 
     setCarrito((prev) => prev ? aplicarEliminacion(prev, itemId) : prev);
     setCarritosPorEmpresa((prev) => {
@@ -383,7 +405,10 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
     setLoadingItemId(itemId);
 
     try {
-      await eliminarItem(itemId);
+      const totales = await eliminarItem(itemId);
+      if (empresaId !== undefined) {
+        sincronizarTotales(empresaId, totales.total_estimado, totales.desglose);
+      }
     } catch {
       if (prevCarrito) setCarrito(prevCarrito);
       setCarritosPorEmpresa(prevMap);
@@ -391,7 +416,7 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoadingItemId(null);
     }
-  }, []);
+  }, [sincronizarTotales]);
 
   // ── vaciar ────────────────────────────────────────────────────────────────
 
@@ -440,6 +465,7 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
         setCarritoActivo,
         agregar,
         actualizarLocal,
+        sincronizarTotales,
         eliminar,
         vaciar,
         clearCarrito,
