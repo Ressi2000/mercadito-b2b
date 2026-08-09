@@ -56,7 +56,7 @@
 | Gestión de clientes | Completo (CRUD, mapa, importación) |
 | Visitas comerciales | Completo (FormVisita, Itinerario) |
 | Gestión de ClienteWebUser | **No existe** |
-| Bandeja de pedidos de clientes | Completo — flujo vendedor → admin, aprobar/rechazar (SweetAlert2), registro manual de N.° SAP, notifica al cliente vía GesRutasApi |
+| Bandeja de pedidos de clientes | Completo — módulo propio con KPIs, bandejas por estado e historial. Vendedor completa canal/sector/clase/ítems reutilizando la pantalla real de crear pedido (sin duplicar el cálculo de IVA/retención) y aprueba; admin revisa y sube a SAP desde ahí mismo — automático, ya no manual. Notifica al cliente con el detalle de lo que cambió |
 | Indicador de origen de pedido | Completo — campo `origen` (móvil/escritorio/cliente) en `pedidos_web` |
 | Módulo de reclamos | **No existe** |
 
@@ -70,13 +70,17 @@
 - ✅ Endpoints backend: `/mercadito/dashboard`, `/mercadito/tasa-bcv`, `/mercadito/visitas`
 - ✅ Filtros del catálogo: categoría (relación real `materiales_categoria`), rango de precio (slider doble), orden
 - ✅ Rebrand completo: **GesRutas Auto**, paleta navy/dorado extraída del empaque real Sindoni, tipografía Bricolage Grotesque, franja tricolor italiana (sidebar + cards principales del dashboard y perfil)
-- ✅ Bandeja de pedidos de clientes en GesRutasPlus: flujo de dos filtros vendedor → admin (`PedidosWebController`, `PedidoWebService`), historial de estados, registro manual de N.° SAP
-- ✅ Indicador de origen del pedido (`origen`: móvil/escritorio/cliente) en `pedidos_web`
+- ✅ Bandeja de pedidos de clientes en GesRutasPlus — módulo completo (`PedidosWebController`, `PedidoWebService`):
+  - Dashboard con KPIs (pendientes, en revisión final, aprobados, rechazados) + accesos rápidos
+  - Bandejas por estado y vista de historial, con roles bien diferenciados: vendedor (solo su cartera), admin (observador en "pendiente", actúa en "revisión final"), super usuario (ve y actúa en todo)
+  - El vendedor completa canal/sector/clase/lista de precio y ajusta los ítems reutilizando la pantalla real de crear pedido (`pedidos.create` prellenada) — cero duplicación del motor de IVA/retención/precio promedio
+  - Al aprobar el admin, sube a SAP automáticamente desde el pedido real ya completado (`PedidosController::subirPedido`) — ya no es un registro manual
+  - Notificación al cliente con diff automático de lo que cambió respecto a lo que pidió originalmente
+- ✅ Indicador de origen del pedido (`origen`: móvil/escritorio/cliente) en `pedidos_web`, código `PC-...` para pedidos de cliente en la tabla `pedidos`
 - ✅ Notificaciones reales al cliente: tabla `notificaciones_cliente`, endpoint interno Plus→Api (token compartido), endpoints cliente (`index`/`marcarLeida`/`marcarTodasLeidas`), campana del header conectada (`NotificacionContext` con polling cada 60s, `NotificacionDropdown`)
 - ✅ `PedidosPage` actualizada con los nuevos estados (`aprobado_vendedor`, `modificado`) y detalle de pedido con vendedor/N.° SAP/seguimiento
 
 **Pendiente:**
-- ⬜ Envío automático a SAP tras aprobación admin (por ahora es manual, registrando el N.° de pedido a mano — ver decisión en el código de `PedidoWebService::registrarSap`)
 - ⬜ Gestión de `ClienteWebUser` desde GesRutasPlus (alta/edición de credenciales del portal)
 - ⬜ Módulo de reclamos (Fase 5)
 
