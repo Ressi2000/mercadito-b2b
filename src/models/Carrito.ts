@@ -8,9 +8,21 @@ export interface CarritoItem {
   foto?: string | null;
   cantidad: number;
   precio_unitario: number;
+  precio_bruto?: number | null;
+  porc_descuento?: number | null;
   subtotal: number;
   unidad_medida?: string;
   moneda?: string;
+}
+
+export interface DesgloseCarrito {
+  subtotal_16: number;
+  subtotal_8: number;
+  subtotal_exento: number;
+  iva_16: number;
+  iva_8: number;
+  retencion: number;
+  total_retencion: number;
 }
 
 export interface Carrito {
@@ -21,4 +33,5 @@ export interface Carrito {
   estado: "draft" | "confirmado" | "procesado" | "rechazado";
   total_estimado: number;
   items: CarritoItem[];
+  desglose?: DesgloseCarrito | null;
 }

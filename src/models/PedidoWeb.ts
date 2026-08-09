@@ -7,6 +7,8 @@ export interface ItemPedidoWeb {
   nombre: string;
   cantidad: number;
   precio_unitario: number;
+  precio_bruto?: number | null;
+  porc_descuento?: number | null;
   subtotal: number;
   unidad_medida?: string;
   moneda?: string;

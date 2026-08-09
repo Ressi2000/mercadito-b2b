@@ -109,29 +109,47 @@ function DetallePedidoModal({
 
           {/* Header tabla */}
           <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-brand-neutral-50 border-b border-brand-neutral-100 text-xs font-semibold text-brand-neutral-500 uppercase tracking-wider">
-            <div className="col-span-5">Producto</div>
+            <div className="col-span-4">Producto</div>
             <div className="col-span-2 text-center">Cantidad</div>
-            <div className="col-span-2 text-right">Precio unit.</div>
+            <div className="col-span-2 text-right">Precio</div>
+            <div className="col-span-1 text-center">Dscto.</div>
             <div className="col-span-3 text-right">Subtotal</div>
           </div>
 
-          {pedido.items?.map((item: ItemPedidoWeb) => (
-            <div key={item.id} className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-brand-neutral-100 last:border-0 items-center">
-              <div className="col-span-5">
-                <p className="text-sm font-semibold text-brand-neutral-900 line-clamp-1">{item.nombre}</p>
-                <p className="text-xs text-brand-neutral-400 font-mono">{item.codigo}</p>
+          {pedido.items?.map((item: ItemPedidoWeb) => {
+            const tieneDescuento = !!item.porc_descuento && item.porc_descuento > 0;
+            return (
+              <div key={item.id} className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-brand-neutral-100 last:border-0 items-center">
+                <div className="col-span-4">
+                  <p className="text-sm font-semibold text-brand-neutral-900 line-clamp-1">{item.nombre}</p>
+                  <p className="text-xs text-brand-neutral-400 font-mono">{item.codigo}</p>
+                </div>
+                <div className="col-span-2 text-center text-sm text-brand-neutral-700">
+                  {item.cantidad} <span className="text-brand-neutral-400 text-xs">{item.unidad_medida}</span>
+                </div>
+                <div className="col-span-2 text-right text-sm">
+                  {tieneDescuento && (
+                    <p className="text-xs text-brand-neutral-400 line-through">
+                      {item.moneda ?? "$"} {item.precio_bruto!.toFixed(2)}
+                    </p>
+                  )}
+                  <p className="text-brand-neutral-600">
+                    {item.moneda ?? "$"} {item.precio_unitario.toFixed(2)}
+                  </p>
+                </div>
+                <div className="col-span-1 text-center">
+                  {tieneDescuento && (
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-green-100 text-green-700">
+                      -{item.porc_descuento!.toFixed(1)}%
+                    </span>
+                  )}
+                </div>
+                <div className="col-span-3 text-right text-sm font-semibold text-brand-neutral-900">
+                  {item.moneda ?? "$"} {item.subtotal.toFixed(2)}
+                </div>
               </div>
-              <div className="col-span-2 text-center text-sm text-brand-neutral-700">
-                {item.cantidad} <span className="text-brand-neutral-400 text-xs">{item.unidad_medida}</span>
-              </div>
-              <div className="col-span-2 text-right text-sm text-brand-neutral-600">
-                {item.moneda ?? "$"} {item.precio_unitario.toFixed(2)}
-              </div>
-              <div className="col-span-3 text-right text-sm font-semibold text-brand-neutral-900">
-                {item.moneda ?? "$"} {item.subtotal.toFixed(2)}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Footer */}

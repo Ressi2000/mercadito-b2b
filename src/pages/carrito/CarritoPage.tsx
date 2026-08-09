@@ -24,6 +24,7 @@ function CarritoItemRow({ item }: { item: CarritoItem }) {
   useEffect(() => () => updater.current.cancelAll(), []);
 
   const isSyncing = loadingItemId === item.id;
+  const tieneDescuento = !!item.porc_descuento && item.porc_descuento > 0;
 
   const handleMenos = () => {
     if (item.cantidad <= 1) return;
@@ -62,8 +63,18 @@ function CarritoItemRow({ item }: { item: CarritoItem }) {
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-brand-neutral-900 truncate">{item.nombre}</p>
         <p className="text-xs text-brand-neutral-400 font-mono">{item.codigo}</p>
-        <p className="text-xs text-brand-neutral-500 mt-0.5">
-          {item.moneda ?? "$"} {item.precio_unitario.toFixed(2)} / {item.unidad_medida ?? "und"}
+        <p className="text-xs text-brand-neutral-500 mt-0.5 flex items-center gap-1.5">
+          {tieneDescuento && (
+            <span className="text-brand-neutral-400 line-through">
+              {item.moneda ?? "$"} {item.precio_bruto!.toFixed(2)}
+            </span>
+          )}
+          <span>{item.moneda ?? "$"} {item.precio_unitario.toFixed(2)} / {item.unidad_medida ?? "und"}</span>
+          {tieneDescuento && (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-green-100 text-green-700">
+              -{item.porc_descuento!.toFixed(1)}%
+            </span>
+          )}
         </p>
         {isSyncing && (
           <p className="text-[10px] text-brand-primary-400 font-medium mt-0.5 animate-pulse">
@@ -235,6 +246,28 @@ export default function CarritoPage() {
                 </span>
               </div>
             </div>
+
+            {carrito.desglose && (
+              <div className="p-4 rounded-xl bg-brand-neutral-50 space-y-1.5">
+                <p className="text-xs font-semibold text-brand-neutral-500 mb-1">Desglose fiscal estimado</p>
+                {[
+                  ["Base imponible 16%", carrito.desglose.subtotal_16],
+                  ["IVA 16%", carrito.desglose.iva_16],
+                  ["Base imponible 8%", carrito.desglose.subtotal_8],
+                  ["IVA 8%", carrito.desglose.iva_8],
+                  ["Base exenta", carrito.desglose.subtotal_exento],
+                  ["Retención", carrito.desglose.retencion],
+                ].map(([label, valor]) => (
+                  <div key={label as string} className="flex items-center justify-between text-sm">
+                    <span className="text-brand-neutral-500">{label}</span>
+                    <span className="text-brand-neutral-800 font-medium tabular-nums">
+                      {carrito.items[0]?.moneda ?? "$"} {(valor as number).toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <Button variant="primary" className="w-full" onClick={() => navigate("/confirmacion")}>
               Confirmar pedido
             </Button>
