@@ -174,6 +174,28 @@ function DetallePedidoModal({
             </div>
           )}
 
+          {/* Desglose fiscal */}
+          {pedido.desglose && (
+            <div className="p-4 rounded-xl bg-brand-neutral-50 space-y-1.5">
+              <p className="text-xs font-semibold text-brand-neutral-500 mb-1">Desglose fiscal</p>
+              {[
+                ["Base imponible 16%", pedido.desglose.subtotal_16],
+                ["IVA 16%", pedido.desglose.iva_16],
+                ["Base imponible 8%", pedido.desglose.subtotal_8],
+                ["IVA 8%", pedido.desglose.iva_8],
+                ["Base exenta", pedido.desglose.subtotal_exento],
+                ["Retención", pedido.desglose.retencion],
+              ].map(([label, valor]) => (
+                <div key={label as string} className="flex items-center justify-between text-sm">
+                  <span className="text-brand-neutral-500">{label}</span>
+                  <span className="text-brand-neutral-800 font-medium tabular-nums">
+                    {pedido.moneda ?? "$"} {(valor as number).toFixed(2)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Historial de estados */}
           {pedido.historial && pedido.historial.length > 0 && (
             <div>

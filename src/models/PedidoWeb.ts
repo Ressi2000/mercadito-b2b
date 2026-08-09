@@ -22,6 +22,16 @@ export interface HistorialPedidoWeb {
   fecha: string;
 }
 
+export interface DesglosePedidoWeb {
+  subtotal_16: number;
+  subtotal_8: number;
+  subtotal_exento: number;
+  iva_16: number;
+  iva_8: number;
+  retencion: number;
+  total_retencion: number;
+}
+
 export interface PedidoWeb {
   id: number;
   codigo_pedido_web: string;
@@ -37,4 +47,5 @@ export interface PedidoWeb {
   fecha: string;
   items?: ItemPedidoWeb[];
   historial?: HistorialPedidoWeb[];
+  desglose?: DesglosePedidoWeb | null;
 }
