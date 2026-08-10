@@ -23,6 +23,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
+  authChecked: boolean;
   loading: boolean;
   error: string | null;
   login: (data: LoginPayload) => Promise<void>;
@@ -33,7 +34,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser]     = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  // authChecked: solo el chequeo de sesión inicial (una vez, al montar la app).
+  // loading: solo acciones explícitas del usuario (login/logout en curso).
+  // Separados para que GuestRoute/ProtectedRoute no confundan un login en
+  // curso con "todavía no sé si hay sesión" y reemplacen el formulario.
+  const [authChecked, setAuthChecked] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError]   = useState<string | null>(null);
 
   // useRef evita que React StrictMode ejecute verifyAuth dos veces
@@ -58,7 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
         localStorage.removeItem("mercadito_user");
       } finally {
-        setLoading(false);
+        setAuthChecked(true);
       }
     };
 
@@ -103,7 +109,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, loading, error, login, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, authChecked, loading, error, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

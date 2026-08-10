@@ -1,6 +1,7 @@
 // src/components/GuestRoute.tsx
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import TricolorSpinner from "./ui/TricolorSpinner";
 
 /**
  * Componente inverso a ProtectedRoute.
@@ -8,13 +9,15 @@ import { useAuth } from "../contexts/AuthContext";
  * Así no puede volver al login escribiendo "/" en la URL.
  */
 export default function GuestRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, authChecked } = useAuth();
 
-  // Esperar a que se resuelva la verificación de sesión
-  if (loading) {
+  // Esperar a que se resuelva el chequeo inicial de sesión (una sola vez).
+  // No depende de "loading": enviar el form de login no debe reemplazar
+  // el contenido de esta ruta.
+  if (!authChecked) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <span className="w-6 h-6 border-2 border-brand-primary-400 border-t-transparent rounded-full animate-spin" />
+      <div className="flex items-center justify-center py-10">
+        <TricolorSpinner size={32} />
       </div>
     );
   }

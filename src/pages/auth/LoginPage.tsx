@@ -1,7 +1,7 @@
 // src/pages/auth/LoginPage.tsx
 import { useForm } from "react-hook-form";
 import { useAuth } from "../../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 
@@ -82,19 +82,29 @@ export default function LoginPage() {
               })}
             />
 
-            <Input
-              type="password"
-              placeholder="••••••••"
-              label="Contraseña"
-              error={errors.password?.message}
-              {...register("password", {
-                required: "La contraseña es requerida",
-                minLength: {
-                  value: 6,
-                  message: "Mínimo 6 caracteres",
-                },
-              })}
-            />
+            <div className="space-y-2">
+              <Input
+                type="password"
+                placeholder="••••••••"
+                label="Contraseña"
+                error={errors.password?.message}
+                {...register("password", {
+                  required: "La contraseña es requerida",
+                  minLength: {
+                    value: 6,
+                    message: "Mínimo 6 caracteres",
+                  },
+                })}
+              />
+              <div className="text-right">
+                <Link
+                  to="/recuperar-password"
+                  className="text-xs font-medium text-brand-primary-400 hover:text-brand-primary-300 transition-colors"
+                >
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
+            </div>
 
             {/* Error global */}
             {error && (

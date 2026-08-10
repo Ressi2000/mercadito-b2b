@@ -1,6 +1,7 @@
 // src/app/routes.tsx
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import LoginPage from "../pages/auth/LoginPage";
+import RecuperarPasswordPage from "../pages/auth/RecuperarPasswordPage";
 import DashboardPage from "../pages/dashboard/DashboardPage";
 import EmpresasPage from "../pages/empresas/EmpresasPage";
 import CatalogoPage from "../pages/catalogo/CatalogoPage";
@@ -23,6 +24,14 @@ export const router = createBrowserRouter([
           // GuestRoute: si ya está autenticado, redirige a /inicio
           <GuestRoute>
             <LoginPage />
+          </GuestRoute>
+        ),
+      },
+      {
+        path: "/recuperar-password",
+        element: (
+          <GuestRoute>
+            <RecuperarPasswordPage />
           </GuestRoute>
         ),
       },
