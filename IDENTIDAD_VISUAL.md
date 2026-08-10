@@ -118,6 +118,16 @@ O como borde superior de un card (ver componente `TricolorEdge.tsx` en `src/page
 
 ### Botones
 
+**Regla del dorado**: una sola acción primaria visible por pantalla — la que
+hace avanzar el flujo (confirmar, enviar, continuar, nuevo pedido, iniciar
+sesión). Nunca dos botones dorados a la vista al mismo tiempo, ni siquiera
+en estados distintos de una misma vista (ej. header + estado vacío). Todo lo
+demás compite por atención en `secondary` o `ghost` — incluido "hacer mi
+primer pedido" en un estado vacío si ya hay un CTA dorado persistente en el
+header. Dentro de una card o componente autocontenido (ej. `ProductCard`) el
+dorado puede repetirse una vez por instancia porque cada card es su propia
+unidad de decisión, no compite con el resto de la pantalla.
+
 ```
 Primario:   bg-brand-primary-600 hover:bg-brand-primary-700
             text-brand-neutral-900 (¡nunca texto blanco sobre dorado!)

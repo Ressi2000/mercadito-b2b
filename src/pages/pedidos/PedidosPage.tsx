@@ -419,7 +419,7 @@ export default function PedidosPage() {
               Ver todos los pedidos
             </button>
           ) : (
-            <Button variant="primary" onClick={() => navigate("/empresas")}>
+            <Button variant="secondary" onClick={() => navigate("/empresas")}>
               Hacer mi primer pedido
             </Button>
           )}
