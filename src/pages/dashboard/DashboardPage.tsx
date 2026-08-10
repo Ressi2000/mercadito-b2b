@@ -56,25 +56,30 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-neutral-900 via-brand-neutral-800 to-brand-neutral-900 px-6 sm:px-9 py-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+      <div className="relative overflow-hidden rounded-2xl border border-brand-primary-400/50 bg-gradient-to-br from-brand-neutral-900 via-brand-neutral-800 to-brand-neutral-900 px-6 sm:px-9 py-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <div
           className="absolute inset-0 opacity-10 pointer-events-none bg-no-repeat"
           style={{ backgroundImage: SKYLINE_BG, backgroundPosition: "right -40px bottom -10px", backgroundSize: "560px" }}
         />
-        <div
-          className="absolute top-4 -right-14 w-56 text-center py-1.5 text-[11px] font-display font-extrabold tracking-wider text-brand-neutral-900 shadow-lg"
-          style={{
-            background: "linear-gradient(135deg, #ffe588, #f2a900 55%, #b37a00)",
-            transform: "rotate(35deg)",
-          }}
-        >
-          NUEVA IMAGEN
-        </div>
 
         <div className="relative">
           <p className="text-xs font-semibold text-brand-primary-300 uppercase tracking-widest">Dashboard</p>
           <h1 className="text-3xl font-display font-extrabold text-white mt-1">Hola, {primerNombre}</h1>
           <p className="text-brand-neutral-300 mt-1">Resumen de tu cuenta con Sindoni.</p>
+
+          {dashboard?.cliente && (dashboard.cliente.razon_social || dashboard.cliente.rif) && (
+            <div className="flex items-center gap-6 mt-4 pt-4 border-t border-white/10">
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold text-brand-neutral-500 uppercase tracking-wide">Razón social</p>
+                <p className="text-sm text-white font-medium mt-0.5 truncate">{dashboard.cliente.razon_social ?? "—"}</p>
+              </div>
+              <div className="w-px h-8 bg-white/10 shrink-0" />
+              <div className="shrink-0">
+                <p className="text-[10px] font-semibold text-brand-neutral-500 uppercase tracking-wide">RIF</p>
+                <p className="text-sm text-white font-medium mt-0.5 tabular-nums">{dashboard.cliente.rif ?? "—"}</p>
+              </div>
+            </div>
+          )}
         </div>
 
         <Button

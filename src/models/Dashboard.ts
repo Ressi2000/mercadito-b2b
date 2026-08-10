@@ -27,11 +27,17 @@ export interface UbicacionCliente {
   estado: string | null;
 }
 
+export interface ClienteInfo {
+  razon_social: string | null;
+  rif: string | null;
+}
+
 export interface DashboardData {
   creditos: CreditoResumen[];
   pedidos_abiertos: number;
   ultimo_pedido: UltimoPedido | null;
   empresas_activas: number;
+  cliente: ClienteInfo | null;
   ubicacion: UbicacionCliente | null;
 }
 
