@@ -1,4 +1,4 @@
-# GesRutas Auto — Manual de Identidad Visual
+# GesRutas iClient — Manual de Identidad Visual
 
 > Portal B2B de Sindoni. Este documento define la paleta, tipografía, tokens Tailwind y patrones de diseño que **toda nueva pantalla o componente debe respetar**.
 >

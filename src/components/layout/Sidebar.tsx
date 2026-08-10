@@ -137,7 +137,7 @@ export default function Sidebar({ collapsed, mobileOpen, onCloseMobile, onExpand
         {!isCollapsedDesktop && (
           <div className="text-left overflow-hidden">
             <h1 className="text-sm font-display font-extrabold text-white leading-tight tracking-tight group-hover:text-brand-primary-300 transition-colors whitespace-nowrap">
-              GesRutas Auto
+              GesRutas iClient
             </h1>
             <p className="text-[11px] text-brand-primary-400 leading-tight whitespace-nowrap">Portal empresarial</p>
           </div>

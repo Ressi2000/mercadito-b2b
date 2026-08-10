@@ -5,7 +5,7 @@ export default {
     extend: {
       colors: {
         brand: {
-          // Paleta corporativa GesRutas Auto / Sindoni — azul profundo,
+          // Paleta corporativa GesRutas iClient / Sindoni — azul profundo,
           // dorado y un acento rojo italiano (bandera), extraída del
           // empaque real de producto (fondo navy, cinta dorada, ribete negro).
           neutral: {

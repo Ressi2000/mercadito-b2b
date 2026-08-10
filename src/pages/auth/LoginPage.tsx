@@ -50,32 +50,13 @@ export default function LoginPage() {
           {/* Línea de acento superior */}
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-brand-primary-500 to-transparent opacity-70" />
 
-          {/* Ícono mineral */}
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-5"
-            style={{
-              background: "rgba(242, 169, 0, 0.18)",
-              border: "1px solid rgba(242, 169, 0, 0.4)",
-            }}
-          >
-            <svg
-              className="w-7 h-7 text-brand-primary-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.5}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"
-              />
-            </svg>
-          </div>
+          <img
+            src="/logo/gesrutas-iclient-trimmed.png"
+            alt="GesRutas iClient"
+            className="h-16 w-auto mx-auto mb-4 drop-shadow-[0_4px_16px_rgba(0,0,0,0.45)]"
+          />
 
-          <h1 className="text-2xl font-display font-extrabold text-white tracking-tight">
-            GesRutas Auto
-          </h1>
-          <p className="text-sm text-brand-neutral-400 mt-1">
+          <p className="text-sm text-brand-neutral-400">
             Portal de pedidos empresariales
           </p>
         </div>

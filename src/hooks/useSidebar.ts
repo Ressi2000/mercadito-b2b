@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-const STORAGE_KEY = "gesrutas_auto_sidebar_collapsed";
+const STORAGE_KEY = "gesrutas_iclient_sidebar_collapsed";
 
 /**
  * Estado del sidebar: colapsado (solo iconos, desktop) y drawer móvil (overlay).

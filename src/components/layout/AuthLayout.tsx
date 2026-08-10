@@ -1,33 +1,22 @@
-// src/app/components/layout/AuthLayout.tsx
+// src/components/layout/AuthLayout.tsx
 import { Outlet } from "react-router-dom";
 
 export default function AuthLayout() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-neutral-900 via-brand-neutral-800 to-brand-neutral-900 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-brand-neutral-900">
 
-      {/* ── Orbes flotantes ── */}
+      {/* ── Mural italiano de fondo ── */}
       <div
-        className="absolute w-[500px] h-[500px] rounded-full opacity-20 blur-3xl animate-orb-1"
-        style={{ background: "radial-gradient(circle, #f2a900, transparent 70%)", top: "-10%", left: "-10%" }}
-      />
-      <div
-        className="absolute w-[400px] h-[400px] rounded-full opacity-15 blur-3xl animate-orb-2"
-        style={{ background: "radial-gradient(circle, #ffd24d, transparent 70%)", bottom: "-5%", right: "-5%" }}
-      />
-      <div
-        className="absolute w-[300px] h-[300px] rounded-full opacity-10 blur-3xl animate-orb-3"
-        style={{ background: "radial-gradient(circle, #ffbe0b, transparent 70%)", top: "50%", right: "20%" }}
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('/login/bg_login.png')" }}
       />
 
-      {/* ── Grid pattern sutil ── */}
+      {/* ── Viñeta: oscurece bordes y centra la atención en la card ── */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0"
         style={{
-          backgroundImage: `
-            linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)
-          `,
-          backgroundSize: "40px 40px",
+          background:
+            "radial-gradient(ellipse at center, rgba(10,26,53,0.35) 0%, rgba(10,26,53,0.65) 55%, rgba(10,26,53,0.88) 100%)",
         }}
       />
 
@@ -60,11 +49,11 @@ export default function AuthLayout() {
         <div
           className="w-full p-8 rounded-2xl shadow-2xl"
           style={{
-            background: "rgba(255, 255, 255, 0.07)",
+            background: "rgba(10, 26, 53, 0.55)",
             backdropFilter: "blur(24px)",
             WebkitBackdropFilter: "blur(24px)",
             border: "1px solid rgba(255, 255, 255, 0.12)",
-            boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)",
+            boxShadow: "0 25px 50px -12px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1)",
           }}
         >
           <Outlet />
