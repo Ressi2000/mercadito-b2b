@@ -56,9 +56,8 @@ export default function DashboardPage() {
         <div
           className="absolute inset-0 pointer-events-none bg-cover bg-center"
           style={{
-            backgroundImage: "url('/pasta/mosaico-pasta.png')",
-            opacity: 0.16,
-            mixBlendMode: "overlay",
+            backgroundImage: "url('/pasta/mosaico-pasta-alpha.png')",
+            opacity: 0.4,
           }}
         />
 
