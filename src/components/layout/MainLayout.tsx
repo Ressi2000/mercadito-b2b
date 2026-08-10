@@ -23,7 +23,7 @@ export default function MainLayout() {
         <main className="flex-1 relative">
           <div
             className="absolute inset-0 pointer-events-none bg-no-repeat bg-top"
-            style={{ backgroundImage: "url('/body/bg-body.png')", backgroundSize: "1600px auto", opacity: 0.05 }}
+            style={{ backgroundImage: "url('/body/bg-body.png')", backgroundSize: "1600px auto", opacity: 0.08 }}
           />
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
             <Outlet />

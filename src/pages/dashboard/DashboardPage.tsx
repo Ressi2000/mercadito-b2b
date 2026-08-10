@@ -57,7 +57,7 @@ export default function DashboardPage() {
           className="absolute inset-0 pointer-events-none bg-cover bg-center"
           style={{
             backgroundImage: "url('/pasta/mosaico-pasta-alpha.png')",
-            opacity: 0.4,
+            opacity: 0.3,
           }}
         />
 
