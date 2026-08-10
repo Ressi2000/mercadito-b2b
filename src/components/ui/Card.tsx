@@ -25,20 +25,23 @@ export default function Card({
   const base =
     "rounded-2xl p-6 transition-all duration-300";
 
+  // Blur + sombra: los define el variant.
   const variants = {
-    default: "bg-white/70 backdrop-blur-xl shadow-xl",
-    elevated: "bg-white/80 backdrop-blur-xl shadow-2xl hover:-translate-y-1 hover:shadow-2xl",
-    flat: "bg-white shadow-sm",
+    default: "backdrop-blur-xl shadow-xl",
+    elevated: "backdrop-blur-xl shadow-2xl hover:-translate-y-1 hover:shadow-2xl",
+    flat: "shadow-sm",
   };
 
-  const borders = {
-    subtle: variant === "flat" ? "border border-brand-neutral-200" : "border border-white/20",
-    gold: "border border-brand-primary-400/70",
-    none: "border-0",
+  // Fondo + borde van juntos, a cargo del nivel de énfasis: "gold" es una
+  // superficie de pergamino opaca, distinta del vidrio translúcido del resto.
+  const surface = {
+    subtle: variant === "flat" ? "bg-white border border-brand-neutral-200" : "bg-white/70 border border-white/20",
+    gold: "bg-[#faf3e0] border-2 border-brand-primary-400/80",
+    none: variant === "flat" ? "bg-white border-0" : "bg-white/70 border-0",
   };
 
   return (
-    <div className={clsx(base, variants[variant], borders[border], className)} style={style}>
+    <div className={clsx(base, variants[variant], surface[border], className)} style={style}>
       {children}
     </div>
   );
