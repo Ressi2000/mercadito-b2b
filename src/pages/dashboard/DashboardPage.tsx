@@ -4,13 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { getDashboard, getTasaBcv, getUltimasVisitas, getProximaVisita } from "../../services/dashboardService";
 import type { DashboardData, TasaBcv, VisitaComercial, ProximaVisita } from "../../models/Dashboard";
-import StatCard from "./widgets/StatCard";
+import KpiCard from "../../components/ui/KpiCard";
 import CreditoWidget from "./widgets/CreditoWidget";
 import MapaWidget from "./widgets/MapaWidget";
 import VisitasWidget from "./widgets/VisitasWidget";
 import ProximamenteWidget from "./widgets/ProximamenteWidget";
-import TricolorEdge from "../../components/ui/TricolorEdge";
-import Card from "../../components/ui/Card";
+import ModuleCard from "../../components/ui/ModuleCard";
 import Button from "../../components/ui/Button";
 
 const statusStyles: Record<string, string> = {
@@ -89,7 +88,7 @@ export default function DashboardPage() {
 
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <StatCard
+        <KpiCard
           featured
           label="Pedidos abiertos"
           value={loading ? "—" : String(dashboard?.pedidos_abiertos ?? 0)}
@@ -101,7 +100,7 @@ export default function DashboardPage() {
             </svg>
           }
         />
-        <StatCard
+        <KpiCard
           label="Empresas activas"
           value={loading ? "—" : String(dashboard?.empresas_activas ?? 0)}
           hint="Para realizar pedidos"
@@ -112,7 +111,7 @@ export default function DashboardPage() {
             </svg>
           }
         />
-        <StatCard
+        <KpiCard
           label="Tasa BCV"
           value={tasa ? `Bs. ${tasa.tasa.toLocaleString("es-VE", { minimumFractionDigits: 2 })}` : "—"}
           hint={tasa ? new Date(tasa.fecha).toLocaleDateString("es-VE") : "No disponible"}
@@ -122,7 +121,7 @@ export default function DashboardPage() {
             </svg>
           }
         />
-        <StatCard
+        <KpiCard
           label="Próxima visita"
           value={proximaVisita ? new Date(proximaVisita.fecha).toLocaleDateString("es-VE", { day: "2-digit", month: "short" }) : "—"}
           hint={proximaVisita?.vendedor ?? "No agendada"}
@@ -140,15 +139,15 @@ export default function DashboardPage() {
           <CreditoWidget creditos={dashboard?.creditos ?? []} loading={loading} />
 
           {/* Último pedido */}
-          <Card variant="default" className="relative overflow-hidden space-y-4">
-            <TricolorEdge />
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-display font-bold text-brand-neutral-900">Último pedido</h2>
+          <ModuleCard
+            title="Último pedido"
+            titleRight={
               <Button variant="ghost" className="!px-3 !py-1.5 text-sm" onClick={() => navigate("/pedidos")}>
                 Ver todos
               </Button>
-            </div>
-
+            }
+            tricolor
+          >
             {loading ? (
               <div className="h-16 bg-brand-neutral-100 rounded-xl animate-pulse" />
             ) : dashboard?.ultimo_pedido ? (
@@ -173,7 +172,7 @@ export default function DashboardPage() {
             ) : (
               <p className="text-sm text-brand-neutral-400 py-2">Aún no has realizado pedidos.</p>
             )}
-          </Card>
+          </ModuleCard>
 
           {/* Módulos futuros */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

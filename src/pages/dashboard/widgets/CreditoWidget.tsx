@@ -1,5 +1,4 @@
-import Card from "../../../components/ui/Card";
-import TricolorEdge from "../../../components/ui/TricolorEdge";
+import ModuleCard from "../../../components/ui/ModuleCard";
 import type { CreditoResumen } from "../../../models/Dashboard";
 
 interface CreditoWidgetProps {
@@ -9,13 +8,11 @@ interface CreditoWidgetProps {
 
 export default function CreditoWidget({ creditos, loading }: CreditoWidgetProps) {
   return (
-    <Card variant="default" className="relative overflow-hidden space-y-5">
-      <TricolorEdge />
-      <div className="flex items-center justify-between">
-        <h2 className="text-base font-display font-bold text-brand-neutral-900">Estado de cuenta</h2>
-        <span className="text-xs font-medium text-brand-neutral-400">Crédito disponible por empresa</span>
-      </div>
-
+    <ModuleCard
+      title="Estado de cuenta"
+      titleRight={<span className="text-xs font-medium text-brand-neutral-400">Crédito disponible por empresa</span>}
+      tricolor
+    >
       {loading ? (
         <div className="space-y-4 animate-pulse">
           {[1, 2].map((n) => (
@@ -57,6 +54,6 @@ export default function CreditoWidget({ creditos, loading }: CreditoWidgetProps)
           })}
         </div>
       )}
-    </Card>
+    </ModuleCard>
   );
 }

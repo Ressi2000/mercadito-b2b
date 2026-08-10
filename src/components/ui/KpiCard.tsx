@@ -1,15 +1,20 @@
-import Card from "../../../components/ui/Card";
+import type { ReactNode } from "react";
+import Card from "./Card";
 
-interface StatCardProps {
+interface KpiCardProps {
   label: string;
   value: string;
   hint?: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   onClick?: () => void;
   featured?: boolean;
 }
 
-export default function StatCard({ label, value, hint, icon, onClick, featured = false }: StatCardProps) {
+/**
+ * Card para un único indicador (KPI): ícono + etiqueta + valor + hint opcional.
+ * `featured` marca el KPI más importante de una fila con acento dorado.
+ */
+export default function KpiCard({ label, value, hint, icon, onClick, featured = false }: KpiCardProps) {
   return (
     <Card
       variant="default"

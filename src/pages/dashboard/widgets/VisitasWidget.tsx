@@ -1,5 +1,4 @@
-import Card from "../../../components/ui/Card";
-import TricolorEdge from "../../../components/ui/TricolorEdge";
+import ModuleCard from "../../../components/ui/ModuleCard";
 import type { VisitaComercial, ProximaVisita } from "../../../models/Dashboard";
 
 interface VisitasWidgetProps {
@@ -18,10 +17,7 @@ function formatFecha(fecha: string) {
 
 export default function VisitasWidget({ ultimas, proxima, loading }: VisitasWidgetProps) {
   return (
-    <Card variant="default" className="relative overflow-hidden space-y-5">
-      <TricolorEdge />
-      <h2 className="text-base font-display font-bold text-brand-neutral-900">Visitas comerciales</h2>
-
+    <ModuleCard title="Visitas comerciales" tricolor>
       {loading ? (
         <div className="space-y-3 animate-pulse">
           {[1, 2, 3].map((n) => (
@@ -67,6 +63,6 @@ export default function VisitasWidget({ ultimas, proxima, loading }: VisitasWidg
           </div>
         </>
       )}
-    </Card>
+    </ModuleCard>
   );
 }
