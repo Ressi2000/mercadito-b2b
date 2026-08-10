@@ -12,7 +12,8 @@ interface KpiCardProps {
 
 /**
  * Card para un único indicador (KPI): ícono + etiqueta + valor + hint opcional.
- * `featured` marca el KPI más importante de una fila con acento dorado.
+ * Todas llevan el borde dorado en degradé (nivel "gold" de Card); `featured`
+ * además resalta el ícono del KPI más importante de la fila.
  */
 export default function KpiCard({ label, value, hint, icon, onClick, featured = false }: KpiCardProps) {
   return (
@@ -21,9 +22,6 @@ export default function KpiCard({ label, value, hint, icon, onClick, featured = 
       border="gold"
       className={`relative overflow-hidden flex items-start gap-4 ${onClick ? "cursor-pointer hover:-translate-y-0.5 hover:shadow-2xl transition-all duration-300" : ""}`}
     >
-      {featured && (
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-brand-primary-300 via-brand-primary-500 to-brand-primary-700" />
-      )}
       <div onClick={onClick} className="flex items-start gap-4 w-full">
         <div
           className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${

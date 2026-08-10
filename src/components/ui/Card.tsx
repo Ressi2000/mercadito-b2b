@@ -32,11 +32,22 @@ export default function Card({
     flat: "shadow-sm",
   };
 
-  // Fondo + borde van juntos, a cargo del nivel de énfasis: "gold" es una
-  // superficie de pergamino opaca, distinta del vidrio translúcido del resto.
+  // Nivel "gold": borde en degradé (no un color plano) — se logra con un
+  // wrapper de fondo degradado + padding de 2px, porque border-image no
+  // respeta border-radius. El contenido real vive en el div interno.
+  if (border === "gold") {
+    return (
+      <div className="rounded-2xl p-[2px] bg-gradient-to-br from-brand-primary-300 via-brand-primary-500 to-brand-primary-700">
+        <div className={clsx(base, variants[variant], "bg-[#faf3e0]", className)} style={style}>
+          {children}
+        </div>
+      </div>
+    );
+  }
+
+  // Fondo + borde van juntos para los demás niveles.
   const surface = {
     subtle: variant === "flat" ? "bg-white border border-brand-neutral-200" : "bg-white/70 border border-white/20",
-    gold: "bg-[#faf3e0] border-2 border-brand-primary-400/80",
     none: variant === "flat" ? "bg-white border-0" : "bg-white/70 border-0",
   };
 

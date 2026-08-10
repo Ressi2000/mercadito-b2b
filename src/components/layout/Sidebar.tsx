@@ -122,8 +122,17 @@ export default function Sidebar({ collapsed, mobileOpen, onCloseMobile, onExpand
     onCloseMobile();
   };
 
+  const torreSindoni = (
+    <img
+      src="/sidebar/torre-sindoni.png"
+      alt=""
+      aria-hidden="true"
+      className="absolute bottom-0 left-1/2 -translate-x-1/2 w-44 max-w-none opacity-[0.07] pointer-events-none select-none"
+    />
+  );
+
   const content = (
-    <nav className="flex flex-col h-full">
+    <nav className="relative z-10 flex flex-col h-full">
       {/* Logo */}
       <button
         onClick={() => handleNavigate("/dashboard")}
@@ -269,10 +278,11 @@ export default function Sidebar({ collapsed, mobileOpen, onCloseMobile, onExpand
     <>
       {/* Desktop sidebar */}
       <aside
-        className={`hidden md:flex flex-col shrink-0 h-screen sticky top-0 bg-gradient-to-b from-brand-neutral-900 via-brand-neutral-800 to-brand-neutral-900 border-r border-white/10 transition-all duration-200 ${
+        className={`hidden md:flex flex-col shrink-0 h-screen sticky top-0 overflow-hidden bg-gradient-to-b from-brand-neutral-900 via-brand-neutral-800 to-brand-neutral-900 border-r border-white/10 transition-all duration-200 ${
           isCollapsedDesktop ? "w-[76px]" : "w-64"
         }`}
       >
+        {!isCollapsedDesktop && torreSindoni}
         {content}
       </aside>
 
@@ -283,7 +293,8 @@ export default function Sidebar({ collapsed, mobileOpen, onCloseMobile, onExpand
             className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"
             onClick={onCloseMobile}
           />
-          <aside className="absolute left-0 top-0 h-full w-72 bg-gradient-to-b from-brand-neutral-900 via-brand-neutral-800 to-brand-neutral-900 border-r border-white/10 animate-slide-up">
+          <aside className="absolute left-0 top-0 h-full w-72 overflow-hidden bg-gradient-to-b from-brand-neutral-900 via-brand-neutral-800 to-brand-neutral-900 border-r border-white/10 animate-slide-up">
+            {torreSindoni}
             {content}
           </aside>
         </div>
