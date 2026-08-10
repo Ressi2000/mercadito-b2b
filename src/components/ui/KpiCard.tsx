@@ -18,6 +18,7 @@ export default function KpiCard({ label, value, hint, icon, onClick, featured = 
   return (
     <Card
       variant="default"
+      border="gold"
       className={`relative overflow-hidden flex items-start gap-4 ${onClick ? "cursor-pointer hover:-translate-y-0.5 hover:shadow-2xl transition-all duration-300" : ""}`}
     >
       {featured && (

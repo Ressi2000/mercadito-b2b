@@ -8,7 +8,7 @@ interface ProximamenteWidgetProps {
 
 export default function ProximamenteWidget({ label, icon, fase }: ProximamenteWidgetProps) {
   return (
-    <Card variant="default" className="flex items-start gap-4 opacity-70">
+    <Card variant="default" border="none" className="flex items-start gap-4 opacity-70">
       <div className="w-11 h-11 rounded-xl bg-brand-neutral-100 flex items-center justify-center text-brand-neutral-400 shrink-0">
         {icon}
       </div>

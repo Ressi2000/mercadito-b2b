@@ -160,19 +160,30 @@ Error:      border-red-300 focus:ring-red-500/20
 ### Cards
 
 ```
-Default:    bg-white/70 backdrop-blur-xl border border-white/20
-            shadow-xl rounded-2xl p-6
+Default:    bg-white/70 backdrop-blur-xl shadow-xl rounded-2xl p-6
 
-Elevated:   bg-white/80 backdrop-blur-xl border border-white/20
-            shadow-2xl rounded-2xl p-6
+Elevated:   bg-white/80 backdrop-blur-xl shadow-2xl rounded-2xl p-6
             hover:-translate-y-1 hover:shadow-2xl
 
-Flat:       bg-white border border-brand-neutral-200
-            shadow-sm rounded-2xl p-6
+Flat:       bg-white shadow-sm rounded-2xl p-6
 
 Con franja: relative overflow-hidden + <TricolorEdge /> como primer hijo
             (solo en cards principales del dashboard)
 ```
+
+**Jerarquía de cards** — el borde (prop `border` de `Card`, ver `KpiCard`/`ModuleCard`)
+comunica el nivel de la card, independiente del `variant` (que solo define
+fondo/sombra):
+
+| Nivel | `border` | Cuándo | Ejemplo |
+|---|---|---|---|
+| Dorado | `gold` | Indicadores/KPIs — la fila de números destacados de una pantalla | `KpiCard` |
+| Tricolor | `subtle` + `<TricolorEdge />` | Módulo principal de la pantalla, cuerpo de contenido | `ModuleCard` con `tricolor` |
+| Sin borde | `none` | Cards secundarias o de menor jerarquía — solo sombra, sin línea | `ProximamenteWidget` |
+
+No combinar dorado y tricolor en la misma card — cada card tiene un solo
+nivel. El default (`subtle`, sin franja) queda para cards que no encajan en
+ninguno de los tres casos anteriores.
 
 ### Badges
 
