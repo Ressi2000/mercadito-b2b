@@ -18,10 +18,6 @@ const statusStyles: Record<string, string> = {
   rechazado: "bg-red-100 text-red-700",
 };
 
-const SKYLINE_BG = `url("data:image/svg+xml;utf8,${encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" width="560" height="160" viewBox="0 0 560 160"><g fill="none" stroke="white" stroke-width="1.5"><rect x="20" y="60" width="40" height="100"/><rect x="70" y="90" width="30" height="70"/><rect x="110" y="40" width="50" height="120"/><circle cx="135" cy="60" r="14"/><rect x="170" y="100" width="25" height="60"/><rect x="210" y="70" width="45" height="90"/><rect x="270" y="95" width="30" height="65"/><rect x="310" y="50" width="55" height="110"/><rect x="380" y="85" width="35" height="75"/><rect x="430" y="65" width="40" height="95"/><rect x="480" y="100" width="25" height="60"/><rect x="515" y="80" width="30" height="80"/></g></svg>'
-)}")`;
-
 export default function DashboardPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -58,8 +54,12 @@ export default function DashboardPage() {
       {/* Hero */}
       <div className="relative overflow-hidden rounded-2xl border border-brand-primary-400/50 bg-gradient-to-br from-brand-neutral-900 via-brand-neutral-800 to-brand-neutral-900 px-6 sm:px-9 py-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <div
-          className="absolute inset-0 opacity-10 pointer-events-none bg-no-repeat"
-          style={{ backgroundImage: SKYLINE_BG, backgroundPosition: "right -40px bottom -10px", backgroundSize: "560px" }}
+          className="absolute inset-0 pointer-events-none bg-cover bg-center"
+          style={{
+            backgroundImage: "url('/pasta/mosaico-pasta.png')",
+            opacity: 0.16,
+            mixBlendMode: "overlay",
+          }}
         />
 
         <div className="relative">
