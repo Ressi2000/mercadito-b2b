@@ -38,7 +38,7 @@ export default function Card({
   if (border === "gold") {
     return (
       <div className="rounded-2xl p-[2px] bg-gradient-to-br from-brand-primary-300 via-brand-primary-500 to-brand-primary-700">
-        <div className={clsx(base, variants[variant], "bg-[#faf3e0]", className)} style={style}>
+        <div className={clsx(base, variants[variant], "bg-[#faf3e0]/70", className)} style={style}>
           {children}
         </div>
       </div>

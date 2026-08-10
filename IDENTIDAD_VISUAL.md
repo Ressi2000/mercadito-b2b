@@ -177,7 +177,7 @@ fondo/sombra):
 
 | Nivel | `border` | Cuándo | Ejemplo |
 |---|---|---|---|
-| Dorado | `gold` | Indicadores/KPIs — la fila de números destacados de una pantalla | `KpiCard` — fondo pergamino `#faf3e0`, borde de 2px |
+| Dorado | `gold` | Indicadores/KPIs — la fila de números destacados de una pantalla | `KpiCard` — glass pergamino `#faf3e0` al 70% + blur, borde en degradé de 2px |
 | Tricolor | `subtle` + `<TricolorEdge />` | Módulo principal de la pantalla, cuerpo de contenido | `ModuleCard` con `tricolor` |
 | Sin borde | `none` | Cards secundarias o de menor jerarquía — solo sombra, sin línea | `ProximamenteWidget` |
 
