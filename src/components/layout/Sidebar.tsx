@@ -127,7 +127,7 @@ export default function Sidebar({ collapsed, mobileOpen, onCloseMobile, onExpand
       src="/sidebar/torre-sindoni.png"
       alt=""
       aria-hidden="true"
-      className="absolute bottom-0 left-1/2 -translate-x-1/2 w-44 max-w-none opacity-[0.07] pointer-events-none select-none"
+      className="absolute bottom-0 left-1/2 -translate-x-1/2 w-72 max-w-none opacity-[0.07] pointer-events-none select-none"
     />
   );
 
