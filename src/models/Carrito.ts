@@ -13,6 +13,8 @@ export interface CarritoItem {
   subtotal: number;
   unidad_medida?: string;
   moneda?: string;
+  /** % de impuesto del material (16/8/exento) — para recalcular el desglose fiscal en el cliente. */
+  porc_impuesto?: number;
 }
 
 export interface DesgloseCarrito {

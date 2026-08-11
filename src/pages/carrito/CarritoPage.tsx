@@ -198,9 +198,19 @@ export default function CarritoPage() {
           </svg>
         }
         title="Mi Carrito"
-        subtitle={
+        subtitle={carrito?.nombre_mercancia && <span>{carrito.nombre_mercancia}</span>}
+        action={
           carrito?.codigo_pedido_web && (
-            <span className="text-xs text-brand-neutral-400 font-mono">Pedido: {carrito.codigo_pedido_web}</span>
+            <div className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-brand-neutral-900 shadow-md shadow-brand-neutral-900/20">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5 text-brand-primary-400 shrink-0">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
+              </svg>
+              <div className="leading-none">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-brand-neutral-400">Código de pedido</p>
+                <p className="text-sm font-mono font-bold text-white mt-1">{carrito.codigo_pedido_web}</p>
+              </div>
+            </div>
           )
         }
       />
@@ -229,7 +239,11 @@ export default function CarritoPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
             </svg>
           </div>
-          <p className="text-brand-neutral-500 font-medium">Tu carrito está vacío.</p>
+          <p className="text-brand-neutral-500 font-medium">
+            {carrito?.nombre_mercancia
+              ? <>El carrito de <span className="font-semibold text-brand-neutral-700">{carrito.nombre_mercancia}</span> está vacío.</>
+              : "El carrito de esta empresa está vacío."}
+          </p>
           <Button variant="primary" onClick={() => navigate("/inicio")}>
             Explorar empresas
           </Button>

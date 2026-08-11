@@ -88,18 +88,54 @@ function calcularTotal(items: CarritoItem[]): number {
   return items.reduce((acc, i) => acc + i.subtotal, 0);
 }
 
-function aplicarActualizacion(c: Carrito, itemId: number, cantidad: number): Carrito {
+// Recalcula el desglose fiscal en el cliente, en espejo de
+// DesgloseFiscalService::calcular (GesRutasApi) — evita el salto visual
+// donde cantidad y total se actualizan al toque pero el desglose (IVA,
+// retención) queda "colgado" esperando el round-trip al servidor.
+// `retencionPct` se cachea de la última respuesta real del backend, ya
+// que el % de retención del cliente no viaja en cada ítem.
+function calcularDesgloseLocal(items: CarritoItem[], retencionPct: number): DesgloseCarrito | null {
+  if (items.length === 0) return null;
+
+  let subtotal16 = 0;
+  let subtotal8 = 0;
+  let subtotalExento = 0;
+
+  for (const item of items) {
+    const porc = item.porc_impuesto ?? 0;
+    if (porc >= 15) subtotal16 += item.subtotal;
+    else if (porc >= 5) subtotal8 += item.subtotal;
+    else subtotalExento += item.subtotal;
+  }
+
+  const iva16 = +(subtotal16 * 0.16).toFixed(2);
+  const iva8 = +(subtotal8 * 0.08).toFixed(2);
+  const totalConIva = subtotal16 + subtotal8 + subtotalExento + iva16 + iva8;
+  const retencion = +(totalConIva * (retencionPct / 100)).toFixed(2);
+
+  return {
+    subtotal_16: +subtotal16.toFixed(2),
+    subtotal_8: +subtotal8.toFixed(2),
+    subtotal_exento: +subtotalExento.toFixed(2),
+    iva_16: iva16,
+    iva_8: iva8,
+    retencion,
+    total_retencion: +(totalConIva - retencion).toFixed(2),
+  };
+}
+
+function aplicarActualizacion(c: Carrito, itemId: number, cantidad: number, retencionPct: number): Carrito {
   const items = c.items.map((i) =>
     i.id === itemId
       ? { ...i, cantidad, subtotal: +(cantidad * i.precio_unitario).toFixed(2) }
       : i
   );
-  return { ...c, items, total_estimado: calcularTotal(items) };
+  return { ...c, items, total_estimado: calcularTotal(items), desglose: calcularDesgloseLocal(items, retencionPct) };
 }
 
-function aplicarEliminacion(c: Carrito, itemId: number): Carrito {
+function aplicarEliminacion(c: Carrito, itemId: number, retencionPct: number): Carrito {
   const items = c.items.filter((i) => i.id !== itemId);
-  return { ...c, items, total_estimado: calcularTotal(items) };
+  return { ...c, items, total_estimado: calcularTotal(items), desglose: calcularDesgloseLocal(items, retencionPct) };
 }
 
 // ── Contexto ──────────────────────────────────────────────────────────────────
@@ -121,6 +157,18 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
   const tempIdRef = useRef(-1);
   const carritoRef = useRef(carrito);
   const carritosPorEmpresaRef = useRef(carritosPorEmpresa);
+  // % de retención del cliente, derivado de la última respuesta real del
+  // backend (no viaja por ítem) — se usa para el recálculo local instantáneo.
+  const retencionPctRef = useRef(0);
+
+  const actualizarRetencionCache = useCallback((desglose: DesgloseCarrito | null | undefined) => {
+    if (!desglose) return;
+    const totalConIva =
+      desglose.subtotal_16 + desglose.subtotal_8 + desglose.subtotal_exento + desglose.iva_16 + desglose.iva_8;
+    if (totalConIva > 0) {
+      retencionPctRef.current = (desglose.retencion / totalConIva) * 100;
+    }
+  }, []);
 
   useEffect(() => { carritoRef.current = carrito; }, [carrito]);
   useEffect(() => {
@@ -142,10 +190,11 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
     const enriched = nombre ? { ...data, nombre_mercancia: nombre } : data;
     setCarrito(enriched);
     setCarritosPorEmpresa((prev) => ({ ...prev, [data.mercancia_id]: enriched }));
+    actualizarRetencionCache(data.desglose);
     if (data.id) { // solo marcar caché si el carrito existe en BD
       cacheRef.current[data.mercancia_id] = { timestamp: Date.now() };
     }
-  }, []);
+  }, [actualizarRetencionCache]);
 
   // ── setCarritoActivo ──────────────────────────────────────────────────────
 
@@ -334,6 +383,7 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
         const carritoReal = reemplazarConReal(carritoOptimista);
         const carritoRealConNombre = nombre ? { ...carritoReal, nombre_mercancia: nombre } : carritoReal;
 
+        actualizarRetencionCache(resp.desglose);
         setCarrito(carritoRealConNombre);
         setCarritosPorEmpresa((prev) => ({ ...prev, [empresaId]: carritoRealConNombre }));
         cacheRef.current[empresaId] = { timestamp: Date.now() };
@@ -348,18 +398,19 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
         setLoadingEmpresaId(null);
       }
     },
-    []
+    [actualizarRetencionCache]
   );
 
   // ── actualizarLocal ───────────────────────────────────────────────────────
 
   const actualizarLocal = useCallback((itemId: number, cantidad: number) => {
-    setCarrito((prev) => prev ? aplicarActualizacion(prev, itemId, cantidad) : prev);
+    const pct = retencionPctRef.current;
+    setCarrito((prev) => prev ? aplicarActualizacion(prev, itemId, cantidad, pct) : prev);
     setCarritosPorEmpresa((prev) => {
       const next = { ...prev };
       Object.keys(next).forEach((k) => {
         if (next[+k].items.some((i) => i.id === itemId)) {
-          next[+k] = aplicarActualizacion(next[+k], itemId, cantidad);
+          next[+k] = aplicarActualizacion(next[+k], itemId, cantidad, pct);
         }
       });
       return next;
@@ -369,10 +420,12 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
   // ── sincronizarTotales ────────────────────────────────────────────────────
   // Aplica un total_estimado/desglose recién calculado por el backend (tras
   // agregar/actualizar/eliminar un ítem) al carrito en memoria, para que el
-  // resumen fiscal nunca quede desactualizado respecto al servidor.
+  // resumen fiscal nunca quede desactualizado respecto al servidor (corrige
+  // cualquier redondeo del recálculo local optimista).
 
   const sincronizarTotales = useCallback(
     (empresaId: number, total_estimado: number, desglose: DesgloseCarrito | null) => {
+      actualizarRetencionCache(desglose);
       setCarrito((prev) =>
         prev && prev.mercancia_id === empresaId ? { ...prev, total_estimado, desglose } : prev
       );
@@ -380,7 +433,7 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
         prev[empresaId] ? { ...prev, [empresaId]: { ...prev[empresaId], total_estimado, desglose } } : prev
       );
     },
-    []
+    [actualizarRetencionCache]
   );
 
   // ── eliminar ──────────────────────────────────────────────────────────────
@@ -392,12 +445,13 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
       .map(Number)
       .find((k) => prevMap[k].items.some((i) => i.id === itemId));
 
-    setCarrito((prev) => prev ? aplicarEliminacion(prev, itemId) : prev);
+    const pct = retencionPctRef.current;
+    setCarrito((prev) => prev ? aplicarEliminacion(prev, itemId, pct) : prev);
     setCarritosPorEmpresa((prev) => {
       const next = { ...prev };
       Object.keys(next).forEach((k) => {
         if (next[+k].items.some((i) => i.id === itemId)) {
-          next[+k] = aplicarEliminacion(next[+k], itemId);
+          next[+k] = aplicarEliminacion(next[+k], itemId, pct);
         }
       });
       return next;
