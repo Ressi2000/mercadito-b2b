@@ -11,6 +11,7 @@ import VisitasWidget from "./widgets/VisitasWidget";
 import ProximamenteWidget from "./widgets/ProximamenteWidget";
 import ModuleCard from "../../components/ui/ModuleCard";
 import Button from "../../components/ui/Button";
+import GoldRing from "../../components/ui/GoldRing";
 
 const statusStyles: Record<string, string> = {
   pendiente: "bg-amber-100 text-amber-700",
@@ -52,7 +53,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-2xl border border-brand-primary-400/50 bg-gradient-to-br from-brand-neutral-900 via-brand-neutral-800 to-brand-neutral-900 px-6 sm:px-9 py-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-neutral-900 via-brand-neutral-800 to-brand-neutral-900 px-6 sm:px-9 py-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <div
           className="absolute inset-0 pointer-events-none bg-cover bg-center"
           style={{
@@ -60,6 +61,7 @@ export default function DashboardPage() {
             opacity: 0.3,
           }}
         />
+        <GoldRing />
 
         <div className="relative">
           <p className="text-xs font-semibold text-brand-primary-300 uppercase tracking-widest">Dashboard</p>

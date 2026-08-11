@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import clsx from "clsx";
+import GoldRing from "./GoldRing";
 
 interface CardProps {
   children: ReactNode;
@@ -51,17 +52,7 @@ export default function Card({
         >
           {children}
         </div>
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 rounded-2xl pointer-events-none"
-          style={{
-            padding: 2,
-            background: "linear-gradient(135deg, #f4d78e, #d4a72c 55%, #a5791a)",
-            WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
-            WebkitMaskComposite: "xor",
-            maskComposite: "exclude",
-          }}
-        />
+        <GoldRing />
       </div>
     );
   }
