@@ -21,6 +21,12 @@ function PasoResumen({
 
   if (!carrito) return null;
 
+  // Se calcula acá en vez de leer carrito.total_estimado: así el total
+  // siempre coincide exactamente con la suma de lo que se está mostrando
+  // en la tabla, sin depender de que ese campo ya haya terminado de
+  // sincronizarse.
+  const total = carrito.items.reduce((acc, i) => acc + Number(i.subtotal), 0);
+
   return (
     <div className="space-y-8 animate-fade-in">
 
@@ -93,7 +99,7 @@ function PasoResumen({
           <div className="flex justify-between items-center px-6 py-4 bg-brand-neutral-50/80 border-t border-brand-neutral-200">
             <span className="text-sm font-semibold text-brand-neutral-700">Total estimado</span>
             <span className="text-xl font-bold text-brand-primary-600">
-              {carrito.items[0]?.moneda ?? "$"} {carrito.total_estimado.toFixed(2)}
+              {carrito.items[0]?.moneda ?? "$"} {total.toFixed(2)}
             </span>
           </div>
         </div>
@@ -194,6 +200,8 @@ function PasoConfirmacion({
   const { carrito } = useCarrito();
   if (!carrito) return null;
 
+  const total = carrito.items.reduce((acc, i) => acc + Number(i.subtotal), 0);
+
   return (
     <div className="max-w-lg mx-auto space-y-8 animate-slide-up">
 
@@ -239,7 +247,7 @@ function PasoConfirmacion({
           <div className="flex justify-between py-2 border-b border-brand-neutral-100">
             <span className="text-brand-neutral-500">Total</span>
             <span className="font-bold text-brand-primary-600 text-base">
-              {carrito.items[0]?.moneda ?? "$"} {carrito.total_estimado.toFixed(2)}
+              {carrito.items[0]?.moneda ?? "$"} {total.toFixed(2)}
             </span>
           </div>
           {carrito.desglose && (
@@ -309,6 +317,14 @@ function PasoConfirmacion({
 // ── Paso 3: Éxito ───────────────────────────────────────────────────
 function PasoExito({ codigo }: { codigo: string }) {
   const navigate = useNavigate();
+  // El SVG anima una vuelta (carrito → check) y después vuelve a loopear —
+  // no tiene un punto de "freeze" limpio en el check. Se deja jugar un solo
+  // ciclo y después se reemplaza por el check estático en reposo.
+  const [animando, setAnimando] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setAnimando(false), 2500);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
     <div className="max-w-lg mx-auto text-center space-y-8 animate-slide-up">
@@ -316,7 +332,15 @@ function PasoExito({ codigo }: { codigo: string }) {
 
         {/* Ícono éxito */}
         <div className="flex justify-center">
-          <img src="/carrito/paso2.svg" alt="" aria-hidden="true" className="w-32 h-32" />
+          {animando ? (
+            <img src="/carrito/paso2.svg" alt="" aria-hidden="true" className="w-32 h-32" />
+          ) : (
+            <div className="w-20 h-20 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center animate-fade-in">
+              <svg className="w-10 h-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          )}
         </div>
 
         <div className="space-y-2">
