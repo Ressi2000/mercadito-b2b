@@ -13,7 +13,7 @@ interface PageHeaderProps {
   subtitle?: ReactNode;
   /** Slot a la derecha — botón de acción, buscador, etc. */
   action?: ReactNode;
-  /** Franja dorada/navy que separa el header del contenido del módulo. Solo para el flujo de Nuevo Pedido. */
+  /** Franja dorada/navy de tope, pegada al sidebar, por encima del título. Solo para el flujo de Nuevo Pedido. */
   decor?: boolean;
 }
 
@@ -25,7 +25,17 @@ interface PageHeaderProps {
 export default function PageHeader({ eyebrow, breadcrumb, icon, title, titleExtra, subtitle, action, decor = false }: PageHeaderProps) {
   return (
     <div>
-      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+      {decor && (
+        <div className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-8 lg:-mt-10 mb-6">
+          <img
+            src="/header/header2.png"
+            alt=""
+            aria-hidden="true"
+            className="w-full h-auto select-none pointer-events-none"
+          />
+        </div>
+      )}
+      <div className={`flex flex-col md:flex-row md:items-start md:justify-between gap-6 ${decor ? "md:pl-10" : ""}`}>
         <div className="flex items-start gap-4 min-w-0">
           {icon && (
             <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-gradient-to-br from-brand-primary-300 via-brand-primary-500 to-brand-primary-700 text-brand-neutral-900 shadow-md shadow-brand-primary-600/30">
@@ -43,14 +53,6 @@ export default function PageHeader({ eyebrow, breadcrumb, icon, title, titleExtr
         </div>
         {action && <div className="w-full md:w-auto shrink-0">{action}</div>}
       </div>
-      {decor && (
-        <img
-          src="/header/header2.png"
-          alt=""
-          aria-hidden="true"
-          className="w-full h-auto mt-6 rounded-2xl shadow-sm select-none pointer-events-none"
-        />
-      )}
     </div>
   );
 }
