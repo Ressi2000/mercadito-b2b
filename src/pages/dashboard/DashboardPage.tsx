@@ -215,24 +215,29 @@ export default function DashboardPage() {
         <p className="text-xs font-semibold text-brand-neutral-400 uppercase tracking-wide">
           Vista previa — colores gradiente
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
           <div className="rounded-2xl p-6 shadow-xl bg-gradient-to-br from-brand-primary-300 via-brand-primary-500 to-brand-primary-700">
             <p className="text-xs font-semibold text-brand-neutral-900/70 uppercase tracking-wide">Dorado</p>
             <p className="text-2xl font-display font-extrabold text-brand-neutral-900 mt-0.5">3</p>
             <p className="text-xs text-brand-neutral-900/70 mt-0.5">Ejemplo de contenido</p>
+          </div>
+          <div className="rounded-2xl p-6 shadow-xl bg-gradient-to-br from-brand-primary-100 via-brand-primary-200 to-brand-primary-300">
+            <p className="text-xs font-semibold text-brand-neutral-700/70 uppercase tracking-wide">Dorado pálido</p>
+            <p className="text-2xl font-display font-extrabold text-brand-neutral-900 mt-0.5">3</p>
+            <p className="text-xs text-brand-neutral-700/70 mt-0.5">Ejemplo de contenido</p>
           </div>
           <div className="rounded-2xl p-6 shadow-xl bg-gradient-to-br from-emerald-400 via-emerald-600 to-emerald-800">
             <p className="text-xs font-semibold text-white/70 uppercase tracking-wide">Verde</p>
             <p className="text-2xl font-display font-extrabold text-white mt-0.5">3</p>
             <p className="text-xs text-white/70 mt-0.5">Ejemplo de contenido</p>
           </div>
-          <div className="rounded-2xl p-6 shadow-xl bg-gradient-to-br from-brand-accent-300 via-brand-accent-500 to-brand-accent-700">
+          <div className="rounded-2xl p-6 shadow-xl bg-gradient-to-br from-brand-accent-500 via-brand-accent-600 to-brand-accent-900">
             <p className="text-xs font-semibold text-white/70 uppercase tracking-wide">Rojo</p>
             <p className="text-2xl font-display font-extrabold text-white mt-0.5">3</p>
             <p className="text-xs text-white/70 mt-0.5">Ejemplo de contenido</p>
           </div>
-          <div className="rounded-2xl p-6 shadow-xl bg-gradient-to-br from-blue-400 via-blue-600 to-blue-800">
-            <p className="text-xs font-semibold text-white/70 uppercase tracking-wide">Azul</p>
+          <div className="rounded-2xl p-6 shadow-xl bg-gradient-to-br from-brand-neutral-700 via-brand-neutral-800 to-brand-neutral-900">
+            <p className="text-xs font-semibold text-brand-primary-300/80 uppercase tracking-wide">Azul</p>
             <p className="text-2xl font-display font-extrabold text-white mt-0.5">3</p>
             <p className="text-xs text-white/70 mt-0.5">Ejemplo de contenido</p>
           </div>
