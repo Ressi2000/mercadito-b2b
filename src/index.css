@@ -96,6 +96,23 @@
     flex: 1;
   }
 
+  /* Mapa (MapaWidget, Leaflet + tiles OSM) — aire de mapa antiguo/sepia,
+     y atribución legal como chip discreto en vez del cartel del embed. */
+  .map-sepia-tiles {
+    filter: sepia(0.65) saturate(0.6) contrast(1.05) brightness(0.95);
+  }
+
+  .leaflet-control-attribution {
+    font-size: 9px !important;
+    background: rgba(250, 243, 224, 0.85) !important;
+    color: #6b6255 !important;
+    padding: 1px 6px !important;
+  }
+
+  .leaflet-control-attribution a {
+    color: #6b6255 !important;
+  }
+
   /* Slider de rango doble (filtro de precio) — dos <input type="range">
      superpuestos; solo el thumb captura el puntero para poder arrastrar
      cada extremo de forma independiente. */
