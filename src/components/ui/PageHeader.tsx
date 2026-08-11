@@ -13,7 +13,7 @@ interface PageHeaderProps {
   subtitle?: ReactNode;
   /** Slot a la derecha — botón de acción, buscador, etc. */
   action?: ReactNode;
-  /** Franja decorativa dorada/navy de fondo, detrás del ícono y título. Solo para el flujo de Nuevo Pedido. */
+  /** Franja dorada/navy que separa el header del contenido del módulo. Solo para el flujo de Nuevo Pedido. */
   decor?: boolean;
 }
 
@@ -24,21 +24,9 @@ interface PageHeaderProps {
  */
 export default function PageHeader({ eyebrow, breadcrumb, icon, title, titleExtra, subtitle, action, decor = false }: PageHeaderProps) {
   return (
-    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-      <div className="relative isolate min-w-0">
-        {decor && (
-          <img
-            src="/header/header2.png"
-            alt=""
-            aria-hidden="true"
-            className="absolute -top-2 -left-4 -z-10 h-14 md:h-16 w-auto max-w-none opacity-25 pointer-events-none select-none"
-            style={{
-              WebkitMaskImage: "linear-gradient(to right, black 55%, transparent 95%)",
-              maskImage: "linear-gradient(to right, black 55%, transparent 95%)",
-            }}
-          />
-        )}
-        <div className="relative flex items-start gap-4">
+    <div>
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+        <div className="flex items-start gap-4 min-w-0">
           {icon && (
             <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-gradient-to-br from-brand-primary-300 via-brand-primary-500 to-brand-primary-700 text-brand-neutral-900 shadow-md shadow-brand-primary-600/30">
               {icon}
@@ -53,8 +41,16 @@ export default function PageHeader({ eyebrow, breadcrumb, icon, title, titleExtr
             {subtitle && <p className="text-brand-neutral-500 mt-1">{subtitle}</p>}
           </div>
         </div>
+        {action && <div className="w-full md:w-auto shrink-0">{action}</div>}
       </div>
-      {action && <div className="w-full md:w-auto shrink-0">{action}</div>}
+      {decor && (
+        <img
+          src="/header/header2.png"
+          alt=""
+          aria-hidden="true"
+          className="w-full h-auto mt-6 rounded-2xl shadow-sm select-none pointer-events-none"
+        />
+      )}
     </div>
   );
 }
