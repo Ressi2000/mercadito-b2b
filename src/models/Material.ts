@@ -26,4 +26,8 @@ export interface Material {
   MonedaId?: string;
   UnidadMed?: string;
   ListaPrecio?: string;
+
+  // Precio bruto (antes de descuento) y % de descuento SAP, si aplica
+  precio_bruto?: number | null;
+  porc_descuento?: number | null;
 }

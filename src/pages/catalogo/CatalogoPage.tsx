@@ -2,13 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import Input from "../../components/ui/Input";
 import PageHeader from "../../components/ui/PageHeader";
 import Breadcrumb from "../../components/ui/Breadcrumb";
 import ProductCard from "./ProductCard";
 import FiltrosCatalogo, { type FiltrosState } from "./FiltrosCatalogo";
 import { useCatalogo } from "../../contexts/CatalogoContext";
 import { useCarrito } from "../../contexts/CarritoContext";
+import { useFavoritos } from "../../hooks/useFavoritos";
 import type { MaterialCategoria } from "../../models/Material";
 
 const FILTROS_INICIALES: FiltrosState = {
@@ -16,6 +16,7 @@ const FILTROS_INICIALES: FiltrosState = {
   precioMin: null,
   precioMax: null,
   orden: "relevancia",
+  soloFavoritos: false,
 };
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
@@ -58,6 +59,7 @@ export default function CatalogoPage() {
 
   const [search, setSearch] = useState("");
   const [filtros, setFiltros] = useState<FiltrosState>(FILTROS_INICIALES);
+  const { esFavorito, toggleFavorito } = useFavoritos();
 
   useEffect(() => {
     if (!empresaIdNum) return;
@@ -96,7 +98,8 @@ export default function CatalogoPage() {
     filtros.categoriaId !== null ||
     (filtros.precioMin !== null && filtros.precioMin > bounds.min) ||
     (filtros.precioMax !== null && filtros.precioMax < bounds.max) ||
-    filtros.orden !== "relevancia";
+    filtros.orden !== "relevancia" ||
+    filtros.soloFavoritos;
 
   const limpiarFiltros = () => setFiltros(FILTROS_INICIALES);
 
@@ -111,6 +114,7 @@ export default function CatalogoPage() {
       if (!coincideBusqueda) return false;
 
       if (filtros.categoriaId !== null && m.categoria?.id !== filtros.categoriaId) return false;
+      if (filtros.soloFavoritos && !esFavorito(m.id)) return false;
 
       const precio = m.PrecioNeto ?? null;
       if (min !== null && (precio === null || precio < min)) return false;
@@ -135,7 +139,7 @@ export default function CatalogoPage() {
     }
 
     return resultado;
-  }, [materiales, search, filtros]);
+  }, [materiales, search, filtros, esFavorito]);
 
   return (
     <div className="space-y-10 animate-fade-in">
@@ -158,19 +162,12 @@ export default function CatalogoPage() {
             </span>
           )
         }
-        action={
-          <div className="w-full md:w-80">
-            <Input
-              placeholder="Buscar por nombre o código..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-        }
       />
 
       {/* ── Filtros ── */}
       <FiltrosCatalogo
+        search={search}
+        onSearchChange={setSearch}
         categorias={categorias}
         filtros={filtros}
         onChange={setFiltros}
@@ -256,10 +253,16 @@ export default function CatalogoPage() {
         /* Grid de productos */
         <>
           <div className="flex items-center justify-between -mt-4">
-            <p className="text-sm text-brand-neutral-400">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 text-white text-xs font-semibold shadow-sm shadow-emerald-700/30">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
+                <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" />
+                <rect x="13.5" y="3.5" width="7" height="7" rx="1.5" />
+                <rect x="3.5" y="13.5" width="7" height="7" rx="1.5" />
+                <rect x="13.5" y="13.5" width="7" height="7" rx="1.5" />
+              </svg>
               {filteredMateriales.length}{" "}
               {filteredMateriales.length === 1 ? "producto encontrado" : "productos encontrados"}
-            </p>
+            </span>
             {/* Indicador de carga del carrito — solo informativo, no bloquea */}
             {loadingCarrito && (
               <p className="text-xs text-brand-neutral-400 flex items-center gap-1.5">
@@ -276,6 +279,8 @@ export default function CatalogoPage() {
                 material={material}
                 empresaId={empresaIdNum}
                 style={{ animationDelay: `${i * 60}ms` }}
+                isFavorito={esFavorito(material.id)}
+                onToggleFavorito={toggleFavorito}
               />
             ))}
           </div>

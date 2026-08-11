@@ -17,6 +17,8 @@ interface ProductCardProps {
   material: Material;
   empresaId: number;
   style?: React.CSSProperties;
+  isFavorito: boolean;
+  onToggleFavorito: (materialId: number) => void;
 }
 
 function ImagePlaceholder({ nombre }: { nombre: string }) {
@@ -30,7 +32,7 @@ function ImagePlaceholder({ nombre }: { nombre: string }) {
   );
 }
 
-export default function ProductCard({ material, empresaId, style }: ProductCardProps) {
+export default function ProductCard({ material, empresaId, style, isFavorito, onToggleFavorito }: ProductCardProps) {
   const { carrito, carritosPorEmpresa, agregar, actualizarLocal, eliminar, sincronizarTotales } = useCarrito();
   const [agregando, setAgregando] = useState(false);
 
@@ -42,6 +44,8 @@ export default function ProductCard({ material, empresaId, style }: ProductCardP
   useEffect(() => () => updater.current.cancelAll(), []);
 
   const tienePrecio = material.PrecioNeto !== undefined && material.PrecioNeto !== null;
+  const tieneDescuento =
+    !!material.porc_descuento && material.porc_descuento > 0 && material.precio_bruto != null;
 
   const carritoActivo =
     carrito?.mercancia_id === empresaId ? carrito : carritosPorEmpresa[empresaId];
@@ -111,10 +115,30 @@ export default function ProductCard({ material, empresaId, style }: ProductCardP
           <ImagePlaceholder nombre={material.TextoMaterial} />
         )}
         {material.UnidadMed && (
-          <span className="absolute top-3 right-3 px-2 py-0.5 rounded-md bg-brand-neutral-900/70 backdrop-blur-sm text-xs font-mono text-brand-neutral-300 border border-white/10">
+          <span className="absolute bottom-3 right-3 px-2 py-0.5 rounded-md bg-brand-neutral-900/70 backdrop-blur-sm text-xs font-mono text-brand-neutral-300 border border-white/10">
             {material.UnidadMed}
           </span>
         )}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleFavorito(material.id);
+          }}
+          aria-label={isFavorito ? "Quitar de favoritos" : "Agregar a favoritos"}
+          aria-pressed={isFavorito}
+          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm shadow-sm flex items-center justify-center transition-transform duration-150 active:scale-90 hover:scale-105"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            className="w-4 h-4"
+            fill={isFavorito ? "#dc2626" : "none"}
+            stroke={isFavorito ? "#dc2626" : "#78716c"}
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 21s-6.716-4.35-9.428-8.209C.688 10.075 1.5 6 5.25 5.25 7.5 4.8 9.6 5.7 12 8.4c2.4-2.7 4.5-3.6 6.75-3.15 3.75.75 4.562 4.825 2.678 7.541C18.716 16.65 12 21 12 21z" />
+          </svg>
+        </button>
         {itemEnCarrito && (
           <span className="absolute top-3 left-3 flex items-center gap-1 px-2 py-0.5 rounded-md bg-brand-primary-500/90 backdrop-blur-sm text-xs font-semibold text-white">
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -139,7 +163,17 @@ export default function ProductCard({ material, empresaId, style }: ProductCardP
         <div>
           {tienePrecio ? (
             <>
-              <span className="text-xl font-bold text-brand-primary-600">
+              {tieneDescuento && (
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <span className="text-xs text-brand-neutral-400 line-through">
+                    {material.MonedaId ?? "$"} {material.precio_bruto!.toFixed(2)}
+                  </span>
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-600">
+                    -{material.porc_descuento!.toFixed(1)}%
+                  </span>
+                </div>
+              )}
+              <span className={`text-xl font-bold ${tieneDescuento ? "text-red-600" : "text-brand-primary-600"}`}>
                 {material.MonedaId ?? "$"} {material.PrecioNeto}
               </span>
               {material.UnidadMed && (

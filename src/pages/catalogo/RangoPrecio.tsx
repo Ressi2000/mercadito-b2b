@@ -1,4 +1,5 @@
 // src/pages/catalogo/RangoPrecio.tsx
+import { useState } from "react";
 
 interface RangoPrecioProps {
   min: number;
@@ -10,6 +11,7 @@ interface RangoPrecioProps {
 }
 
 export default function RangoPrecio({ min, max, valueMin, valueMax, onChange, moneda = "USD" }: RangoPrecioProps) {
+  const [activo, setActivo] = useState<"min" | "max" | null>(null);
   const rango = max - min;
   const step = rango > 0 ? Math.max(rango / 100, 0.01) : 1;
 
@@ -52,7 +54,10 @@ export default function RangoPrecio({ min, max, valueMin, valueMax, onChange, mo
           step={step}
           value={valueMin}
           onChange={handleMinChange}
+          onMouseDown={() => setActivo("min")}
+          onTouchStart={() => setActivo("min")}
           disabled={disabled}
+          style={{ zIndex: activo === "min" ? 3 : 2, touchAction: "none" }}
           className="range-thumb absolute inset-x-0 w-full appearance-none bg-transparent pointer-events-none disabled:opacity-40"
         />
         <input
@@ -63,7 +68,10 @@ export default function RangoPrecio({ min, max, valueMin, valueMax, onChange, mo
           step={step}
           value={valueMax}
           onChange={handleMaxChange}
+          onMouseDown={() => setActivo("max")}
+          onTouchStart={() => setActivo("max")}
           disabled={disabled}
+          style={{ zIndex: activo === "max" ? 3 : 2, touchAction: "none" }}
           className="range-thumb absolute inset-x-0 w-full appearance-none bg-transparent pointer-events-none disabled:opacity-40"
         />
       </div>

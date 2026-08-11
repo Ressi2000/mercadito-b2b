@@ -1,5 +1,7 @@
 // src/pages/catalogo/FiltrosCatalogo.tsx
 import type { MaterialCategoria } from "../../models/Material";
+import Card from "../../components/ui/Card";
+import Input from "../../components/ui/Input";
 import RangoPrecio from "./RangoPrecio";
 
 export type OrdenCatalogo = "relevancia" | "nombre_asc" | "nombre_desc" | "precio_asc" | "precio_desc";
@@ -9,9 +11,12 @@ export interface FiltrosState {
   precioMin: number | null;
   precioMax: number | null;
   orden: OrdenCatalogo;
+  soloFavoritos: boolean;
 }
 
 interface FiltrosCatalogoProps {
+  search: string;
+  onSearchChange: (search: string) => void;
   categorias: MaterialCategoria[];
   filtros: FiltrosState;
   onChange: (filtros: FiltrosState) => void;
@@ -24,9 +29,39 @@ interface FiltrosCatalogoProps {
 const selectClass =
   "w-full rounded-xl border border-brand-neutral-300 bg-white/70 backdrop-blur-md px-3.5 py-2.5 text-sm text-brand-neutral-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-primary-500 focus:border-transparent";
 
-export default function FiltrosCatalogo({ categorias, filtros, onChange, activo, onLimpiar, bounds, moneda }: FiltrosCatalogoProps) {
+const SearchIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4">
+    <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 15.803a7.5 7.5 0 0 0 10.607 0z" />
+  </svg>
+);
+
+const HeartIcon = ({ filled }: { filled: boolean }) => (
+  <svg viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2} className="w-4 h-4">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 21s-6.716-4.35-9.428-8.209C.688 10.075 1.5 6 5.25 5.25 7.5 4.8 9.6 5.7 12 8.4c2.4-2.7 4.5-3.6 6.75-3.15 3.75.75 4.562 4.825 2.678 7.541C18.716 16.65 12 21 12 21z" />
+  </svg>
+);
+
+export default function FiltrosCatalogo({
+  search,
+  onSearchChange,
+  categorias,
+  filtros,
+  onChange,
+  activo,
+  onLimpiar,
+  bounds,
+  moneda,
+}: FiltrosCatalogoProps) {
   return (
-    <div className="rounded-2xl border border-brand-neutral-200 bg-white/60 backdrop-blur-md p-4 sm:p-5">
+    <Card border="gold" className="space-y-5">
+      {/* Buscador */}
+      <Input
+        placeholder="Buscar por nombre o código..."
+        value={search}
+        onChange={(e) => onSearchChange(e.target.value)}
+        leftIcon={<SearchIcon />}
+      />
+
       <div className="flex flex-col sm:flex-row sm:items-end gap-5">
         {/* Categoría */}
         <div className="flex-1 min-w-0 space-y-1.5">
@@ -80,6 +115,21 @@ export default function FiltrosCatalogo({ categorias, filtros, onChange, activo,
           </select>
         </div>
 
+        {/* Solo favoritos */}
+        <button
+          type="button"
+          onClick={() => onChange({ ...filtros, soloFavoritos: !filtros.soloFavoritos })}
+          aria-pressed={filtros.soloFavoritos}
+          className={`shrink-0 h-[42px] px-4 rounded-xl text-sm font-medium border flex items-center gap-2 transition-colors duration-200 ${
+            filtros.soloFavoritos
+              ? "bg-red-50 border-red-200 text-red-600"
+              : "border-brand-neutral-300 text-brand-neutral-600 hover:bg-brand-neutral-50"
+          }`}
+        >
+          <HeartIcon filled={filtros.soloFavoritos} />
+          Favoritos
+        </button>
+
         {activo && (
           <button
             onClick={onLimpiar}
@@ -89,6 +139,6 @@ export default function FiltrosCatalogo({ categorias, filtros, onChange, activo,
           </button>
         )}
       </div>
-    </div>
+    </Card>
   );
 }
