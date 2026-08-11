@@ -73,6 +73,7 @@ export default function ProductCard({ material, empresaId, style, isFavorito, on
         precio_unitario: material.PrecioNeto ?? 0,
         unidad_medida: material.UnidadMed ?? "und",
         moneda: material.MonedaId ?? "$",
+        porc_impuesto: material.PorcImpuesto ?? 0,
       });
     } catch {
       // Error disponible en context.error

@@ -327,6 +327,7 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
         subtotal: +(cantidad * (materialSnapshot?.precio_unitario ?? 0)).toFixed(2),
         unidad_medida: materialSnapshot?.unidad_medida ?? "",
         moneda: materialSnapshot?.moneda ?? "$",
+        porc_impuesto: materialSnapshot?.porc_impuesto ?? 0,
       };
 
       const aplicarOptimista = (c: Carrito): Carrito => {
@@ -342,7 +343,7 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
         } else {
           items = [...c.items, itemOptimista];
         }
-        return { ...c, items, total_estimado: calcularTotal(items) };
+        return { ...c, items, total_estimado: calcularTotal(items), desglose: calcularDesgloseLocal(items, retencionPctRef.current) };
       };
 
       const carritoBase: Carrito = carritosPorEmpresaRef.current[empresaId] ?? {

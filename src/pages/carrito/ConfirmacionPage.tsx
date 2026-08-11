@@ -1,5 +1,5 @@
 // src/pages/carrito/ConfirmacionPage.tsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCarrito } from "../../contexts/CarritoContext";
 import { confirmarPedido } from "../../services/pedidoService";
@@ -274,11 +274,7 @@ function PasoExito({ codigo }: { codigo: string }) {
 
         {/* Ícono éxito */}
         <div className="flex justify-center">
-          <div className="w-20 h-20 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center">
-            <svg className="w-10 h-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
+          <img src="/carrito/paso2.svg" alt="" aria-hidden="true" className="w-32 h-32" />
         </div>
 
         <div className="space-y-2">
@@ -318,11 +314,15 @@ export default function ConfirmacionPage() {
   const [codigoConfirmado, setCodigoConfirmado] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  // Redirigir si no hay carrito o está vacío
-  if (!carrito || carrito.items.length === 0) {
-    navigate("/carrito");
-    return null;
-  }
+  // Redirigir si no hay carrito o está vacío — pero no en el paso 3 (éxito),
+  // que se muestra justo después de clearCarrito() al confirmar el pedido.
+  const carritoVacio = paso !== 3 && (!carrito || carrito.items.length === 0);
+
+  useEffect(() => {
+    if (carritoVacio) navigate("/carrito");
+  }, [carritoVacio, navigate]);
+
+  if (carritoVacio) return null;
 
   const handleEnviar = async () => {
     if (!carrito || !carrito.id) return;
