@@ -156,9 +156,9 @@ export default function Sidebar({ collapsed, mobileOpen, onCloseMobile, onExpand
       {!isCollapsedDesktop && (
         <div className="px-4 pb-3">
           <div className="tricolor-stripe w-11">
-            <span style={{ background: "#009246" }} />
-            <span style={{ background: "#f2f2f2" }} />
-            <span style={{ background: "#ce2b37" }} />
+            <span style={{ background: "linear-gradient(180deg, #00b25a, #007a3d)" }} />
+            <span style={{ background: "linear-gradient(180deg, #ffffff, #e6e1d3)" }} />
+            <span style={{ background: "linear-gradient(180deg, #e0323e, #a91f29)" }} />
           </div>
         </div>
       )}
