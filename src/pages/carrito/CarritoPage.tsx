@@ -15,6 +15,8 @@ import { useNavigate } from "react-router-dom";
 import { useCarrito } from "../../contexts/CarritoContext";
 import { crearActualizadorDebounced } from "../../services/carritoService";
 import Button from "../../components/ui/Button";
+import PageHeader from "../../components/ui/PageHeader";
+import Breadcrumb from "../../components/ui/Breadcrumb";
 import type { CarritoItem } from "../../models/Carrito";
 
 function CarritoItemRow({ item, empresaId }: { item: CarritoItem; empresaId: number }) {
@@ -178,23 +180,23 @@ export default function CarritoPage() {
 
   return (
     <div className="space-y-10 animate-fade-in">
-      <div className="flex flex-col gap-1">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-xs font-semibold text-brand-primary-600 hover:text-brand-primary-700 uppercase tracking-widest transition-colors duration-200 w-fit"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-          </svg>
-          Volver
-        </button>
-        <h1 className="text-3xl font-display font-extrabold text-brand-neutral-900">Mi Carrito</h1>
-        {carrito?.codigo_pedido_web && (
-          <p className="text-xs text-brand-neutral-400 font-mono">
-            Pedido: {carrito.codigo_pedido_web}
-          </p>
-        )}
-      </div>
+      <PageHeader
+        breadcrumb={
+          <Breadcrumb
+            items={[
+              { label: "Inicio", to: "/inicio" },
+              ...(carrito?.mercancia_id ? [{ label: "Catálogo", to: `/catalogo/${carrito.mercancia_id}` }] : []),
+              { label: "Carrito" },
+            ]}
+          />
+        }
+        title="Mi Carrito"
+        subtitle={
+          carrito?.codigo_pedido_web && (
+            <span className="text-xs text-brand-neutral-400 font-mono">Pedido: {carrito.codigo_pedido_web}</span>
+          )
+        }
+      />
 
       {error && (
         <div

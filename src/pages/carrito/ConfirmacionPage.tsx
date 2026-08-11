@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useCarrito } from "../../contexts/CarritoContext";
 import { confirmarPedido } from "../../services/pedidoService";
 import Button from "../../components/ui/Button";
+import PageHeader from "../../components/ui/PageHeader";
 
 // ── Paso 1: Resumen editable ────────────────────────────────────────
 function PasoResumen({
@@ -23,15 +24,16 @@ function PasoResumen({
   return (
     <div className="space-y-8 animate-fade-in">
 
-      {/* Encabezado */}
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-full bg-brand-primary-500 text-brand-neutral-900 flex items-center justify-center text-sm font-bold">1</div>
-          <p className="text-xs font-semibold text-brand-primary-600 uppercase tracking-widest">Paso 1 de 2</p>
-        </div>
-        <h1 className="text-3xl font-display font-extrabold text-brand-neutral-900">Resumen del pedido</h1>
-        <p className="text-brand-neutral-500">Revisa los productos antes de confirmar.</p>
-      </div>
+      <PageHeader
+        breadcrumb={
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 rounded-full bg-brand-primary-500 text-brand-neutral-900 flex items-center justify-center text-sm font-bold">1</div>
+            <p className="text-xs font-semibold text-brand-primary-600 uppercase tracking-widest">Paso 1 de 2</p>
+          </div>
+        }
+        title="Resumen del pedido"
+        subtitle="Revisa los productos antes de confirmar."
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 
@@ -166,15 +168,16 @@ function PasoConfirmacion({
   return (
     <div className="max-w-lg mx-auto space-y-8 animate-slide-up">
 
-      {/* Encabezado */}
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-full bg-brand-primary-500 text-brand-neutral-900 flex items-center justify-center text-sm font-bold">2</div>
-          <p className="text-xs font-semibold text-brand-primary-600 uppercase tracking-widest">Paso 2 de 2</p>
-        </div>
-        <h1 className="text-3xl font-display font-extrabold text-brand-neutral-900">Confirmar pedido</h1>
-        <p className="text-brand-neutral-500">Esta acción no se puede deshacer.</p>
-      </div>
+      <PageHeader
+        breadcrumb={
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 rounded-full bg-brand-primary-500 text-brand-neutral-900 flex items-center justify-center text-sm font-bold">2</div>
+            <p className="text-xs font-semibold text-brand-primary-600 uppercase tracking-widest">Paso 2 de 2</p>
+          </div>
+        }
+        title="Confirmar pedido"
+        subtitle="Esta acción no se puede deshacer."
+      />
 
       {/* Card de confirmación */}
       <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-8 space-y-6">

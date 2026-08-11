@@ -1,8 +1,10 @@
 // src/pages/catalogo/CatalogoPage.tsx
 
 import { useEffect, useMemo, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Input from "../../components/ui/Input";
+import PageHeader from "../../components/ui/PageHeader";
+import Breadcrumb from "../../components/ui/Breadcrumb";
 import ProductCard from "./ProductCard";
 import FiltrosCatalogo, { type FiltrosState } from "./FiltrosCatalogo";
 import { useCatalogo } from "../../contexts/CatalogoContext";
@@ -38,7 +40,6 @@ function ProductSkeleton() {
 
 export default function CatalogoPage() {
   const { empresaId } = useParams<{ empresaId: string }>();
-  const navigate = useNavigate();
   const empresaIdNum = Number(empresaId);
 
   const {
@@ -139,50 +140,28 @@ export default function CatalogoPage() {
   return (
     <div className="space-y-10 animate-fade-in">
 
-      {/* ── Encabezado ── */}
-      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-        <div className="flex flex-col gap-1">
-          <button
-            onClick={() => navigate("/inicio")}
-            className="flex items-center gap-1.5 text-xs font-semibold text-brand-primary-600 hover:text-brand-primary-700 uppercase tracking-widest transition-colors duration-200 w-fit"
-          >
-            <svg
-              className="w-3.5 h-3.5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2.5}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-            </svg>
-            Inicio
-          </button>
-
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-display font-extrabold text-brand-neutral-900">Catálogo de Productos</h1>
-            {/* Indicador de refresco silencioso — no interrumpe al usuario */}
-            {refreshing && (
-              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-primary-50 border border-brand-primary-100 text-[11px] font-medium text-brand-primary-600 animate-fade-in">
-                <span className="w-2.5 h-2.5 rounded-full border-2 border-brand-primary-400 border-t-transparent animate-spin" />
-                Actualizando
-              </span>
-            )}
+      <PageHeader
+        breadcrumb={<Breadcrumb items={[{ label: "Inicio", to: "/inicio" }, { label: "Catálogo" }]} />}
+        title="Catálogo de Productos"
+        subtitle="Agrega productos a tu pedido directamente desde aquí."
+        titleExtra={
+          refreshing && (
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-primary-50 border border-brand-primary-100 text-[11px] font-medium text-brand-primary-600 animate-fade-in">
+              <span className="w-2.5 h-2.5 rounded-full border-2 border-brand-primary-400 border-t-transparent animate-spin" />
+              Actualizando
+            </span>
+          )
+        }
+        action={
+          <div className="w-full md:w-80">
+            <Input
+              placeholder="Buscar por nombre o código..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
           </div>
-
-          <p className="text-brand-neutral-500 mt-1">
-            Agrega productos a tu pedido directamente desde aquí.
-          </p>
-        </div>
-
-        {/* Buscador */}
-        <div className="w-full md:w-80 shrink-0">
-          <Input
-            placeholder="Buscar por nombre o código..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-      </div>
+        }
+      />
 
       {/* ── Filtros ── */}
       <FiltrosCatalogo

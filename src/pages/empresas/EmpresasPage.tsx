@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
+import PageHeader from "../../components/ui/PageHeader";
 import { getEmpresasByCliente } from "../../services/empresaService";
 import { useCarrito } from "../../contexts/CarritoContext";
 import type { Empresa } from "../../models/Empresa";
@@ -63,12 +64,11 @@ export default function EmpresasPage() {
   return (
     <div className="space-y-10 animate-fade-in">
 
-      {/* Encabezado */}
-      <div className="flex flex-col gap-1">
-        <p className="text-xs font-semibold text-brand-primary-600 uppercase tracking-widest">Inicio</p>
-        <h1 className="text-3xl font-display font-extrabold text-brand-neutral-900">Selecciona una Empresa</h1>
-        <p className="text-brand-neutral-500 mt-1">Empresas habilitadas para tu cuenta.</p>
-      </div>
+      <PageHeader
+        eyebrow="Nuevo pedido"
+        title="Selecciona una Empresa"
+        subtitle="Empresas habilitadas para tu cuenta."
+      />
 
       {/* Grid */}
       {loading ? (
