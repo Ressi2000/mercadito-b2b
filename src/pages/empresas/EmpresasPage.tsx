@@ -73,6 +73,7 @@ export default function EmpresasPage() {
         }
         title="Selecciona una Empresa"
         subtitle="Empresas habilitadas para tu cuenta."
+        decor
       />
 
       {/* Grid */}
