@@ -142,6 +142,12 @@ export default function CatalogoPage() {
 
       <PageHeader
         breadcrumb={<Breadcrumb items={[{ label: "Inicio", to: "/inicio" }, { label: "Catálogo" }]} />}
+        icon={
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 3h5.17a2 2 0 011.42.59l8.82 8.82a2 2 0 010 2.82l-6.76 6.76a2 2 0 01-2.82 0l-8.82-8.82A2 2 0 013 11.17V6a3 3 0 013-3z" />
+            <circle cx="8.5" cy="8.5" r="1.1" fill="currentColor" stroke="none" />
+          </svg>
+        }
         title="Catálogo de Productos"
         subtitle="Agrega productos a tu pedido directamente desde aquí."
         titleExtra={

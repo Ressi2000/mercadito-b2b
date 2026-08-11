@@ -66,6 +66,11 @@ export default function EmpresasPage() {
 
       <PageHeader
         eyebrow="Nuevo pedido"
+        icon={
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 21V7a1 1 0 011-1h6a1 1 0 011 1v14M15 21v-9a1 1 0 011-1h3a1 1 0 011 1v9M4 21h16M8 10h1M8 13h1M8 16h1" />
+          </svg>
+        }
         title="Selecciona una Empresa"
         subtitle="Empresas habilitadas para tu cuenta."
       />

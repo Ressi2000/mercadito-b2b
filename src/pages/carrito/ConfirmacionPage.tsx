@@ -31,6 +31,13 @@ function PasoResumen({
             <p className="text-xs font-semibold text-brand-primary-600 uppercase tracking-widest">Paso 1 de 2</p>
           </div>
         }
+        icon={
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-6 h-6">
+            <rect x="6" y="4" width="12" height="16" rx="2" />
+            <path strokeLinecap="round" d="M9 4V3a1 1 0 011-1h4a1 1 0 011 1v1" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 13l2 2 4-4" />
+          </svg>
+        }
         title="Resumen del pedido"
         subtitle="Revisa los productos antes de confirmar."
       />
@@ -174,6 +181,12 @@ function PasoConfirmacion({
             <div className="w-7 h-7 rounded-full bg-brand-primary-500 text-brand-neutral-900 flex items-center justify-center text-sm font-bold">2</div>
             <p className="text-xs font-semibold text-brand-primary-600 uppercase tracking-widest">Paso 2 de 2</p>
           </div>
+        }
+        icon={
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-6 h-6">
+            <circle cx="12" cy="12" r="9" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.5 12.5l2.5 2.5 4.5-5" />
+          </svg>
         }
         title="Confirmar pedido"
         subtitle="Esta acción no se puede deshacer."

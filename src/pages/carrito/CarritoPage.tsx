@@ -190,6 +190,13 @@ export default function CarritoPage() {
             ]}
           />
         }
+        icon={
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-6 h-6">
+            <circle cx="9" cy="20" r="1" fill="currentColor" stroke="none" />
+            <circle cx="17" cy="20" r="1" fill="currentColor" stroke="none" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h2l2.4 12.2a1.5 1.5 0 001.48 1.3h7.24a1.5 1.5 0 001.47-1.18L20 8H6" />
+          </svg>
+        }
         title="Mi Carrito"
         subtitle={
           carrito?.codigo_pedido_web && (
