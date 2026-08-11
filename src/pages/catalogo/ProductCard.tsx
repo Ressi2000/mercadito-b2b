@@ -44,8 +44,15 @@ export default function ProductCard({ material, empresaId, style, isFavorito, on
   useEffect(() => () => updater.current.cancelAll(), []);
 
   const tienePrecio = material.PrecioNeto !== undefined && material.PrecioNeto !== null;
+
+  // precio_bruto/porc_descuento pueden llegar como string (DECIMAL de SAP
+  // sin cast numérico en el backend) — se normalizan acá para no romper
+  // con .toFixed() si el backend todavía no está actualizado.
+  const precioBruto = material.precio_bruto != null ? Number(material.precio_bruto) : null;
+  const porcDescuento = material.porc_descuento != null ? Number(material.porc_descuento) : null;
   const tieneDescuento =
-    !!material.porc_descuento && material.porc_descuento > 0 && material.precio_bruto != null;
+    porcDescuento !== null && !isNaN(porcDescuento) && porcDescuento > 0 &&
+    precioBruto !== null && !isNaN(precioBruto);
 
   const carritoActivo =
     carrito?.mercancia_id === empresaId ? carrito : carritosPorEmpresa[empresaId];
@@ -166,10 +173,10 @@ export default function ProductCard({ material, empresaId, style, isFavorito, on
               {tieneDescuento && (
                 <div className="flex items-center gap-1.5 mb-0.5">
                   <span className="text-xs text-brand-neutral-400 line-through">
-                    {material.MonedaId ?? "$"} {material.precio_bruto!.toFixed(2)}
+                    {material.MonedaId ?? "$"} {precioBruto!.toFixed(2)}
                   </span>
                   <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-600">
-                    -{material.porc_descuento!.toFixed(1)}%
+                    -{porcDescuento!.toFixed(1)}%
                   </span>
                 </div>
               )}
