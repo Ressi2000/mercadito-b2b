@@ -32,15 +32,36 @@ export default function Card({
     flat: "shadow-sm",
   };
 
-  // Nivel "gold": borde en degradé (no un color plano) — se logra con un
-  // wrapper de fondo degradado + padding de 2px, porque border-image no
-  // respeta border-radius. El contenido real vive en el div interno.
+  // Nivel "gold": cuerpo de vidrio + anillo dorado como capas separadas.
+  // Cualquier técnica que pinte el degradé "detrás" del cuerpo translúcido
+  // (wrapper con padding, o background-clip: border-box en el mismo div)
+  // termina rellenando TODO el interior de oro sólido, no solo el borde —
+  // el backdrop-blur ve ese oro en vez de la página real. La solución es
+  // que el anillo sea una forma hueca de verdad (mask-composite: exclude),
+  // pintada ARRIBA del cuerpo de vidrio en vez de detrás.
   if (border === "gold") {
     return (
-      <div className="rounded-2xl p-[2px] bg-gradient-to-br from-brand-primary-300 via-brand-primary-500 to-brand-primary-700">
-        <div className={clsx(base, variants[variant], "bg-[#faf3e0]/70", className)} style={style}>
+      <div className="relative rounded-2xl">
+        <div
+          className={clsx(base, "backdrop-blur-xl bg-white/40", className)}
+          style={{
+            boxShadow: "0 20px 40px -16px rgba(163,122,20,0.3), inset 0 1px 0 rgba(255,255,255,0.65)",
+            ...style,
+          }}
+        >
           {children}
         </div>
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 rounded-2xl pointer-events-none"
+          style={{
+            padding: 2,
+            background: "linear-gradient(135deg, #f4d78e, #d4a72c 55%, #a5791a)",
+            WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+            WebkitMaskComposite: "xor",
+            maskComposite: "exclude",
+          }}
+        />
       </div>
     );
   }
