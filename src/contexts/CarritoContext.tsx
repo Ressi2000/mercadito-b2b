@@ -55,6 +55,7 @@ interface CarritoContextType {
   eliminar: (itemId: number) => Promise<void>;
   vaciar: (empresaId: number) => Promise<void>;
   clearCarrito: () => void;
+  limpiarCarritoConfirmado: (empresaId: number) => void;
   clearError: () => void;
 }
 
@@ -503,6 +504,22 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
     sessionStorage.removeItem(SESSION_KEY); // limpiar al cerrar sesión
   }, []);
 
+  // ── limpiarCarritoConfirmado ──────────────────────────────────────────────
+  // Igual que clearCarrito pero solo para UNA empresa — se usa al confirmar
+  // un pedido. clearCarrito() (logout) borraba TODOS los carritos en memoria,
+  // incluyendo los de otras empresas que el cliente tuviera en armado.
+
+  const limpiarCarritoConfirmado = useCallback((empresaId: number) => {
+    setCarrito((prev) => (prev && prev.mercancia_id === empresaId ? null : prev));
+    setCarritosPorEmpresa((prev) => {
+      if (!(empresaId in prev)) return prev;
+      const next = { ...prev };
+      delete next[empresaId];
+      return next;
+    });
+    cacheRef.current[empresaId] = { timestamp: 0 };
+  }, []);
+
   const clearError = useCallback(() => setError(null), []);
 
   return (
@@ -524,6 +541,7 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
         eliminar,
         vaciar,
         clearCarrito,
+        limpiarCarritoConfirmado,
         clearError,
       }}
     >

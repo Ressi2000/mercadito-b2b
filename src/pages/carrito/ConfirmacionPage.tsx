@@ -122,6 +122,28 @@ function PasoResumen({
             </div>
           </div>
 
+          {/* Desglose fiscal */}
+          {carrito.desglose && (
+            <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-6 space-y-1.5">
+              <h3 className="text-sm font-semibold text-brand-neutral-700 mb-2">Desglose fiscal estimado</h3>
+              {[
+                ["Base imponible 16%", carrito.desglose.subtotal_16],
+                ["IVA 16%", carrito.desglose.iva_16],
+                ["Base imponible 8%", carrito.desglose.subtotal_8],
+                ["IVA 8%", carrito.desglose.iva_8],
+                ["Base exenta", carrito.desglose.subtotal_exento],
+                ["Retención", carrito.desglose.retencion],
+              ].map(([label, valor]) => (
+                <div key={label as string} className="flex items-center justify-between text-sm">
+                  <span className="text-brand-neutral-500">{label}</span>
+                  <span className="text-brand-neutral-800 font-medium tabular-nums">
+                    {carrito.items[0]?.moneda ?? "$"} {(valor as number).toFixed(2)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Observaciones */}
           <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-6 space-y-3">
             <label className="text-sm font-semibold text-brand-neutral-700">
@@ -220,6 +242,26 @@ function PasoConfirmacion({
               {carrito.items[0]?.moneda ?? "$"} {carrito.total_estimado.toFixed(2)}
             </span>
           </div>
+          {carrito.desglose && (
+            <div className="py-2 space-y-1">
+              <span className="text-brand-neutral-500 block mb-1">Desglose fiscal estimado</span>
+              {[
+                ["Base imponible 16%", carrito.desglose.subtotal_16],
+                ["IVA 16%", carrito.desglose.iva_16],
+                ["Base imponible 8%", carrito.desglose.subtotal_8],
+                ["IVA 8%", carrito.desglose.iva_8],
+                ["Base exenta", carrito.desglose.subtotal_exento],
+                ["Retención", carrito.desglose.retencion],
+              ].map(([label, valor]) => (
+                <div key={label as string} className="flex items-center justify-between text-xs">
+                  <span className="text-brand-neutral-400">{label}</span>
+                  <span className="text-brand-neutral-700 font-medium tabular-nums">
+                    {carrito.items[0]?.moneda ?? "$"} {(valor as number).toFixed(2)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
           {observaciones && (
             <div className="py-2">
               <span className="text-brand-neutral-500 block mb-1">Observaciones</span>
@@ -306,7 +348,7 @@ function PasoExito({ codigo }: { codigo: string }) {
 // ── Página principal ────────────────────────────────────────────────
 export default function ConfirmacionPage() {
   const navigate = useNavigate();
-  const { carrito, clearCarrito } = useCarrito();
+  const { carrito, limpiarCarritoConfirmado } = useCarrito();
 
   const [paso, setPaso] = useState<1 | 2 | 3>(1);
   const [observaciones, setObservaciones] = useState("");
@@ -315,7 +357,7 @@ export default function ConfirmacionPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Redirigir si no hay carrito o está vacío — pero no en el paso 3 (éxito),
-  // que se muestra justo después de clearCarrito() al confirmar el pedido.
+  // que se muestra justo después de limpiar el carrito confirmado.
   const carritoVacio = paso !== 3 && (!carrito || carrito.items.length === 0);
 
   useEffect(() => {
@@ -332,7 +374,7 @@ export default function ConfirmacionPage() {
     try {
       const pedido = await confirmarPedido(carrito.id, observaciones);
       setCodigoConfirmado(pedido.codigo_pedido_web);
-      clearCarrito();
+      limpiarCarritoConfirmado(carrito.mercancia_id);
       setPaso(3);
     } catch (err: any) {
       const msg = err.response?.data?.message || "Error al confirmar el pedido.";
