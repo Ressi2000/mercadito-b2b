@@ -85,9 +85,13 @@ export default function CatalogoPage() {
     return Array.from(mapa.values()).sort((a, b) => a.nombre.localeCompare(b.nombre));
   }, [materiales]);
 
-  // Rango de precios disponible en el catálogo cargado
+  // Rango de precios disponible en el catálogo cargado.
+  // PrecioNeto puede llegar como string desde el backend (columnas DECIMAL
+  // de SAP sin cast numérico) — Number() lo normaliza en vez de descartarlo.
   const bounds = useMemo(() => {
-    const precios = materiales.map((m) => m.PrecioNeto).filter((p): p is number => typeof p === "number");
+    const precios = materiales
+      .map((m) => Number(m.PrecioNeto))
+      .filter((p) => !isNaN(p));
     if (precios.length === 0) return { min: 0, max: 0 };
     return { min: Math.floor(Math.min(...precios)), max: Math.ceil(Math.max(...precios)) };
   }, [materiales]);
@@ -116,9 +120,9 @@ export default function CatalogoPage() {
       if (filtros.categoriaId !== null && m.categoria?.id !== filtros.categoriaId) return false;
       if (filtros.soloFavoritos && !esFavorito(m.id)) return false;
 
-      const precio = m.PrecioNeto ?? null;
-      if (min !== null && (precio === null || precio < min)) return false;
-      if (max !== null && (precio === null || precio > max)) return false;
+      const precio = m.PrecioNeto !== undefined && m.PrecioNeto !== null ? Number(m.PrecioNeto) : null;
+      if (min !== null && (precio === null || isNaN(precio) || precio < min)) return false;
+      if (max !== null && (precio === null || isNaN(precio) || precio > max)) return false;
 
       return true;
     });
@@ -131,10 +135,10 @@ export default function CatalogoPage() {
         resultado = [...resultado].sort((a, b) => b.TextoMaterial.localeCompare(a.TextoMaterial));
         break;
       case "precio_asc":
-        resultado = [...resultado].sort((a, b) => (a.PrecioNeto ?? 0) - (b.PrecioNeto ?? 0));
+        resultado = [...resultado].sort((a, b) => Number(a.PrecioNeto ?? 0) - Number(b.PrecioNeto ?? 0));
         break;
       case "precio_desc":
-        resultado = [...resultado].sort((a, b) => (b.PrecioNeto ?? 0) - (a.PrecioNeto ?? 0));
+        resultado = [...resultado].sort((a, b) => Number(b.PrecioNeto ?? 0) - Number(a.PrecioNeto ?? 0));
         break;
     }
 
