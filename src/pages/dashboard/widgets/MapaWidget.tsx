@@ -9,24 +9,14 @@ interface MapaWidgetProps {
   loading: boolean;
 }
 
-// Pin dorado — placeholder hasta reemplazarlo por el SVG del cliente.
+// Ícono de tienda del cliente — ilustración animada (hojas + notificación).
+// Se ancla por el centro, no por la base, porque es una escena completa,
+// no un pin con punta.
 const pinIcon = L.divIcon({
   className: "",
-  html: `
-    <svg width="30" height="40" viewBox="0 0 34 44" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="pinGold" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#f4d78e" />
-          <stop offset="55%" stop-color="#d4a72c" />
-          <stop offset="100%" stop-color="#a5791a" />
-        </linearGradient>
-      </defs>
-      <path d="M17 0C7.6 0 0 7.6 0 17c0 12.5 17 27 17 27s17-14.5 17-27C34 7.6 26.4 0 17 0z" fill="url(#pinGold)" stroke="#7d5c15" stroke-width="1" />
-      <circle cx="17" cy="17" r="6.5" fill="#0a1a35" />
-    </svg>
-  `,
-  iconSize: [30, 40],
-  iconAnchor: [15, 40],
+  html: `<img src="/map/My-Store-animated.svg" width="56" height="56" style="filter: drop-shadow(0 3px 4px rgba(0,0,0,0.35))" />`,
+  iconSize: [56, 56],
+  iconAnchor: [28, 28],
 });
 
 export default function MapaWidget({ ubicacion, loading }: MapaWidgetProps) {
