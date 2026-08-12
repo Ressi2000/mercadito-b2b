@@ -12,13 +12,14 @@ import Button from "../../components/ui/Button";
 import { useCarrito } from "../../contexts/CarritoContext";
 import { crearActualizadorDebounced } from "../../services/carritoService";
 import type { Material } from "../../models/Material";
+import type { FavoritoSnapshot } from "../../hooks/useFavoritos";
 
 interface ProductCardProps {
   material: Material;
   empresaId: number;
   style?: React.CSSProperties;
   isFavorito: boolean;
-  onToggleFavorito: (materialId: number) => void;
+  onToggleFavorito: (snapshot: FavoritoSnapshot) => void;
 }
 
 function ImagePlaceholder({ nombre }: { nombre: string }) {
@@ -131,7 +132,16 @@ export default function ProductCard({ material, empresaId, style, isFavorito, on
           type="button"
           onClick={(e) => {
             e.stopPropagation();
-            onToggleFavorito(material.id);
+            onToggleFavorito({
+              id: material.id,
+              materialId: material.MaterialId,
+              nombre: material.TextoMaterial,
+              precio: material.PrecioNeto ?? null,
+              moneda: material.MonedaId ?? "$",
+              foto: material.foto?.foto ?? null,
+              unidadMedida: material.UnidadMed ?? "und",
+              empresaId,
+            });
           }}
           aria-label={isFavorito ? "Quitar de favoritos" : "Agregar a favoritos"}
           aria-pressed={isFavorito}

@@ -2,8 +2,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { getDashboard, getTasaBcv, getUltimasVisitas, getProximaVisita } from "../../services/dashboardService";
-import type { DashboardData, TasaBcv, VisitaComercial, ProximaVisita } from "../../models/Dashboard";
+import { getDashboard, getTasaBcv, getUltimasVisitas, getProximaVisita, getDescuentos } from "../../services/dashboardService";
+import type { DashboardData, TasaBcv, VisitaComercial, ProximaVisita, ProductoDescuento } from "../../models/Dashboard";
+import { useFavoritos } from "../../hooks/useFavoritos";
 import KpiCard from "../../components/ui/KpiCard";
 import CreditoWidget from "./widgets/CreditoWidget";
 import MapaWidget from "./widgets/MapaWidget";
@@ -12,6 +13,43 @@ import ProximamenteWidget from "./widgets/ProximamenteWidget";
 import ModuleCard from "../../components/ui/ModuleCard";
 import Button from "../../components/ui/Button";
 import GoldRing from "../../components/ui/GoldRing";
+
+const HeartIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
+    <path d="M12 21s-6.716-4.35-9.428-8.209C.688 10.075 1.5 6 5.25 5.25 7.5 4.8 9.6 5.7 12 8.4c2.4-2.7 4.5-3.6 6.75-3.15 3.75.75 4.562 4.825 2.678 7.541C18.716 16.65 12 21 12 21z" />
+  </svg>
+);
+
+function ProductoMiniCard({
+  nombre,
+  foto,
+  onClick,
+  children,
+}: {
+  nombre: string;
+  foto: string | null;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="text-left rounded-xl border border-brand-neutral-200 hover:border-brand-primary-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden bg-white group"
+    >
+      <div className="h-24 bg-gradient-to-br from-brand-neutral-100 to-brand-neutral-200 flex items-center justify-center overflow-hidden">
+        {foto ? (
+          <img src={foto} alt={nombre} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+        ) : (
+          <span className="text-lg font-bold text-brand-primary-600">{nombre.charAt(0).toUpperCase()}</span>
+        )}
+      </div>
+      <div className="p-3">
+        <p className="text-sm font-semibold text-brand-neutral-900 line-clamp-1">{nombre}</p>
+        {children}
+      </div>
+    </button>
+  );
+}
 
 const statusStyles: Record<string, string> = {
   pendiente: "bg-amber-100 text-amber-700",
@@ -27,18 +65,21 @@ export default function DashboardPage() {
   const [tasa, setTasa] = useState<TasaBcv | null>(null);
   const [visitas, setVisitas] = useState<VisitaComercial[]>([]);
   const [proximaVisita, setProximaVisita] = useState<ProximaVisita | null>(null);
+  const [descuentos, setDescuentos] = useState<ProductoDescuento[]>([]);
   const [loading, setLoading] = useState(true);
+  const { listaFavoritos } = useFavoritos();
 
   useEffect(() => {
     let mounted = true;
 
-    Promise.allSettled([getDashboard(), getTasaBcv(), getUltimasVisitas(), getProximaVisita()]).then(
-      ([dashRes, tasaRes, visitasRes, proximaRes]) => {
+    Promise.allSettled([getDashboard(), getTasaBcv(), getUltimasVisitas(), getProximaVisita(), getDescuentos()]).then(
+      ([dashRes, tasaRes, visitasRes, proximaRes, descuentosRes]) => {
         if (!mounted) return;
         if (dashRes.status === "fulfilled") setDashboard(dashRes.value);
         if (tasaRes.status === "fulfilled") setTasa(tasaRes.value);
         if (visitasRes.status === "fulfilled") setVisitas(visitasRes.value);
         if (proximaRes.status === "fulfilled") setProximaVisita(proximaRes.value);
+        if (descuentosRes.status === "fulfilled") setDescuentos(descuentosRes.value);
         setLoading(false);
       }
     );
@@ -211,6 +252,57 @@ export default function DashboardPage() {
           <VisitasWidget ultimas={visitas} proxima={proximaVisita} loading={loading} />
         </div>
       </div>
+
+      {/* Favoritos */}
+      {listaFavoritos.length > 0 && (
+        <ModuleCard
+          title="Tus favoritos"
+          titleRight={<span className="text-red-500"><HeartIcon /></span>}
+        >
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+            {listaFavoritos.map((f) => (
+              <ProductoMiniCard
+                key={f.id}
+                nombre={f.nombre}
+                foto={f.foto}
+                onClick={() => navigate(`/catalogo/${f.empresaId}`)}
+              >
+                <p className="text-xs text-brand-primary-600 font-bold mt-1">
+                  {f.precio != null ? `${f.moneda} ${f.precio.toFixed(2)}` : "Sin precio"}
+                </p>
+              </ProductoMiniCard>
+            ))}
+          </div>
+        </ModuleCard>
+      )}
+
+      {/* Productos en descuento */}
+      {descuentos.length > 0 && (
+        <ModuleCard title="Productos en descuento">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+            {descuentos.map((p) => (
+              <ProductoMiniCard
+                key={p.id}
+                nombre={p.nombre}
+                foto={p.foto}
+                onClick={() => navigate(`/catalogo/${p.empresa_id}`)}
+              >
+                <div className="flex items-center gap-1.5 mt-1">
+                  <span className="text-[10px] text-brand-neutral-400 line-through">
+                    {p.moneda} {p.precio_bruto.toFixed(2)}
+                  </span>
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-600">
+                    -{p.porc_descuento.toFixed(0)}%
+                  </span>
+                </div>
+                <p className="text-xs text-red-600 font-bold mt-0.5">
+                  {p.moneda} {p.precio_neto.toFixed(2)}
+                </p>
+              </ProductoMiniCard>
+            ))}
+          </div>
+        </ModuleCard>
+      )}
 
       {/* ── Vista previa: colores gradiente para cards ── */}
       {/* Solo para evaluar — no es un componente final todavía. */}

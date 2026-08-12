@@ -1,38 +1,55 @@
 // src/hooks/useFavoritos.ts
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-const STORAGE_KEY = "mercadito_favoritos";
+const STORAGE_KEY = "mercadito_favoritos_v2";
 
-function leerFavoritos(): Set<number> {
+export interface FavoritoSnapshot {
+  id: number;
+  materialId: string;
+  nombre: string;
+  precio: number | null;
+  moneda: string;
+  foto: string | null;
+  unidadMedida: string;
+  empresaId: number;
+}
+
+function leerFavoritos(): Record<number, FavoritoSnapshot> {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return new Set(raw ? JSON.parse(raw) : []);
+    return raw ? JSON.parse(raw) : {};
   } catch {
-    return new Set();
+    return {};
   }
 }
 
-/** Favoritos de catálogo, persistidos en localStorage (sin backend por ahora). */
+/**
+ * Favoritos de catálogo, persistidos en localStorage (sin backend por ahora).
+ * Se guarda un snapshot liviano del producto (no solo el id) para poder
+ * mostrarlos en el Dashboard sin tener que volver a consultar el catálogo
+ * de cada empresa.
+ */
 export function useFavoritos() {
-  const [favoritos, setFavoritos] = useState<Set<number>>(() => leerFavoritos());
+  const [favoritos, setFavoritos] = useState<Record<number, FavoritoSnapshot>>(() => leerFavoritos());
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(favoritos)));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(favoritos));
   }, [favoritos]);
 
-  const esFavorito = useCallback((materialId: number) => favoritos.has(materialId), [favoritos]);
+  const esFavorito = useCallback((materialId: number) => materialId in favoritos, [favoritos]);
 
-  const toggleFavorito = useCallback((materialId: number) => {
+  const toggleFavorito = useCallback((snapshot: FavoritoSnapshot) => {
     setFavoritos((prev) => {
-      const next = new Set(prev);
-      if (next.has(materialId)) {
-        next.delete(materialId);
-      } else {
-        next.add(materialId);
+      if (prev[snapshot.id]) {
+        const next = { ...prev };
+        delete next[snapshot.id];
+        return next;
       }
-      return next;
+      return { ...prev, [snapshot.id]: snapshot };
     });
   }, []);
 
-  return { favoritos, esFavorito, toggleFavorito };
+  const listaFavoritos = useMemo(() => Object.values(favoritos), [favoritos]);
+
+  return { favoritos, listaFavoritos, esFavorito, toggleFavorito };
 }

@@ -59,3 +59,16 @@ export interface ProximaVisita {
   fecha: string;
   vendedor: string;
 }
+
+export interface ProductoDescuento {
+  id: number;
+  material_id: string;
+  nombre: string;
+  foto: string | null;
+  precio_neto: number;
+  precio_bruto: number;
+  porc_descuento: number;
+  moneda: string;
+  unidad_medida: string;
+  empresa_id: number;
+}

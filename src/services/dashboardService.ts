@@ -1,6 +1,6 @@
 // src/services/dashboardService.ts
 import api from "./api";
-import type { DashboardData, TasaBcv, VisitaComercial, ProximaVisita } from "../models/Dashboard";
+import type { DashboardData, TasaBcv, VisitaComercial, ProximaVisita, ProductoDescuento } from "../models/Dashboard";
 
 interface ApiResponse<T = null> {
   success: boolean;
@@ -41,4 +41,10 @@ export const getProximaVisita = async (): Promise<ProximaVisita | null> => {
     params: { tipo: "proxima" },
   });
   return response.data.data ?? null;
+};
+
+/** Top productos con descuento SAP vigente, entre todas las empresas del cliente */
+export const getDescuentos = async (): Promise<ProductoDescuento[]> => {
+  const response = await api.get<ApiResponse<ProductoDescuento[]>>("/mercadito/dashboard/descuentos");
+  return response.data.data ?? [];
 };
