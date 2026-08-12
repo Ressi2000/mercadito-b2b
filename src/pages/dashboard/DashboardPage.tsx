@@ -9,18 +9,13 @@ import KpiCard from "../../components/ui/KpiCard";
 import CreditoWidget from "./widgets/CreditoWidget";
 import MapaWidget from "./widgets/MapaWidget";
 import VisitasWidget from "./widgets/VisitasWidget";
+import FavoritosWidget from "./widgets/FavoritosWidget";
 import ProximamenteWidget from "./widgets/ProximamenteWidget";
 import ModuleCard from "../../components/ui/ModuleCard";
 import Button from "../../components/ui/Button";
 import GoldRing from "../../components/ui/GoldRing";
 import Carousel from "../../components/ui/Carousel";
 import SplitText from "../../components/ui/SplitText";
-
-const HeartIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
-    <path d="M12 21s-6.716-4.35-9.428-8.209C.688 10.075 1.5 6 5.25 5.25 7.5 4.8 9.6 5.7 12 8.4c2.4-2.7 4.5-3.6 6.75-3.15 3.75.75 4.562 4.825 2.678 7.541C18.716 16.65 12 21 12 21z" />
-  </svg>
-);
 
 const TagIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
@@ -125,10 +120,6 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const { listaFavoritos } = useFavoritos();
 
-  const favoritosPorEmpresa = useMemo(
-    () => agruparPorEmpresa(listaFavoritos, (f) => f.empresaId, (f) => f.empresaNombre),
-    [listaFavoritos]
-  );
   const descuentosPorEmpresa = useMemo(
     () => agruparPorEmpresa(descuentos, (d) => d.empresa_id, (d) => d.empresa_nombre ?? ""),
     [descuentos]
@@ -316,45 +307,12 @@ export default function DashboardPage() {
 
         <div className="space-y-6">
           <MapaWidget ubicacion={dashboard?.ubicacion ?? null} loading={loading} />
+          <FavoritosWidget favoritos={listaFavoritos} onSelect={(f) => navigate(`/catalogo/${f.empresaId}`)} />
           <VisitasWidget ultimas={visitas} proxima={proximaVisita} loading={loading} />
         </div>
       </div>
 
-      {/* Favoritos — una card independiente por empresa, no una sección compartida */}
-      {favoritosPorEmpresa.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <span className="text-red-500"><HeartIcon /></span>
-            <h2 className="text-base font-display font-bold text-brand-neutral-900">Tus favoritos</h2>
-          </div>
-          <div className="space-y-5">
-            {favoritosPorEmpresa.map((grupo) => (
-              <EmpresaCarouselCard
-                key={grupo.empresaId}
-                empresaNombre={grupo.empresaNombre}
-                onVerCatalogo={() => navigate(`/catalogo/${grupo.empresaId}`)}
-              >
-                <Carousel>
-                  {grupo.items.map((f) => (
-                    <ProductoMiniCard
-                      key={f.id}
-                      nombre={f.nombre}
-                      foto={f.foto}
-                      onClick={() => navigate(`/catalogo/${f.empresaId}`)}
-                    >
-                      <p className="text-xs text-brand-primary-600 font-bold mt-1">
-                        {f.precio != null ? `${f.moneda} ${f.precio.toFixed(2)}` : "Sin precio"}
-                      </p>
-                    </ProductoMiniCard>
-                  ))}
-                </Carousel>
-              </EmpresaCarouselCard>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Productos en descuento — misma independencia por empresa */}
+      {/* Productos en descuento — una card independiente por empresa */}
       {descuentosPorEmpresa.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-2">
