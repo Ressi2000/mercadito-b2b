@@ -172,7 +172,7 @@ export default function DashboardPage() {
         <div className="relative">
           <p className="text-xs font-semibold text-brand-primary-300 uppercase tracking-widest">Dashboard</p>
           <h1 className="text-3xl font-display font-extrabold text-white mt-1">
-            <SplitText text={`Hola, ${primerNombre}`} />
+            <SplitText key={primerNombre} text={`Hola, ${primerNombre}`} />
           </h1>
           <p className="text-brand-neutral-300 mt-1">Resumen de tu cuenta con Sindoni.</p>
 
