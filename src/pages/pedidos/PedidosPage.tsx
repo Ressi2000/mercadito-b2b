@@ -440,8 +440,14 @@ export default function PedidosPage() {
 
       {/* ── Modal detalle ── */}
       {loadingDetalle && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-brand-neutral-900/40 backdrop-blur-sm">
-          <TricolorSpinner size={48} />
+        <div className="fixed inset-0 z-50">
+          {/* Backdrop en su propio elemento (sin z-index propio) — el z-50
+              directo sobre un nodo fixed+blur queda descuadrado bajo el
+              header sticky en algunos navegadores. */}
+          <div className="fixed inset-0 bg-brand-neutral-900/40 backdrop-blur-sm" />
+          <div className="relative w-full h-full flex items-center justify-center">
+            <TricolorSpinner size={48} />
+          </div>
         </div>
       )}
 
