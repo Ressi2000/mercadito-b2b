@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { getPedidos, getPedido } from "../../services/pedidoService";
 import type { PedidoWeb, ItemPedidoWeb } from "../../models/PedidoWeb";
 import Button from "../../components/ui/Button";
+import TricolorSpinner from "../../components/ui/TricolorSpinner";
 
 // ── Helpers de estado ───────────────────────────────────────────────
 const STATUS_CONFIG = {
@@ -73,39 +74,42 @@ function DetallePedidoModal({
   onClose: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      {/* Backdrop — fixed (no absolute) para que siga cubriendo todo el
+          viewport aunque este contenedor scrollee por un modal muy alto. */}
       <div
-        className="absolute inset-0 bg-brand-neutral-900/60 backdrop-blur-sm"
+        className="fixed inset-0 bg-brand-neutral-900/60 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* Modal */}
-      <div className="relative w-full max-w-2xl bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 overflow-hidden animate-slide-up">
+      <div className="relative min-h-full flex items-center justify-center p-4">
+        {/* Modal — alto acotado al viewport, con su propio scroll interno
+            para que header y cierre siempre queden accesibles. */}
+        <div className="relative w-full max-w-2xl max-h-[85vh] flex flex-col bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 overflow-hidden animate-slide-up">
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-brand-neutral-100">
-          <div>
-            <h3 className="text-lg font-display font-bold text-brand-neutral-900">
-              Pedido {pedido.codigo_pedido_web}
-            </h3>
-            <p className="text-xs text-brand-neutral-400 mt-0.5">{pedido.fecha} · {pedido.empresa}</p>
+          {/* Header */}
+          <div className="shrink-0 flex items-center justify-between px-6 py-5 border-b border-brand-neutral-100">
+            <div>
+              <h3 className="text-lg font-display font-bold text-brand-neutral-900">
+                Pedido {pedido.codigo_pedido_web}
+              </h3>
+              <p className="text-xs text-brand-neutral-400 mt-0.5">{pedido.fecha} · {pedido.empresa}</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <StatusBadge status={pedido.status} />
+              <button
+                onClick={onClose}
+                className="w-8 h-8 rounded-lg hover:bg-brand-neutral-100 flex items-center justify-center transition-colors"
+              >
+                <svg className="w-4 h-4 text-brand-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <StatusBadge status={pedido.status} />
-            <button
-              onClick={onClose}
-              className="w-8 h-8 rounded-lg hover:bg-brand-neutral-100 flex items-center justify-center transition-colors"
-            >
-              <svg className="w-4 h-4 text-brand-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
 
-        {/* Items */}
-        <div className="overflow-y-auto max-h-[60vh]">
+          {/* Cuerpo — ítems + resto del detalle comparten un único scroll */}
+          <div className="overflow-y-auto flex-1">
 
           {/* Header tabla */}
           <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-brand-neutral-50 border-b border-brand-neutral-100 text-xs font-semibold text-brand-neutral-500 uppercase tracking-wider">
@@ -150,10 +154,9 @@ function DetallePedidoModal({
               </div>
             );
           })}
-        </div>
 
-        {/* Footer */}
-        <div className="px-6 py-5 border-t border-brand-neutral-100 space-y-4">
+          {/* Footer */}
+          <div className="px-6 py-5 border-t border-brand-neutral-100 space-y-4">
 
           {/* Observaciones */}
           {pedido.observaciones && (
@@ -244,8 +247,13 @@ function DetallePedidoModal({
               {pedido.moneda ?? "$"} {pedido.total.toFixed(2)}
             </span>
           </div>
+          </div>
+          {/* fin cuerpo con scroll */}
         </div>
+        {/* fin modal */}
       </div>
+      {/* fin wrapper de centrado */}
+    </div>
     </div>
   );
 }
@@ -433,7 +441,7 @@ export default function PedidosPage() {
       {/* ── Modal detalle ── */}
       {loadingDetalle && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-brand-neutral-900/40 backdrop-blur-sm">
-          <div className="w-12 h-12 border-4 border-brand-primary-400 border-t-transparent rounded-full animate-spin" />
+          <TricolorSpinner size={48} />
         </div>
       )}
 
