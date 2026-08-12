@@ -17,6 +17,7 @@ import type { FavoritoSnapshot } from "../../hooks/useFavoritos";
 interface ProductCardProps {
   material: Material;
   empresaId: number;
+  empresaNombre: string;
   style?: React.CSSProperties;
   isFavorito: boolean;
   onToggleFavorito: (snapshot: FavoritoSnapshot) => void;
@@ -33,7 +34,7 @@ function ImagePlaceholder({ nombre }: { nombre: string }) {
   );
 }
 
-export default function ProductCard({ material, empresaId, style, isFavorito, onToggleFavorito }: ProductCardProps) {
+export default function ProductCard({ material, empresaId, empresaNombre, style, isFavorito, onToggleFavorito }: ProductCardProps) {
   const { carrito, carritosPorEmpresa, agregar, actualizarLocal, eliminar, sincronizarTotales } = useCarrito();
   const [agregando, setAgregando] = useState(false);
 
@@ -141,6 +142,7 @@ export default function ProductCard({ material, empresaId, style, isFavorito, on
               foto: material.foto?.foto ?? null,
               unidadMedida: material.UnidadMed ?? "und",
               empresaId,
+              empresaNombre,
             });
           }}
           aria-label={isFavorito ? "Quitar de favoritos" : "Agregar a favoritos"}

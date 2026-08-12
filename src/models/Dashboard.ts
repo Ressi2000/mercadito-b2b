@@ -71,4 +71,5 @@ export interface ProductoDescuento {
   moneda: string;
   unidad_medida: string;
   empresa_id: number;
+  empresa_nombre: string | null;
 }

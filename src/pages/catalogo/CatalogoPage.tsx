@@ -55,6 +55,7 @@ export default function CatalogoPage() {
     fetchCarrito,
     setCarritoActivo,
     loadingCarrito,
+    carritosPorEmpresa,
   } = useCarrito();
 
   const [search, setSearch] = useState("");
@@ -282,6 +283,7 @@ export default function CatalogoPage() {
                 key={material.id}
                 material={material}
                 empresaId={empresaIdNum}
+                empresaNombre={carritosPorEmpresa[empresaIdNum]?.nombre_mercancia ?? ""}
                 style={{ animationDelay: `${i * 60}ms` }}
                 isFavorito={esFavorito(material.id)}
                 onToggleFavorito={toggleFavorito}

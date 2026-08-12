@@ -1,5 +1,5 @@
 // src/pages/dashboard/DashboardPage.tsx
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { getDashboard, getTasaBcv, getUltimasVisitas, getProximaVisita, getDescuentos } from "../../services/dashboardService";
@@ -13,6 +13,7 @@ import ProximamenteWidget from "./widgets/ProximamenteWidget";
 import ModuleCard from "../../components/ui/ModuleCard";
 import Button from "../../components/ui/Button";
 import GoldRing from "../../components/ui/GoldRing";
+import Carousel from "../../components/ui/Carousel";
 
 const HeartIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
@@ -34,7 +35,7 @@ function ProductoMiniCard({
   return (
     <button
       onClick={onClick}
-      className="text-left rounded-xl border border-brand-neutral-200 hover:border-brand-primary-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden bg-white group"
+      className="shrink-0 w-40 snap-start text-left rounded-xl border border-brand-neutral-200 hover:border-brand-primary-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden bg-white group"
     >
       <div className="h-24 bg-gradient-to-br from-brand-neutral-100 to-brand-neutral-200 flex items-center justify-center overflow-hidden">
         {foto ? (
@@ -57,6 +58,28 @@ const statusStyles: Record<string, string> = {
   rechazado: "bg-red-100 text-red-700",
 };
 
+interface GrupoEmpresa<T> {
+  empresaId: number;
+  empresaNombre: string;
+  items: T[];
+}
+
+function agruparPorEmpresa<T>(
+  items: T[],
+  getEmpresaId: (item: T) => number,
+  getEmpresaNombre: (item: T) => string
+): GrupoEmpresa<T>[] {
+  const grupos = new Map<number, GrupoEmpresa<T>>();
+  for (const item of items) {
+    const empresaId = getEmpresaId(item);
+    if (!grupos.has(empresaId)) {
+      grupos.set(empresaId, { empresaId, empresaNombre: getEmpresaNombre(item) || `Empresa ${empresaId}`, items: [] });
+    }
+    grupos.get(empresaId)!.items.push(item);
+  }
+  return Array.from(grupos.values());
+}
+
 export default function DashboardPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -68,6 +91,15 @@ export default function DashboardPage() {
   const [descuentos, setDescuentos] = useState<ProductoDescuento[]>([]);
   const [loading, setLoading] = useState(true);
   const { listaFavoritos } = useFavoritos();
+
+  const favoritosPorEmpresa = useMemo(
+    () => agruparPorEmpresa(listaFavoritos, (f) => f.empresaId, (f) => f.empresaNombre),
+    [listaFavoritos]
+  );
+  const descuentosPorEmpresa = useMemo(
+    () => agruparPorEmpresa(descuentos, (d) => d.empresa_id, (d) => d.empresa_nombre ?? ""),
+    [descuentos]
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -254,51 +286,69 @@ export default function DashboardPage() {
       </div>
 
       {/* Favoritos */}
-      {listaFavoritos.length > 0 && (
+      {favoritosPorEmpresa.length > 0 && (
         <ModuleCard
           title="Tus favoritos"
           titleRight={<span className="text-red-500"><HeartIcon /></span>}
         >
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-            {listaFavoritos.map((f) => (
-              <ProductoMiniCard
-                key={f.id}
-                nombre={f.nombre}
-                foto={f.foto}
-                onClick={() => navigate(`/catalogo/${f.empresaId}`)}
-              >
-                <p className="text-xs text-brand-primary-600 font-bold mt-1">
-                  {f.precio != null ? `${f.moneda} ${f.precio.toFixed(2)}` : "Sin precio"}
+          <div className="space-y-6">
+            {favoritosPorEmpresa.map((grupo) => (
+              <div key={grupo.empresaId}>
+                <p className="text-xs font-semibold text-brand-neutral-500 uppercase tracking-wide mb-3">
+                  {grupo.empresaNombre}
                 </p>
-              </ProductoMiniCard>
+                <Carousel>
+                  {grupo.items.map((f) => (
+                    <ProductoMiniCard
+                      key={f.id}
+                      nombre={f.nombre}
+                      foto={f.foto}
+                      onClick={() => navigate(`/catalogo/${f.empresaId}`)}
+                    >
+                      <p className="text-xs text-brand-primary-600 font-bold mt-1">
+                        {f.precio != null ? `${f.moneda} ${f.precio.toFixed(2)}` : "Sin precio"}
+                      </p>
+                    </ProductoMiniCard>
+                  ))}
+                </Carousel>
+              </div>
             ))}
           </div>
         </ModuleCard>
       )}
 
       {/* Productos en descuento */}
-      {descuentos.length > 0 && (
+      {descuentosPorEmpresa.length > 0 && (
         <ModuleCard title="Productos en descuento">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-            {descuentos.map((p) => (
-              <ProductoMiniCard
-                key={p.id}
-                nombre={p.nombre}
-                foto={p.foto}
-                onClick={() => navigate(`/catalogo/${p.empresa_id}`)}
-              >
-                <div className="flex items-center gap-1.5 mt-1">
-                  <span className="text-[10px] text-brand-neutral-400 line-through">
-                    {p.moneda} {p.precio_bruto.toFixed(2)}
-                  </span>
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-600">
-                    -{p.porc_descuento.toFixed(0)}%
-                  </span>
-                </div>
-                <p className="text-xs text-red-600 font-bold mt-0.5">
-                  {p.moneda} {p.precio_neto.toFixed(2)}
+          <div className="space-y-6">
+            {descuentosPorEmpresa.map((grupo) => (
+              <div key={grupo.empresaId}>
+                <p className="text-xs font-semibold text-brand-neutral-500 uppercase tracking-wide mb-3">
+                  {grupo.empresaNombre}
                 </p>
-              </ProductoMiniCard>
+                <Carousel>
+                  {grupo.items.map((p) => (
+                    <ProductoMiniCard
+                      key={p.id}
+                      nombre={p.nombre}
+                      foto={p.foto}
+                      onClick={() => navigate(`/catalogo/${p.empresa_id}`)}
+                    >
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <span className="text-[10px] text-brand-neutral-400 line-through">
+                          {p.moneda} {p.precio_bruto.toFixed(2)}
+                        </span>
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-600">
+                          -{p.porc_descuento.toFixed(0)}%
+                        </span>
+                      </div>
+                      <p className="text-xs text-red-600 font-bold mt-0.5">
+                        {p.moneda} {p.precio_neto.toFixed(2)}
+                      </p>
+                    </ProductoMiniCard>
+                  ))}
+                </Carousel>
+              </div>
             ))}
           </div>
         </ModuleCard>

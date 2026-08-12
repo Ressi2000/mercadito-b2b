@@ -12,6 +12,7 @@ export interface FavoritoSnapshot {
   foto: string | null;
   unidadMedida: string;
   empresaId: number;
+  empresaNombre: string;
 }
 
 function leerFavoritos(): Record<number, FavoritoSnapshot> {
