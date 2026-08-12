@@ -29,7 +29,7 @@ export default function FavoritosWidget({ favoritos, onSelect }: FavoritosWidget
             >
               <div className="w-10 h-10 rounded-lg shrink-0 bg-gradient-to-br from-brand-neutral-100 to-brand-neutral-200 flex items-center justify-center overflow-hidden">
                 {f.foto ? (
-                  <img src={f.foto} alt={f.nombre} className="h-full w-full object-cover" />
+                  <img src={f.foto} alt={f.nombre} loading="lazy" decoding="async" className="h-full w-full object-cover" />
                 ) : (
                   <span className="text-xs font-bold text-brand-primary-600">{f.nombre.charAt(0).toUpperCase()}</span>
                 )}

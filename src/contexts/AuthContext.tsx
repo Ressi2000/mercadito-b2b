@@ -13,6 +13,8 @@ import {
   checkAuth,
   type LoginPayload,
 } from "../services/authService";
+import { UNAUTHORIZED_EVENT } from "../services/api";
+import { clearDashboardCache } from "../services/dashboardCache";
 
 interface User {
   id: number;
@@ -71,6 +73,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     verifyAuth();
   }, []);
 
+  // Cuando cualquier request autenticado recibe 401 (sesión expirada, cookie
+  // invalidada por otra app en el mismo host, etc.), api.ts dispara este
+  // evento en vez de navegar él mismo — así el estado se limpia primero y
+  // ProtectedRoute redirige solo, sin pisarse con GuestRoute.
+  useEffect(() => {
+    const clearSession = () => {
+      setUser(null);
+      localStorage.removeItem("mercadito_user");
+      clearDashboardCache();
+    };
+    window.addEventListener(UNAUTHORIZED_EVENT, clearSession);
+    return () => window.removeEventListener(UNAUTHORIZED_EVENT, clearSession);
+  }, []);
+
   // ── Login ──────────────────────────────────────────────────────────
   const login = async (data: LoginPayload) => {
     setLoading(true);
@@ -104,6 +120,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(null);
       hasVerified.current = false; // permite re-verificación en próximo login
       localStorage.removeItem("mercadito_user");
+      clearDashboardCache();
       setLoading(false);
     }
   };

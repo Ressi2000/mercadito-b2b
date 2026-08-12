@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { getDashboard, getTasaBcv, getUltimasVisitas, getProximaVisita, getDescuentos } from "../../services/dashboardService";
 import type { DashboardData, TasaBcv, VisitaComercial, ProximaVisita, ProductoDescuento } from "../../models/Dashboard";
+import { getDashboardCache, setDashboardCache, DASHBOARD_CACHE_TTL_MS, type DashboardSnapshot } from "../../services/dashboardCache";
 import { useFavoritos } from "../../hooks/useFavoritos";
 import KpiCard from "../../components/ui/KpiCard";
 import CreditoWidget from "./widgets/CreditoWidget";
@@ -67,7 +68,7 @@ function ProductoMiniCard({
     >
       <div className="h-24 bg-gradient-to-br from-brand-neutral-100 to-brand-neutral-200 flex items-center justify-center overflow-hidden">
         {foto ? (
-          <img src={foto} alt={nombre} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+          <img src={foto} alt={nombre} loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
         ) : (
           <span className="text-lg font-bold text-brand-primary-600">{nombre.charAt(0).toUpperCase()}</span>
         )}
@@ -108,16 +109,34 @@ function agruparPorEmpresa<T>(
   return Array.from(grupos.values());
 }
 
+async function fetchDashboardSnapshot(): Promise<DashboardSnapshot> {
+  const [dashRes, tasaRes, visitasRes, proximaRes, descuentosRes] = await Promise.allSettled([
+    getDashboard(),
+    getTasaBcv(),
+    getUltimasVisitas(),
+    getProximaVisita(),
+    getDescuentos(),
+  ]);
+  return {
+    dashboard: dashRes.status === "fulfilled" ? dashRes.value : null,
+    tasa: tasaRes.status === "fulfilled" ? tasaRes.value : null,
+    visitas: visitasRes.status === "fulfilled" ? visitasRes.value : [],
+    proximaVisita: proximaRes.status === "fulfilled" ? proximaRes.value : null,
+    descuentos: descuentosRes.status === "fulfilled" ? descuentosRes.value : [],
+  };
+}
+
 export default function DashboardPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [dashboard, setDashboard] = useState<DashboardData | null>(null);
-  const [tasa, setTasa] = useState<TasaBcv | null>(null);
-  const [visitas, setVisitas] = useState<VisitaComercial[]>([]);
-  const [proximaVisita, setProximaVisita] = useState<ProximaVisita | null>(null);
-  const [descuentos, setDescuentos] = useState<ProductoDescuento[]>([]);
-  const [loading, setLoading] = useState(true);
+  const cached = getDashboardCache();
+  const [dashboard, setDashboard] = useState<DashboardData | null>(cached?.data.dashboard ?? null);
+  const [tasa, setTasa] = useState<TasaBcv | null>(cached?.data.tasa ?? null);
+  const [visitas, setVisitas] = useState<VisitaComercial[]>(cached?.data.visitas ?? []);
+  const [proximaVisita, setProximaVisita] = useState<ProximaVisita | null>(cached?.data.proximaVisita ?? null);
+  const [descuentos, setDescuentos] = useState<ProductoDescuento[]>(cached?.data.descuentos ?? []);
+  const [loading, setLoading] = useState(!cached);
   const { listaFavoritos } = useFavoritos();
 
   const descuentosPorEmpresa = useMemo(
@@ -125,24 +144,37 @@ export default function DashboardPage() {
     [descuentos]
   );
 
+  const aplicarSnapshot = (data: DashboardSnapshot) => {
+    setDashboard(data.dashboard);
+    setTasa(data.tasa);
+    setVisitas(data.visitas);
+    setProximaVisita(data.proximaVisita);
+    setDescuentos(data.descuentos);
+  };
+
   useEffect(() => {
     let mounted = true;
+    const isFresh = cached && Date.now() - cached.timestamp < DASHBOARD_CACHE_TTL_MS;
 
-    Promise.allSettled([getDashboard(), getTasaBcv(), getUltimasVisitas(), getProximaVisita(), getDescuentos()]).then(
-      ([dashRes, tasaRes, visitasRes, proximaRes, descuentosRes]) => {
-        if (!mounted) return;
-        if (dashRes.status === "fulfilled") setDashboard(dashRes.value);
-        if (tasaRes.status === "fulfilled") setTasa(tasaRes.value);
-        if (visitasRes.status === "fulfilled") setVisitas(visitasRes.value);
-        if (proximaRes.status === "fulfilled") setProximaVisita(proximaRes.value);
-        if (descuentosRes.status === "fulfilled") setDescuentos(descuentosRes.value);
-        setLoading(false);
-      }
-    );
+    // Caché fresco: ya se mostró en el useState inicial, no hay nada que pedir.
+    if (isFresh) {
+      setLoading(false);
+      return;
+    }
+
+    // Caché expirado o inexistente: refrescar. Si había caché (aunque viejo),
+    // los datos ya están en pantalla — no mostramos skeleton, solo refrescamos.
+    fetchDashboardSnapshot().then((data) => {
+      if (!mounted) return;
+      setDashboardCache(data);
+      aplicarSnapshot(data);
+      setLoading(false);
+    });
 
     return () => {
       mounted = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const primerNombre = user?.email?.split("@")[0] ?? "";
