@@ -1,39 +1,48 @@
-// src/pages/auth/RecuperarPasswordPage.tsx
+// src/pages/auth/ResetPasswordPage.tsx
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
-import { solicitarRecuperacion } from "../../services/authService";
+import { restablecerPassword } from "../../services/authService";
 
-interface RecuperarForm {
-  email: string;
+interface ResetForm {
+  password: string;
+  password_confirmation: string;
 }
 
-export default function RecuperarPasswordPage() {
-  const [enviado, setEnviado] = useState(false);
+export default function ResetPasswordPage() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const token = searchParams.get("token") ?? "";
+  const email = searchParams.get("email") ?? "";
+
+  const [exito, setExito] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
-  } = useForm<RecuperarForm>();
+  } = useForm<ResetForm>();
 
-  const onSubmit = async (data: RecuperarForm) => {
+  const enlaceInvalido = !token || !email;
+
+  const onSubmit = async (data: ResetForm) => {
     setLoading(true);
     setError(null);
     try {
-      await solicitarRecuperacion(data.email);
-      // El backend siempre responde éxito, exista o no la cuenta —
-      // evita que este formulario sirva para averiguar qué correos
-      // están registrados.
-      setEnviado(true);
+      const resp = await restablecerPassword({ token, email, ...data });
+      if (!resp.success) throw new Error(resp.message);
+      setExito(true);
+      setTimeout(() => navigate("/"), 2500);
     } catch (err: any) {
       setError(
         err.response?.data?.message ||
-          "No pudimos procesar la solicitud. Intentá de nuevo en unos minutos."
+          err.message ||
+          "No pudimos restablecer la contraseña."
       );
     } finally {
       setLoading(false);
@@ -65,18 +74,17 @@ export default function RecuperarPasswordPage() {
             }}
           >
             <svg className="w-7 h-7 text-brand-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
             </svg>
           </div>
 
           <h1 className="text-xl font-display font-extrabold text-white tracking-tight">
-            Recuperar contraseña
+            Nueva contraseña
           </h1>
 
-          {!enviado && (
+          {!enlaceInvalido && !exito && (
             <p className="text-sm text-brand-neutral-400 mt-2 leading-relaxed max-w-xs mx-auto">
-              Ingresá el correo con el que iniciás sesión y te mandamos un
-              enlace para restablecer tu contraseña.
+              Elegí una contraseña nueva para <span className="text-brand-neutral-200 font-medium">{email}</span>.
             </p>
           )}
         </div>
@@ -84,40 +92,63 @@ export default function RecuperarPasswordPage() {
         <div className="mx-8 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
         <div className="px-8 pt-7 pb-9">
-          {enviado ? (
-            <div className="text-center space-y-4">
-              <div
-                className="flex items-start gap-3 p-4 rounded-xl text-left"
-                style={{
-                  background: "rgba(34, 197, 94, 0.10)",
-                  border: "1px solid rgba(34, 197, 94, 0.25)",
-                }}
-              >
-                <svg className="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <p className="text-sm text-green-300 font-medium">
-                  Si ese correo está registrado, vas a recibir un enlace para
-                  restablecer tu contraseña en los próximos minutos.
-                </p>
-              </div>
-              <p className="text-xs text-brand-neutral-500">
-                ¿No te llegó? Revisá la carpeta de spam antes de pedir otro enlace.
+          {enlaceInvalido ? (
+            <div
+              className="flex items-start gap-3 p-4 rounded-xl"
+              style={{
+                background: "rgba(239, 68, 68, 0.10)",
+                border: "1px solid rgba(239, 68, 68, 0.25)",
+              }}
+            >
+              <svg className="w-4 h-4 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+              </svg>
+              <p className="text-sm text-red-300 font-medium">
+                Este enlace no es válido. Pedí uno nuevo desde "¿Olvidaste tu
+                contraseña?" en el login.
+              </p>
+            </div>
+          ) : exito ? (
+            <div
+              className="flex items-start gap-3 p-4 rounded-xl"
+              style={{
+                background: "rgba(34, 197, 94, 0.10)",
+                border: "1px solid rgba(34, 197, 94, 0.25)",
+              }}
+            >
+              <svg className="w-5 h-5 text-green-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="text-sm text-green-300 font-medium">
+                Contraseña actualizada. Ya podés iniciar sesión con la nueva
+                contraseña — te llevamos al login en un momento.
               </p>
             </div>
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               <Input
-                type="email"
-                placeholder="correo@empresa.com"
-                label="Correo electrónico"
-                error={errors.email?.message}
-                {...register("email", {
-                  required: "El correo es requerido",
-                  pattern: {
-                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: "Correo electrónico inválido",
+                type="password"
+                placeholder="••••••••"
+                label="Nueva contraseña"
+                error={errors.password?.message}
+                {...register("password", {
+                  required: "La contraseña es requerida",
+                  minLength: {
+                    value: 8,
+                    message: "Mínimo 8 caracteres",
                   },
+                })}
+              />
+
+              <Input
+                type="password"
+                placeholder="••••••••"
+                label="Confirmar contraseña"
+                error={errors.password_confirmation?.message}
+                {...register("password_confirmation", {
+                  required: "Confirmá la contraseña",
+                  validate: (value) =>
+                    value === watch("password") || "Las contraseñas no coinciden",
                 })}
               />
 
@@ -142,7 +173,7 @@ export default function RecuperarPasswordPage() {
                 isLoading={loading}
                 className="w-full !mt-7"
               >
-                Enviar enlace
+                Restablecer contraseña
               </Button>
             </form>
           )}

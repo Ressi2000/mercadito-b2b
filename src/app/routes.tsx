@@ -16,6 +16,7 @@ import RouteErrorBoundary from "../components/RouteErrorBoundary";
 // todos descarguen el código de los otros 6 módulos solo para ver el login
 // o el dashboard.
 const RecuperarPasswordPage = lazy(() => import("../pages/auth/RecuperarPasswordPage"));
+const ResetPasswordPage = lazy(() => import("../pages/auth/ResetPasswordPage"));
 const DashboardPage = lazy(() => import("../pages/dashboard/DashboardPage"));
 const EmpresasPage = lazy(() => import("../pages/empresas/EmpresasPage"));
 const CatalogoPage = lazy(() => import("../pages/catalogo/CatalogoPage"));
@@ -62,6 +63,14 @@ export const router = createBrowserRouter([
         element: (
           <GuestRoute>
             {lazyPage(RecuperarPasswordPage)}
+          </GuestRoute>
+        ),
+      },
+      {
+        path: "/recuperar-password/confirmar",
+        element: (
+          <GuestRoute>
+            {lazyPage(ResetPasswordPage)}
           </GuestRoute>
         ),
       },
