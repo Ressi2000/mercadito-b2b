@@ -1,6 +1,6 @@
 // src/pages/catalogo/CatalogoPage.tsx
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import PageHeader from "../../components/ui/PageHeader";
 import Breadcrumb from "../../components/ui/Breadcrumb";
@@ -146,6 +146,40 @@ export default function CatalogoPage() {
     return resultado;
   }, [materiales, search, filtros, esFavorito]);
 
+  // ── Scroll infinito ─────────────────────────────────────────────────────
+  // El catálogo ya vive entero en memoria (filtrado/ordenado arriba) — no
+  // hay ida y vuelta al backend acá, solo se revela de a tandas mientras
+  // se scrollea, para no renderizar cientos de cards de una sola vez.
+  const BATCH_SIZE = 24;
+  const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  // Reiniciar la tanda visible cuando cambia QUÉ se está viendo (búsqueda,
+  // filtros o empresa) — no cuando cambia algo que no afecta el conjunto
+  // resultante (ej. togglear un favorito), para no "colapsar" la grilla
+  // de golpe debajo del usuario mientras navega.
+  useEffect(() => {
+    setVisibleCount(BATCH_SIZE);
+  }, [search, filtros, empresaIdNum]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((prev) => Math.min(prev + BATCH_SIZE, filteredMateriales.length));
+        }
+      },
+      { rootMargin: "600px" } // disparar antes de que el sentinel entre en pantalla, para que no se note el corte
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [filteredMateriales.length]);
+
+  const materialesVisibles = filteredMateriales.slice(0, visibleCount);
+  const hayMasPorMostrar = visibleCount < filteredMateriales.length;
+
   return (
     <div className="space-y-10 animate-fade-in">
 
@@ -265,8 +299,9 @@ export default function CatalogoPage() {
                 <rect x="3.5" y="13.5" width="7" height="7" rx="1.5" />
                 <rect x="13.5" y="13.5" width="7" height="7" rx="1.5" />
               </svg>
-              {filteredMateriales.length}{" "}
-              {filteredMateriales.length === 1 ? "producto encontrado" : "productos encontrados"}
+              {hayMasPorMostrar
+                ? `Mostrando ${materialesVisibles.length} de ${filteredMateriales.length} productos`
+                : `${filteredMateriales.length} ${filteredMateriales.length === 1 ? "producto encontrado" : "productos encontrados"}`}
             </span>
             {/* Indicador de carga del carrito — solo informativo, no bloquea */}
             {loadingCarrito && (
@@ -278,18 +313,27 @@ export default function CatalogoPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredMateriales.map((material, i) => (
+            {materialesVisibles.map((material, i) => (
               <ProductCard
                 key={material.id}
                 material={material}
                 empresaId={empresaIdNum}
                 empresaNombre={carritosPorEmpresa[empresaIdNum]?.nombre_mercancia ?? ""}
-                style={{ animationDelay: `${i * 60}ms` }}
+                style={{ animationDelay: `${(i % BATCH_SIZE) * 60}ms` }}
                 isFavorito={esFavorito(material.id)}
                 onToggleFavorito={toggleFavorito}
               />
             ))}
           </div>
+
+          {/* Sentinel del scroll infinito: al acercarse acá se revela la
+              siguiente tanda. rootMargin ya dispara con anticipación, así
+              que esto casi nunca llega a verse. */}
+          {hayMasPorMostrar && (
+            <div ref={sentinelRef} className="flex justify-center py-8">
+              <span className="w-2.5 h-2.5 rounded-full border-2 border-brand-neutral-300 border-t-transparent animate-spin" />
+            </div>
+          )}
         </>
       )}
     </div>
