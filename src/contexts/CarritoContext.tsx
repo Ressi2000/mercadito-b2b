@@ -391,6 +391,15 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
         // "carritoOptimista" congelado al inicio de esta función) y, si la
         // cantidad local diverge de la que se envió, se preserva la local y
         // se reconcilia con el backend aparte.
+        //
+        // Tampoco se usa resp.total_estimado/resp.desglose para el carrito
+        // completo: es una foto tomada por el backend en el instante de ESTE
+        // request puntual, y con varios productos agregándose casi a la vez
+        // (mismo motivo que sincronizarTotales, ver esa nota) puede llegar
+        // desactualizada respecto a otros ítems ya confirmados. El total y
+        // el desglose se recalculan siempre en local a partir de los ítems
+        // finales — resp.desglose solo se usa para refinar el % de
+        // retención cacheado.
         let cantidadDivergente: number | null = null;
         const reemplazarConReal = (c: Carrito): Carrito => {
           const items = c.items.map((i) => {
@@ -399,22 +408,21 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
             cantidadDivergente = i.cantidad;
             return { ...resp.item, cantidad: i.cantidad, subtotal: +(i.cantidad * resp.item.precio_unitario).toFixed(2) };
           });
-          return {
-            ...c,
-            id: resp.carrito_id,
-            codigo_pedido_web: resp.codigo_pedido_web,
-            total_estimado: cantidadDivergente === null ? resp.total_estimado : c.total_estimado,
-            desglose: cantidadDivergente === null ? resp.desglose : c.desglose,
-            items,
-          };
+          return { ...c, id: resp.carrito_id, codigo_pedido_web: resp.codigo_pedido_web, items };
         };
 
+        actualizarRetencionCache(resp.desglose);
+        const pct = retencionPctRef.current;
         const nombre = carritosPorEmpresaRef.current[empresaId]?.nombre_mercancia;
         const baseActual = carritosPorEmpresaRef.current[empresaId] ?? carritoOptimista;
         const carritoReal = reemplazarConReal(baseActual);
-        const carritoRealConNombre = nombre ? { ...carritoReal, nombre_mercancia: nombre } : carritoReal;
+        const carritoRealConNombre: Carrito = {
+          ...carritoReal,
+          total_estimado: calcularTotal(carritoReal.items),
+          desglose: calcularDesgloseLocal(carritoReal.items, pct),
+          ...(nombre ? { nombre_mercancia: nombre } : {}),
+        };
 
-        if (cantidadDivergente === null) actualizarRetencionCache(resp.desglose);
         setCarrito(carritoRealConNombre);
         setCarritosPorEmpresa((prev) => ({ ...prev, [empresaId]: carritoRealConNombre }));
         cacheRef.current[empresaId] = { timestamp: Date.now() };
@@ -467,15 +475,40 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
   // resumen fiscal nunca quede desactualizado respecto al servidor (corrige
   // cualquier redondeo del recálculo local optimista).
 
+  // No se aplica el total_estimado/desglose que devuelve el servidor tal
+  // cual: cada request de UN ítem (agregar, actualizar cantidad) devuelve
+  // una foto del carrito ENTERO tomada en el instante en que el backend
+  // procesó ESE request puntual. Con varios productos cambiando casi al
+  // mismo tiempo (backend serializado + red lenta), esas fotos llegan
+  // desordenadas — la última en aplicarse no es necesariamente la que
+  // refleja el estado real, y el total/desglose termina mostrando una
+  // mezcla de instantes distintos (visto en producción: ítems con la
+  // cantidad correcta pero un total que no correspondía a la suma).
+  // En su lugar, la respuesta del servidor solo se usa para refinar el %
+  // de retención cacheado; el total y el desglose se recalculan SIEMPRE
+  // en local a partir de los ítems actuales — única fuente de verdad,
+  // sin ventana para una carrera entre requests.
   const sincronizarTotales = useCallback(
-    (empresaId: number, total_estimado: number, desglose: DesgloseCarrito | null) => {
-      actualizarRetencionCache(desglose);
+    (empresaId: number, _total_estimado: number, desgloseServidor: DesgloseCarrito | null) => {
+      actualizarRetencionCache(desgloseServidor);
+      const pct = retencionPctRef.current;
       setCarrito((prev) =>
-        prev && prev.mercancia_id === empresaId ? { ...prev, total_estimado, desglose } : prev
+        prev && prev.mercancia_id === empresaId
+          ? { ...prev, total_estimado: calcularTotal(prev.items), desglose: calcularDesgloseLocal(prev.items, pct) }
+          : prev
       );
-      setCarritosPorEmpresa((prev) =>
-        prev[empresaId] ? { ...prev, [empresaId]: { ...prev[empresaId], total_estimado, desglose } } : prev
-      );
+      setCarritosPorEmpresa((prev) => {
+        const actual = prev[empresaId];
+        if (!actual) return prev;
+        return {
+          ...prev,
+          [empresaId]: {
+            ...actual,
+            total_estimado: calcularTotal(actual.items),
+            desglose: calcularDesgloseLocal(actual.items, pct),
+          },
+        };
+      });
     },
     [actualizarRetencionCache]
   );
