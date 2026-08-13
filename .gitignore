@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# Variables de entorno reales — .env.example es la única plantilla que se
+# commitea. Sin esto, un futuro .env.production con la URL real de la API
+# queda a un "git add ." de terminar en el repo.
+.env
+.env.*
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

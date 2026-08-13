@@ -1,8 +1,12 @@
 // src/services/api.ts
 import axios from "axios";
 
+// Sin VITE_API_BASE_URL definida, cae al backend local de desarrollo — pero
+// en cualquier build de producción real, esta env var es obligatoria (ver
+// .env.example): dejar el fallback local significaría desplegar la app
+// apuntando a 127.0.0.1, o peor, a HTTP en vez de HTTPS.
 const api = axios.create({
-  baseURL: "http://127.0.0.1:8000/api",
+  baseURL: import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000/api",
   withCredentials: true,
   withXSRFToken: true,
   timeout: 15000,
