@@ -34,6 +34,28 @@ export interface DesglosePedidoWeb {
   total_retencion: number;
 }
 
+export interface PaginacionMeta {
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+}
+
+export interface ContadoresPedidos {
+  todos: number;
+  pendiente: number;
+  aprobado_vendedor: number;
+  aprobado: number;
+  rechazado: number;
+  modificado: number;
+}
+
+export interface PedidosPaginados {
+  pedidos: PedidoWeb[];
+  meta: PaginacionMeta;
+  counts: ContadoresPedidos;
+}
+
 export interface PedidoWeb {
   id: number;
   codigo_pedido_web: string;

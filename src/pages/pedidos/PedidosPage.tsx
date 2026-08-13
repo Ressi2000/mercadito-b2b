@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getPedidos, getPedido } from "../../services/pedidoService";
-import type { PedidoWeb, ItemPedidoWeb } from "../../models/PedidoWeb";
+import type { PedidoWeb, ItemPedidoWeb, PaginacionMeta, ContadoresPedidos } from "../../models/PedidoWeb";
 import Button from "../../components/ui/Button";
 import TricolorSpinner from "../../components/ui/TricolorSpinner";
 import PageHeader from "../../components/ui/PageHeader";
@@ -305,29 +305,140 @@ function PedidoRow({
   );
 }
 
+// ── Paginación ──────────────────────────────────────────────────────
+function paginasAMostrar(actual: number, ultima: number): (number | "…")[] {
+  if (ultima <= 7) return Array.from({ length: ultima }, (_, i) => i + 1);
+
+  const paginas: (number | "…")[] = [1];
+  if (actual > 3) paginas.push("…");
+  for (let p = Math.max(2, actual - 1); p <= Math.min(ultima - 1, actual + 1); p++) {
+    paginas.push(p);
+  }
+  if (actual < ultima - 2) paginas.push("…");
+  paginas.push(ultima);
+  return paginas;
+}
+
+function Paginador({
+  meta,
+  onCambiarPagina,
+}: {
+  meta: PaginacionMeta;
+  onCambiarPagina: (pagina: number) => void;
+}) {
+  if (meta.last_page <= 1) return null;
+
+  const desde = (meta.current_page - 1) * meta.per_page + 1;
+  const hasta = Math.min(meta.current_page * meta.per_page, meta.total);
+
+  return (
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+      <p className="text-xs text-brand-neutral-400">
+        Mostrando <span className="font-semibold text-brand-neutral-600">{desde}–{hasta}</span> de{" "}
+        <span className="font-semibold text-brand-neutral-600">{meta.total}</span> pedidos
+      </p>
+
+      <div className="flex items-center gap-1.5">
+        <button
+          onClick={() => onCambiarPagina(meta.current_page - 1)}
+          disabled={meta.current_page <= 1}
+          className="w-9 h-9 rounded-lg flex items-center justify-center text-brand-neutral-500 hover:bg-brand-neutral-100 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+          aria-label="Página anterior"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+        </button>
+
+        {paginasAMostrar(meta.current_page, meta.last_page).map((p, i) =>
+          p === "…" ? (
+            <span key={`ellipsis-${i}`} className="w-9 h-9 flex items-center justify-center text-brand-neutral-300 text-sm">
+              …
+            </span>
+          ) : (
+            <button
+              key={p}
+              onClick={() => onCambiarPagina(p)}
+              className={`w-9 h-9 rounded-lg text-sm font-semibold tabular-nums transition-colors ${
+                p === meta.current_page
+                  ? "bg-brand-primary-600 text-brand-neutral-900 shadow-md"
+                  : "text-brand-neutral-600 hover:bg-brand-neutral-100"
+              }`}
+            >
+              {p}
+            </button>
+          )
+        )}
+
+        <button
+          onClick={() => onCambiarPagina(meta.current_page + 1)}
+          disabled={meta.current_page >= meta.last_page}
+          className="w-9 h-9 rounded-lg flex items-center justify-center text-brand-neutral-500 hover:bg-brand-neutral-100 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+          aria-label="Página siguiente"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── Página principal ────────────────────────────────────────────────
+const CONTADORES_VACIOS: ContadoresPedidos = {
+  todos: 0, pendiente: 0, aprobado_vendedor: 0, aprobado: 0, rechazado: 0, modificado: 0,
+};
+
 export default function PedidosPage() {
   const navigate = useNavigate();
   const [pedidos, setPedidos] = useState<PedidoWeb[]>([]);
+  const [meta, setMeta] = useState<PaginacionMeta | null>(null);
+  const [counts, setCounts] = useState<ContadoresPedidos>(CONTADORES_VACIOS);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filtroStatus, setFiltroStatus] = useState<PedidoWeb["status"] | "todos">("todos");
+  const [pagina, setPagina] = useState(1);
   const [pedidoDetalle, setPedidoDetalle] = useState<PedidoWeb | null>(null);
   const [loadingDetalle, setLoadingDetalle] = useState(false);
 
+  // Volver a la página 1 cada vez que cambia el filtro — quedarse en, por
+  // ejemplo, la página 3 de "Pendientes" al pasar a "Rechazados" mostraría
+  // una página que ni siquiera existe para ese filtro.
   useEffect(() => {
-    const fetchPedidos = async () => {
-      try {
-        const data = await getPedidos();
-        setPedidos(data);
-      } catch {
-        setError("No se pudieron cargar los pedidos.");
-      } finally {
-        setLoading(false);
-      }
+    setPagina(1);
+  }, [filtroStatus]);
+
+  useEffect(() => {
+    // AbortController (no un simple flag): en desarrollo, React StrictMode
+    // monta este efecto dos veces — sin abortar la primera tanda de
+    // requests, quedaban corriendo igual contra el backend aunque su
+    // resultado se descartara. Mismo patrón que Dashboard/Catálogo/Carrito.
+    const controller = new AbortController();
+    let vigente = true;
+
+    setLoading(true);
+    setError(null);
+
+    getPedidos(filtroStatus, pagina, controller.signal)
+      .then((data) => {
+        if (!vigente) return;
+        setPedidos(data.pedidos);
+        setMeta(data.meta);
+        setCounts(data.counts);
+      })
+      .catch(() => {
+        if (vigente) setError("No se pudieron cargar los pedidos.");
+      })
+      .finally(() => {
+        if (vigente) setLoading(false);
+      });
+
+    return () => {
+      vigente = false;
+      controller.abort();
     };
-    fetchPedidos();
-  }, []);
+  }, [filtroStatus, pagina]);
 
   const handleVerDetalle = async (id: number) => {
     setLoadingDetalle(true);
@@ -339,19 +450,6 @@ export default function PedidosPage() {
     } finally {
       setLoadingDetalle(false);
     }
-  };
-
-  const pedidosFiltrados = filtroStatus === "todos"
-    ? pedidos
-    : pedidos.filter((p) => p.status === filtroStatus);
-
-  const contadores = {
-    todos: pedidos.length,
-    pendiente: pedidos.filter((p) => p.status === "pendiente").length,
-    aprobado_vendedor: pedidos.filter((p) => p.status === "aprobado_vendedor").length,
-    aprobado: pedidos.filter((p) => p.status === "aprobado").length,
-    rechazado: pedidos.filter((p) => p.status === "rechazado").length,
-    modificado: pedidos.filter((p) => p.status === "modificado").length,
   };
 
   return (
@@ -384,7 +482,7 @@ export default function PedidosPage() {
       )}
 
       {/* ── Filtros ── */}
-      {!loading && pedidos.length > 0 && (
+      {counts.todos > 0 && (
         <div className="flex flex-wrap gap-2">
           {(["todos", "pendiente", "aprobado_vendedor", "aprobado", "rechazado", "modificado"] as const).map((s) => (
             <button
@@ -400,7 +498,7 @@ export default function PedidosPage() {
               <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${
                 filtroStatus === s ? "bg-brand-neutral-900/10 text-brand-neutral-900" : "bg-brand-neutral-100 text-brand-neutral-500"
               }`}>
-                {contadores[s]}
+                {counts[s]}
               </span>
             </button>
           ))}
@@ -412,7 +510,7 @@ export default function PedidosPage() {
         <div className="space-y-4">
           {[1, 2, 3].map((n) => <PedidoSkeleton key={n} />)}
         </div>
-      ) : pedidosFiltrados.length === 0 ? (
+      ) : pedidos.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 gap-4">
           <img src="/carrito/empty.svg" alt="" aria-hidden="true" className="w-28 h-28" />
           <p className="text-brand-neutral-500 font-medium">
@@ -433,11 +531,12 @@ export default function PedidosPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {pedidosFiltrados.map((pedido, i) => (
+          {pedidos.map((pedido, i) => (
             <div key={pedido.id} style={{ animationDelay: `${i * 60}ms` }}>
               <PedidoRow pedido={pedido} onVerDetalle={handleVerDetalle} />
             </div>
           ))}
+          {meta && <Paginador meta={meta} onCambiarPagina={setPagina} />}
         </div>
       )}
 
