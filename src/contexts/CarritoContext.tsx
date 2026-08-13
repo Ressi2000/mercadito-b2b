@@ -31,6 +31,7 @@ import type { Carrito, CarritoItem, DesgloseCarrito } from "../models/Carrito";
 import {
   getCarrito,
   agregarItem,
+  actualizarCantidad,
   eliminarItem,
   vaciarCarrito,
 } from "../services/carritoService";
@@ -380,29 +381,52 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
       try {
         const resp = await agregarItem(empresaId, material_id, cantidad);
 
-        // Reemplazar ítem optimista (por material_id) con el real (con id positivo)
+        // Reemplazar ítem optimista (por material_id) con el real (con id
+        // positivo). OJO: mientras este POST seguía en vuelo, el usuario
+        // pudo haber seguido tocando +/- sobre el ítem optimista (temp id) —
+        // esos clicks solo tocaron el estado local (actualizarLocal), el
+        // backend no los vio. Si acá pisamos con resp.item tal cual, esa
+        // cantidad "manda" y los clicks posteriores desaparecen en silencio.
+        // Por eso se parte del estado MÁS RECIENTE (no del snapshot
+        // "carritoOptimista" congelado al inicio de esta función) y, si la
+        // cantidad local diverge de la que se envió, se preserva la local y
+        // se reconcilia con el backend aparte.
+        let cantidadDivergente: number | null = null;
         const reemplazarConReal = (c: Carrito): Carrito => {
-          const items = c.items.map((i) =>
-            i.material_id === material_id ? resp.item : i
-          );
+          const items = c.items.map((i) => {
+            if (i.material_id !== material_id) return i;
+            if (i.id !== tempId || i.cantidad === cantidad) return resp.item;
+            cantidadDivergente = i.cantidad;
+            return { ...resp.item, cantidad: i.cantidad, subtotal: +(i.cantidad * resp.item.precio_unitario).toFixed(2) };
+          });
           return {
             ...c,
             id: resp.carrito_id,
             codigo_pedido_web: resp.codigo_pedido_web,
-            total_estimado: resp.total_estimado,
-            desglose: resp.desglose,
+            total_estimado: cantidadDivergente === null ? resp.total_estimado : c.total_estimado,
+            desglose: cantidadDivergente === null ? resp.desglose : c.desglose,
             items,
           };
         };
 
         const nombre = carritosPorEmpresaRef.current[empresaId]?.nombre_mercancia;
-        const carritoReal = reemplazarConReal(carritoOptimista);
+        const baseActual = carritosPorEmpresaRef.current[empresaId] ?? carritoOptimista;
+        const carritoReal = reemplazarConReal(baseActual);
         const carritoRealConNombre = nombre ? { ...carritoReal, nombre_mercancia: nombre } : carritoReal;
 
-        actualizarRetencionCache(resp.desglose);
+        if (cantidadDivergente === null) actualizarRetencionCache(resp.desglose);
         setCarrito(carritoRealConNombre);
         setCarritosPorEmpresa((prev) => ({ ...prev, [empresaId]: carritoRealConNombre }));
         cacheRef.current[empresaId] = { timestamp: Date.now() };
+
+        // Reconciliar con el backend la cantidad que quedó pendiente (ver
+        // nota arriba) — recién ahora el ítem tiene id real para poder hacerlo.
+        if (cantidadDivergente !== null) {
+          actualizarCantidad(resp.item.id, cantidadDivergente).then(
+            (totales) => sincronizarTotales(empresaId, totales.total_estimado, totales.desglose),
+            () => { /* silencioso: la próxima edición manual reintenta via el debounce normal */ }
+          );
+        }
       } catch (err: any) {
         // Revertir
         setCarrito(carritoBase.id === 0 ? null : carritoBase);
@@ -413,8 +437,12 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
       } finally {
         setLoadingEmpresaId(null);
       }
+      // sincronizarTotales se declara más abajo en este mismo componente
+      // pero es estable (useCallback con deps constantes) — no hace falta
+      // en el array de deps, y agregarla rompería con un ReferenceError
+      // por orden de declaración (TDZ) en el array evaluado en este punto.
     },
-    [actualizarRetencionCache]
+    [actualizarRetencionCache] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   // ── actualizarLocal ───────────────────────────────────────────────────────

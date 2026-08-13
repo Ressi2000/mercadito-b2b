@@ -43,7 +43,10 @@ export default function ProductCard({ material, empresaId, empresaNombre, style,
       sincronizarTotales(empresaId, totales.total_estimado, totales.desglose);
     })
   );
-  useEffect(() => () => updater.current.cancelAll(), []);
+  // flushAll (no cancelAll): si la card se desmonta (scroll, filtro, cambio
+  // de empresa) dentro de la ventana de debounce, el último ajuste de
+  // cantidad se envía ya mismo en vez de perderse en silencio.
+  useEffect(() => () => updater.current.flushAll(), []);
 
   const tienePrecio = material.PrecioNeto !== undefined && material.PrecioNeto !== null;
 

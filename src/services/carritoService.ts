@@ -68,6 +68,7 @@ export async function vaciarCarrito(empresaId: number): Promise<void> {
 export interface ActualizadorDebounced {
   schedule: (itemId: number, cantidad: number) => void;
   cancelAll: () => void;
+  flushAll: () => void;
 }
 
 export function crearActualizadorDebounced(
@@ -75,25 +76,49 @@ export function crearActualizadorDebounced(
   onSuccess?: (itemId: number, totales: TotalesCarrito) => void
 ): ActualizadorDebounced {
   const timers: Record<number, ReturnType<typeof setTimeout>> = {};
+  // Última cantidad programada por ítem — se necesita aparte del timer para
+  // poder enviarla de inmediato en flushAll() en vez de esperar el delay.
+  const pendientes: Record<number, number> = {};
+
+  const enviar = async (itemId: number, cantidad: number) => {
+    delete timers[itemId];
+    delete pendientes[itemId];
+    try {
+      const totales = await actualizarCantidad(itemId, cantidad);
+      onSuccess?.(itemId, totales);
+    } catch {
+      if (import.meta.env.DEV) {
+        console.warn(`[carritoService] Error sincronizando ítem ${itemId}`);
+      }
+    }
+  };
 
   const schedule = (itemId: number, cantidad: number) => {
     if (timers[itemId]) clearTimeout(timers[itemId]);
-    timers[itemId] = setTimeout(async () => {
-      delete timers[itemId];
-      try {
-        const totales = await actualizarCantidad(itemId, cantidad);
-        onSuccess?.(itemId, totales);
-      } catch {
-        if (import.meta.env.DEV) {
-          console.warn(`[carritoService] Error sincronizando ítem ${itemId}`);
-        }
-      }
-    }, delayMs);
+    pendientes[itemId] = cantidad;
+    timers[itemId] = setTimeout(() => enviar(itemId, cantidad), delayMs);
   };
 
   const cancelAll = () => {
     Object.values(timers).forEach(clearTimeout);
+    Object.keys(timers).forEach((k) => delete timers[+k]);
+    Object.keys(pendientes).forEach((k) => delete pendientes[+k]);
   };
 
-  return { schedule, cancelAll };
+  // Envía YA cualquier cambio de cantidad que estuviera esperando el debounce,
+  // en vez de descartarlo. Se usa al desmontar la fila del carrito (navegar
+  // fuera de /carrito) para no perder el último ajuste del usuario — antes
+  // cancelAll() lo tiraba sin enviarlo si el desmontaje caía dentro de la
+  // ventana de debounce.
+  const flushAll = () => {
+    Object.keys(timers).forEach((key) => {
+      const itemId = Number(key);
+      clearTimeout(timers[itemId]);
+      const cantidad = pendientes[itemId];
+      delete timers[itemId];
+      if (cantidad !== undefined) enviar(itemId, cantidad);
+    });
+  };
+
+  return { schedule, cancelAll, flushAll };
 }

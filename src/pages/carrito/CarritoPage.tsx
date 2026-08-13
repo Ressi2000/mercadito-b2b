@@ -27,7 +27,10 @@ function CarritoItemRow({ item, empresaId }: { item: CarritoItem; empresaId: num
       sincronizarTotales(empresaId, totales.total_estimado, totales.desglose);
     })
   );
-  useEffect(() => () => updater.current.cancelAll(), []);
+  // flushAll (no cancelAll): si el usuario navega fuera de /carrito dentro
+  // de la ventana de debounce, el último ajuste de cantidad se envía ya
+  // mismo en vez de perderse en silencio.
+  useEffect(() => () => updater.current.flushAll(), []);
 
   const isSyncing = loadingItemId === item.id;
   const tieneDescuento = !!item.porc_descuento && item.porc_descuento > 0;
