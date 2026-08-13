@@ -157,6 +157,20 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
   const cacheRef = useRef<Record<number, { timestamp: number }>>({});
   const tempIdRef = useRef(-1);
   const carritoRef = useRef(carrito);
+
+  // Dedup de requests en vuelo por empresa (mismo motivo que en
+  // CatalogoContext): el chequeo de caché no evita una segunda llamada
+  // que se dispara antes de que la primera haya respondido — típicamente
+  // por el doble-montaje de React StrictMode en desarrollo.
+  const enVueloRef = useRef<Record<number, Promise<Carrito>>>({});
+  const fetchCarritoRemoto = (empresaId: number): Promise<Carrito> => {
+    if (!enVueloRef.current[empresaId]) {
+      enVueloRef.current[empresaId] = getCarrito(empresaId).finally(() => {
+        delete enVueloRef.current[empresaId];
+      });
+    }
+    return enVueloRef.current[empresaId];
+  };
   const carritosPorEmpresaRef = useRef(carritosPorEmpresa);
   // % de retención del cliente, derivado de la última respuesta real del
   // backend (no viaja por ítem) — se usa para el recálculo local instantáneo.
@@ -239,7 +253,7 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
     setLoadingCarrito(true);
     setError(null);
     try {
-      const data = await getCarrito(empresaId);
+      const data = await fetchCarritoRemoto(empresaId);
       const nombre = carritosPorEmpresaRef.current[empresaId]?.nombre_mercancia;
       syncCarrito(data, nombre);
     } catch {
@@ -276,7 +290,7 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
       if (pendientes.length === 0) return;
 
       try {
-        const results = await Promise.allSettled(pendientes.map((e) => getCarrito(e.id)));
+        const results = await Promise.allSettled(pendientes.map((e) => fetchCarritoRemoto(e.id)));
         setCarritosPorEmpresa((prev) => {
           const next = { ...prev };
           results.forEach((r, i) => {
