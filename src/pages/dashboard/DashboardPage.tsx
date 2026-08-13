@@ -109,13 +109,13 @@ function agruparPorEmpresa<T>(
   return Array.from(grupos.values());
 }
 
-async function fetchDashboardSnapshot(): Promise<DashboardSnapshot> {
+async function fetchDashboardSnapshot(signal?: AbortSignal): Promise<DashboardSnapshot> {
   const [dashRes, tasaRes, visitasRes, proximaRes, descuentosRes] = await Promise.allSettled([
-    getDashboard(),
-    getTasaBcv(),
-    getUltimasVisitas(),
-    getProximaVisita(),
-    getDescuentos(),
+    getDashboard(signal),
+    getTasaBcv(signal),
+    getUltimasVisitas(signal),
+    getProximaVisita(signal),
+    getDescuentos(signal),
   ]);
   return {
     dashboard: dashRes.status === "fulfilled" ? dashRes.value : null,
@@ -162,9 +162,17 @@ export default function DashboardPage() {
       return;
     }
 
+    // AbortController real (no solo un flag "mounted"): en React StrictMode
+    // (desarrollo) este efecto se monta, desmonta y vuelve a montar a
+    // propósito para detectar cleanups faltantes — sin abort, las 5
+    // peticiones del primer montaje seguían viajando igual (aunque su
+    // resultado se descartara), duplicando la carga sobre un backend ya
+    // lento. Al abortar en el cleanup, esas quedan canceladas de verdad.
+    const controller = new AbortController();
+
     // Caché expirado o inexistente: refrescar. Si había caché (aunque viejo),
     // los datos ya están en pantalla — no mostramos skeleton, solo refrescamos.
-    fetchDashboardSnapshot().then((data) => {
+    fetchDashboardSnapshot(controller.signal).then((data) => {
       if (!mounted) return;
       setDashboardCache(data);
       aplicarSnapshot(data);
@@ -173,6 +181,7 @@ export default function DashboardPage() {
 
     return () => {
       mounted = false;
+      controller.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
