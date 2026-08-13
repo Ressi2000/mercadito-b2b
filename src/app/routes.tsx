@@ -7,6 +7,7 @@ import AuthLayout from "../components/layout/AuthLayout";
 import ProtectedRoute from "../components/ProtectedRoute";
 import GuestRoute from "../components/GuestRoute";
 import TricolorSpinner from "../components/ui/TricolorSpinner";
+import RouteErrorBoundary from "../components/RouteErrorBoundary";
 
 // LoginPage se mantiene con import estático: es lo primero que ve cualquier
 // usuario no autenticado, cargarlo "lazy" solo agregaría un parpadeo extra
@@ -42,6 +43,10 @@ function lazyPage(Component: React.ComponentType) {
 export const router = createBrowserRouter([
   {
     element: <AuthLayout />,
+    // Red de seguridad para todo el grupo de login: si LoginPage o
+    // AuthLayout lanzan un error de render, esto reemplaza esa pantalla
+    // en vez de dejar la app en blanco.
+    errorElement: <RouteErrorBoundary />,
     children: [
       {
         path: "/",
@@ -68,16 +73,22 @@ export const router = createBrowserRouter([
         <MainLayout />
       </ProtectedRoute>
     ),
+    // Red de seguridad para errores en ProtectedRoute/MainLayout mismos
+    // (fuera del alcance de los errorElement por-página de abajo).
+    errorElement: <RouteErrorBoundary />,
     children: [
-      { path: "/dashboard",    element: lazyPage(DashboardPage) },
+      // errorElement en CADA página (no solo arriba): así un error en,
+      // por ejemplo, Catálogo, solo reemplaza el contenido — el Sidebar
+      // y el Header siguen ahí, la app no se siente "rota entera".
+      { path: "/dashboard",    element: lazyPage(DashboardPage), errorElement: <RouteErrorBoundary /> },
 
       // /inicio en lugar de /empresas — más amigable para el usuario
-      { path: "/inicio",       element: lazyPage(EmpresasPage) },
-      { path: "/catalogo/:empresaId", element: lazyPage(CatalogoPage) },
-      { path: "/carrito",      element: lazyPage(CarritoPage) },
-      { path: "/confirmacion", element: lazyPage(ConfirmacionPage) },
-      { path: "/pedidos",      element: lazyPage(PedidosPage) },
-      { path: "/perfil",       element: lazyPage(PerfilPage) },
+      { path: "/inicio",       element: lazyPage(EmpresasPage), errorElement: <RouteErrorBoundary /> },
+      { path: "/catalogo/:empresaId", element: lazyPage(CatalogoPage), errorElement: <RouteErrorBoundary /> },
+      { path: "/carrito",      element: lazyPage(CarritoPage), errorElement: <RouteErrorBoundary /> },
+      { path: "/confirmacion", element: lazyPage(ConfirmacionPage), errorElement: <RouteErrorBoundary /> },
+      { path: "/pedidos",      element: lazyPage(PedidosPage), errorElement: <RouteErrorBoundary /> },
+      { path: "/perfil",       element: lazyPage(PerfilPage), errorElement: <RouteErrorBoundary /> },
 
       // Redirigir /empresas a /inicio por compatibilidad
       { path: "/empresas",     element: <Navigate to="/inicio" replace /> },

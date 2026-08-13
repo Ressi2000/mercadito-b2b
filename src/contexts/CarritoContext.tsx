@@ -46,6 +46,13 @@ interface CarritoContextType {
   loadingEmpresaId: number | null;
   error: string | null;
   totalItemsGlobal: number;
+  // true mientras el total_estimado/desglose mostrados son el cálculo local
+  // (instantáneo) y todavía hay al menos una cantidad esperando que el
+  // servidor la confirme — para mostrar un indicador sutil en vez de que
+  // el total simplemente cambie sin aviso cuando la confirmación llega.
+  sincronizando: boolean;
+  iniciarSync: () => void;
+  terminarSync: () => void;
 
   fetchCarrito: (empresaId: number, force?: boolean) => Promise<void>;
   fetchTodosLosCarritos: (empresas: { id: number; nombre: string }[]) => Promise<void>;
@@ -154,6 +161,13 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
   const [loadingItemId, setLoadingItemId] = useState<number | null>(null);
   const [loadingEmpresaId, setLoadingEmpresaId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Contador (no boolean) porque puede haber varios ítems sincronizando su
+  // cantidad a la vez — "sincronizando" debe seguir en true hasta que el
+  // ÚLTIMO termine. Ver iniciarSync/terminarSync más abajo.
+  const [syncsEnVuelo, setSyncsEnVuelo] = useState(0);
+  const iniciarSync = useCallback(() => setSyncsEnVuelo((n) => n + 1), []);
+  const terminarSync = useCallback(() => setSyncsEnVuelo((n) => Math.max(0, n - 1)), []);
 
   const cacheRef = useRef<Record<number, { timestamp: number }>>({});
   const tempIdRef = useRef(-1);
@@ -430,10 +444,11 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
         // Reconciliar con el backend la cantidad que quedó pendiente (ver
         // nota arriba) — recién ahora el ítem tiene id real para poder hacerlo.
         if (cantidadDivergente !== null) {
+          iniciarSync();
           actualizarCantidad(resp.item.id, cantidadDivergente).then(
             (totales) => sincronizarTotales(empresaId, totales.total_estimado, totales.desglose),
             () => { /* silencioso: la próxima edición manual reintenta via el debounce normal */ }
-          );
+          ).finally(terminarSync);
         }
       } catch (err: any) {
         // Revertir
@@ -450,7 +465,7 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
       // en el array de deps, y agregarla rompería con un ReferenceError
       // por orden de declaración (TDZ) en el array evaluado en este punto.
     },
-    [actualizarRetencionCache] // eslint-disable-line react-hooks/exhaustive-deps
+    [actualizarRetencionCache, iniciarSync, terminarSync] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   // ── actualizarLocal ───────────────────────────────────────────────────────
@@ -607,6 +622,9 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
         loadingEmpresaId,
         error,
         totalItemsGlobal,
+        sincronizando: syncsEnVuelo > 0,
+        iniciarSync,
+        terminarSync,
         fetchCarrito,
         fetchTodosLosCarritos,
         setCarritoActivo,

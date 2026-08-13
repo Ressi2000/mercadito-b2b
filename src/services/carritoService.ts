@@ -71,18 +71,34 @@ export interface ActualizadorDebounced {
   flushAll: () => void;
 }
 
+export interface HooksSincronizacion {
+  // Se llaman alrededor del request real (no del delay de debounce en sí),
+  // para que un indicador de "sincronizando" en la UI refleje cuándo hay
+  // de verdad una petición en vuelo.
+  onStart?: () => void;
+  onFinally?: () => void;
+}
+
 export function crearActualizadorDebounced(
   delayMs = 600,
-  onSuccess?: (itemId: number, totales: TotalesCarrito) => void
+  onSuccess?: (itemId: number, totales: TotalesCarrito) => void,
+  hooks?: HooksSincronizacion
 ): ActualizadorDebounced {
   const timers: Record<number, ReturnType<typeof setTimeout>> = {};
   // Última cantidad programada por ítem — se necesita aparte del timer para
   // poder enviarla de inmediato en flushAll() en vez de esperar el delay.
   const pendientes: Record<number, number> = {};
+  // Instante del último envío real por ítem — permite que el PRIMER ajuste
+  // después de estar quieto se sienta instantáneo (se manda ya), y solo los
+  // clicks repetidos justo después se agrupen en un debounce normal. Antes,
+  // hasta el primer click esperaba el delay completo.
+  const ultimoEnvio: Record<number, number> = {};
 
   const enviar = async (itemId: number, cantidad: number) => {
     delete timers[itemId];
     delete pendientes[itemId];
+    ultimoEnvio[itemId] = Date.now();
+    hooks?.onStart?.();
     try {
       const totales = await actualizarCantidad(itemId, cantidad);
       onSuccess?.(itemId, totales);
@@ -90,13 +106,21 @@ export function crearActualizadorDebounced(
       if (import.meta.env.DEV) {
         console.warn(`[carritoService] Error sincronizando ítem ${itemId}`);
       }
+    } finally {
+      hooks?.onFinally?.();
     }
   };
 
   const schedule = (itemId: number, cantidad: number) => {
-    if (timers[itemId]) clearTimeout(timers[itemId]);
     pendientes[itemId] = cantidad;
-    timers[itemId] = setTimeout(() => enviar(itemId, cantidad), delayMs);
+    if (timers[itemId]) clearTimeout(timers[itemId]);
+
+    const tiempoDesdeUltimoEnvio = Date.now() - (ultimoEnvio[itemId] ?? -Infinity);
+    if (tiempoDesdeUltimoEnvio >= delayMs) {
+      enviar(itemId, cantidad);
+      return;
+    }
+    timers[itemId] = setTimeout(() => enviar(itemId, pendientes[itemId] ?? cantidad), delayMs);
   };
 
   const cancelAll = () => {

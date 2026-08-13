@@ -35,13 +35,15 @@ function ImagePlaceholder({ nombre }: { nombre: string }) {
 }
 
 export default function ProductCard({ material, empresaId, empresaNombre, style, isFavorito, onToggleFavorito }: ProductCardProps) {
-  const { carrito, carritosPorEmpresa, agregar, actualizarLocal, eliminar, sincronizarTotales } = useCarrito();
+  const { carrito, carritosPorEmpresa, agregar, actualizarLocal, eliminar, sincronizarTotales, iniciarSync, terminarSync } = useCarrito();
   const [agregando, setAgregando] = useState(false);
 
   const updater = useRef(
-    crearActualizadorDebounced(500, (_, totales) => {
-      sincronizarTotales(empresaId, totales.total_estimado, totales.desglose);
-    })
+    crearActualizadorDebounced(
+      500,
+      (_, totales) => sincronizarTotales(empresaId, totales.total_estimado, totales.desglose),
+      { onStart: iniciarSync, onFinally: terminarSync }
+    )
   );
   // flushAll (no cancelAll): si la card se desmonta (scroll, filtro, cambio
   // de empresa) dentro de la ventana de debounce, el último ajuste de

@@ -20,12 +20,14 @@ import Breadcrumb from "../../components/ui/Breadcrumb";
 import type { CarritoItem } from "../../models/Carrito";
 
 function CarritoItemRow({ item, empresaId }: { item: CarritoItem; empresaId: number }) {
-  const { actualizarLocal, eliminar, loadingItemId, sincronizarTotales } = useCarrito();
+  const { actualizarLocal, eliminar, loadingItemId, sincronizarTotales, iniciarSync, terminarSync } = useCarrito();
 
   const updater = useRef(
-    crearActualizadorDebounced(500, (_, totales) => {
-      sincronizarTotales(empresaId, totales.total_estimado, totales.desglose);
-    })
+    crearActualizadorDebounced(
+      500,
+      (_, totales) => sincronizarTotales(empresaId, totales.total_estimado, totales.desglose),
+      { onStart: iniciarSync, onFinally: terminarSync }
+    )
   );
   // flushAll (no cancelAll): si el usuario navega fuera de /carrito dentro
   // de la ventana de debounce, el último ajuste de cantidad se envía ya
@@ -156,7 +158,7 @@ function CarritoSkeleton() {
 
 export default function CarritoPage() {
   const navigate = useNavigate();
-  const { carrito, loadingCarrito, error, clearError, vaciar, fetchCarrito } = useCarrito();
+  const { carrito, loadingCarrito, error, clearError, vaciar, fetchCarrito, sincronizando } = useCarrito();
 
   useEffect(() => {
     if (carrito?.mercancia_id) {
@@ -256,7 +258,15 @@ export default function CarritoPage() {
           </div>
 
           <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-6 space-y-5 sticky top-8">
-            <h2 className="text-lg font-display font-bold text-brand-neutral-900">Resumen del pedido</h2>
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-lg font-display font-bold text-brand-neutral-900">Resumen del pedido</h2>
+              {sincronizando && (
+                <span className="flex items-center gap-1.5 text-xs font-medium text-brand-neutral-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-primary-400 animate-pulse" />
+                  Sincronizando
+                </span>
+              )}
+            </div>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between text-brand-neutral-600">
                 <span>Productos ({carrito.items.length})</span>
@@ -267,7 +277,9 @@ export default function CarritoPage() {
               <div className="h-px bg-brand-neutral-100" />
               <div className="flex justify-between font-bold text-brand-neutral-900 text-base">
                 <span>Total estimado</span>
-                <span className="text-brand-primary-600 tabular-nums">
+                <span
+                  className={`text-brand-primary-600 tabular-nums transition-opacity duration-200 ${sincronizando ? "opacity-60" : ""}`}
+                >
                   {carrito.items[0]?.moneda ?? "$"} {carrito.total_estimado.toFixed(2)}
                 </span>
               </div>
