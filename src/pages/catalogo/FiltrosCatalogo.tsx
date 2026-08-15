@@ -130,14 +130,24 @@ export default function FiltrosCatalogo({
           Favoritos
         </button>
 
-        {activo && (
-          <button
-            onClick={onLimpiar}
-            className="shrink-0 h-[42px] px-4 rounded-xl text-sm font-medium text-brand-primary-600 hover:bg-brand-primary-50 border border-transparent hover:border-brand-primary-100 transition-colors duration-200"
-          >
-            Limpiar filtros
-          </button>
-        )}
+        {/* Siempre se renderiza (nunca se saca del layout) — si apareciera
+            y desapareciera con `activo`, el campo Categoría (flex-1) se
+            reacomodaría cada vez y correría horizontalmente todo lo que
+            va después (rango de precio, orden, favoritos). Se oculta con
+            opacidad en vez de con conditional rendering. */}
+        <button
+          onClick={onLimpiar}
+          disabled={!activo}
+          aria-hidden={!activo}
+          tabIndex={activo ? 0 : -1}
+          className={`shrink-0 h-[42px] px-4 rounded-xl text-sm font-medium border border-transparent transition-colors duration-200 ${
+            activo
+              ? "text-brand-primary-600 hover:bg-brand-primary-50 hover:border-brand-primary-100"
+              : "opacity-0 pointer-events-none"
+          }`}
+        >
+          Limpiar filtros
+        </button>
       </div>
     </Card>
   );
