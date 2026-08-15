@@ -3,7 +3,7 @@ import clsx from "clsx";
 import TricolorSpinner from "./TricolorSpinner";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "ghost";
+  variant?: "primary" | "secondary" | "ghost" | "danger";
   isLoading?: boolean;
   children: ReactNode;
 }
@@ -26,6 +26,8 @@ export default function Button({
       "bg-brand-neutral-100 text-brand-neutral-900 hover:bg-brand-neutral-200 active:scale-[0.98]",
     ghost:
       "bg-transparent text-brand-neutral-700 hover:bg-brand-neutral-100 active:scale-[0.98]",
+    danger:
+      "bg-red-600 text-white hover:bg-red-700 active:scale-[0.98] shadow-lg shadow-red-600/25 hover:shadow-xl hover:shadow-red-600/35",
   };
 
   return (

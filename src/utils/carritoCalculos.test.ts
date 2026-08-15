@@ -73,13 +73,13 @@ describe("calcularDesgloseLocal", () => {
     expect(desglose.iva_8).toBeCloseTo(4, 2);
   });
 
-  it("aplica el % de retención cacheado sobre el total con IVA", () => {
+  it("aplica el % de retención cacheado sobre el IVA (no sobre la factura completa)", () => {
     const items = [item({ subtotal: 100, porc_impuesto: 16 })];
-    // total con iva = 116; retención 5% = 5.8
+    // iva = 16; retención 5% del IVA = 0.8 (no del total con iva, 116)
     const desglose = calcularDesgloseLocal(items, 5)!;
 
-    expect(desglose.retencion).toBeCloseTo(5.8, 2);
-    expect(desglose.total_retencion).toBeCloseTo(110.2, 2);
+    expect(desglose.retencion).toBeCloseTo(0.8, 2);
+    expect(desglose.total_retencion).toBeCloseTo(115.2, 2);
   });
 
   it(
