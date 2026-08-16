@@ -10,13 +10,14 @@
 //      positivo, recién ahí los clicks +/- empiezan a hacer requests.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCarrito } from "../../contexts/CarritoContext";
 import { crearActualizadorDebounced } from "../../services/carritoService";
 import Button from "../../components/ui/Button";
 import PageHeader from "../../components/ui/PageHeader";
 import Breadcrumb from "../../components/ui/Breadcrumb";
+import ConfirmModal from "../../components/ui/ConfirmModal";
 import type { CarritoItem } from "../../models/Carrito";
 
 function CarritoItemRow({ item, empresaId }: { item: CarritoItem; empresaId: number }) {
@@ -177,13 +178,22 @@ export default function CarritoPage() {
     }
   }, [loadingCarrito, carrito]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleVaciar = async () => {
+  const [modalVaciarAbierto, setModalVaciarAbierto] = useState(false);
+  const [vaciando, setVaciando] = useState(false);
+
+  const handleConfirmarVaciar = async () => {
     if (!carrito) return;
-    const confirmado = window.confirm("¿Vaciar el carrito por completo?");
-    if (confirmado) await vaciar(carrito.mercancia_id);
+    setVaciando(true);
+    try {
+      await vaciar(carrito.mercancia_id);
+      setModalVaciarAbierto(false);
+    } finally {
+      setVaciando(false);
+    }
   };
 
   return (
+    <>
     <div className="space-y-10 animate-fade-in">
       <PageHeader
         breadcrumb={
@@ -317,7 +327,7 @@ export default function CarritoPage() {
             </button>
             <div className="pt-2 border-t border-brand-neutral-100">
               <button
-                onClick={handleVaciar}
+                onClick={() => setModalVaciarAbierto(true)}
                 className="w-full text-xs text-brand-neutral-400 hover:text-red-500 transition-colors duration-200"
               >
                 Vaciar carrito
@@ -327,5 +337,16 @@ export default function CarritoPage() {
         </div>
       )}
     </div>
+
+    <ConfirmModal
+      open={modalVaciarAbierto}
+      title="¿Vaciar el carrito?"
+      message="Se van a eliminar todos los productos que agregaste. Esta acción no se puede deshacer."
+      confirmLabel="Vaciar carrito"
+      isLoading={vaciando}
+      onConfirm={handleConfirmarVaciar}
+      onCancel={() => setModalVaciarAbierto(false)}
+    />
+    </>
   );
 }

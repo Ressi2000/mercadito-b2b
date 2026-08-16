@@ -6,6 +6,7 @@ import Button from "../../components/ui/Button";
 import PageHeader from "../../components/ui/PageHeader";
 import { getEmpresasByCliente } from "../../services/empresaService";
 import { useCarrito } from "../../contexts/CarritoContext";
+import { getEmpresasCache, setEmpresasCache, EMPRESAS_CACHE_TTL_MS } from "../../services/empresasCache";
 import type { Empresa } from "../../models/Empresa";
 
 function EmpresaSkeleton() {
@@ -33,17 +34,42 @@ function ImagePlaceholder({ nombre }: { nombre: string }) {
 }
 
 export default function EmpresasPage() {
-  const [empresas, setEmpresas] = useState<Empresa[]>([]);
-  const [loading, setLoading] = useState(true);
+  const cached = getEmpresasCache();
+  const [empresas, setEmpresas] = useState<Empresa[]>(cached?.data ?? []);
+  const [loading, setLoading] = useState(!cached);
   const navigate = useNavigate();
   const { fetchTodosLosCarritos, carritosPorEmpresa } = useCarrito();
 
+  // Con caché (aunque esté vencido), las empresas ya están en pantalla desde
+  // el useState inicial — no hace falta mostrar el skeleton para volver a
+  // pedirlas, solo refrescar de fondo. Mismo patrón que DashboardPage.
   useEffect(() => {
+    if (cached?.data.length) {
+      fetchTodosLosCarritos(
+        cached.data.map((e) => ({ id: e.id, nombre: e.nombre_mercancia }))
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const isFresh = cached && Date.now() - cached.timestamp < EMPRESAS_CACHE_TTL_MS;
+    if (isFresh) {
+      setLoading(false);
+      return;
+    }
+
+    // AbortController (no un simple flag): en StrictMode este efecto se
+    // monta dos veces — sin abortar la primera tanda, la petición viajaba
+    // igual contra el backend aunque su resultado se descartara. Mismo
+    // patrón que Dashboard/Catálogo/Carrito/Pedidos.
+    const controller = new AbortController();
     let mounted = true;
     const fetchEmpresas = async () => {
       try {
-        const data = await getEmpresasByCliente();
+        const data = await getEmpresasByCliente(controller.signal);
         if (!mounted) return;
+        setEmpresasCache(data);
         setEmpresas(data);
         // Pasar id + nombre para que el dropdown del header pueda mostrar el nombre
         if (data.length > 0) {
@@ -52,13 +78,16 @@ export default function EmpresasPage() {
           );
         }
       } catch (error) {
-        console.error("Error cargando empresas", error);
+        if (mounted) console.error("Error cargando empresas", error);
       } finally {
         if (mounted) setLoading(false);
       }
     };
     fetchEmpresas();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+      controller.abort();
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (

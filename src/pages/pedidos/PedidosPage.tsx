@@ -1,8 +1,8 @@
 // src/pages/pedidos/PedidosPage.tsx
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getPedidos, getPedido } from "../../services/pedidoService";
-import type { PedidoWeb, ItemPedidoWeb, PaginacionMeta, ContadoresPedidos } from "../../models/PedidoWeb";
+import type { PedidoWeb, ItemPedidoWeb, PaginacionMeta, ContadoresPedidos, PedidosPaginados } from "../../models/PedidoWeb";
 import Button from "../../components/ui/Button";
 import TricolorSpinner from "../../components/ui/TricolorSpinner";
 import PageHeader from "../../components/ui/PageHeader";
@@ -402,6 +402,15 @@ export default function PedidosPage() {
   const [pedidoDetalle, setPedidoDetalle] = useState<PedidoWeb | null>(null);
   const [loadingDetalle, setLoadingDetalle] = useState(false);
 
+  // Cache en memoria por pestaña visitada (status+página) durante esta
+  // visita a la página — cambiar entre "Pendiente"/"Aprobado"/etc. ya
+  // consultados antes se siente instantáneo en vez de mostrar el skeleton
+  // de nuevo cada vez. Vive en un ref (no en state) porque solo el efecto
+  // la lee/escribe — no necesita disparar un re-render por sí sola. Se
+  // pierde al salir de /pedidos, así que nunca queda desactualizada por
+  // mucho tiempo (ej. un pedido nuevo confirmado en otra visita).
+  const cacheRef = useRef<Map<string, PedidosPaginados>>(new Map());
+
   // Volver a la página 1 cada vez que cambia el filtro — quedarse en, por
   // ejemplo, la página 3 de "Pendientes" al pasar a "Rechazados" mostraría
   // una página que ni siquiera existe para ese filtro.
@@ -417,18 +426,35 @@ export default function PedidosPage() {
     const controller = new AbortController();
     let vigente = true;
 
-    setLoading(true);
-    setError(null);
+    const clave = `${filtroStatus}:${pagina}`;
+    const cacheado = cacheRef.current.get(clave);
+
+    const aplicar = (data: PedidosPaginados) => {
+      setPedidos(data.pedidos);
+      setMeta(data.meta);
+      setCounts(data.counts);
+    };
+
+    if (cacheado) {
+      // Ya visitamos esta pestaña/página antes: mostrar de una, sin
+      // skeleton — y de paso revalidar en segundo plano por si cambió
+      // algo (ej. un pedido que pasó de "pendiente" a "aprobado").
+      aplicar(cacheado);
+      setError(null);
+      setLoading(false);
+    } else {
+      setLoading(true);
+      setError(null);
+    }
 
     getPedidos(filtroStatus, pagina, controller.signal)
       .then((data) => {
         if (!vigente) return;
-        setPedidos(data.pedidos);
-        setMeta(data.meta);
-        setCounts(data.counts);
+        cacheRef.current.set(clave, data);
+        aplicar(data);
       })
       .catch(() => {
-        if (vigente) setError("No se pudieron cargar los pedidos.");
+        if (vigente && !cacheado) setError("No se pudieron cargar los pedidos.");
       })
       .finally(() => {
         if (vigente) setLoading(false);

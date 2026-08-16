@@ -34,7 +34,9 @@ export function calcularDesgloseLocal(items: CarritoItem[], retencionPct: number
   const iva16 = +(subtotal16 * 0.16).toFixed(2);
   const iva8 = +(subtotal8 * 0.08).toFixed(2);
   const totalConIva = subtotal16 + subtotal8 + subtotalExento + iva16 + iva8;
-  const retencion = +(totalConIva * (retencionPct / 100)).toFixed(2);
+  // Retención de IVA (ley venezolana): sobre el monto del IVA, no sobre
+  // la factura completa — ver DesgloseFiscalService (GesRutasApi).
+  const retencion = +((iva16 + iva8) * (retencionPct / 100)).toFixed(2);
 
   return {
     subtotal_16: +subtotal16.toFixed(2),

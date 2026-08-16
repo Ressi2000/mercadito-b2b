@@ -4,6 +4,7 @@ import { Outlet } from "react-router-dom";
 import { useSidebar } from "../../hooks/useSidebar";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
+import Footer from "./Footer";
 
 export default function MainLayout() {
   const { collapsed, toggleCollapsed, mobileOpen, openMobile, closeMobile } = useSidebar();
@@ -29,6 +30,8 @@ export default function MainLayout() {
             <Outlet />
           </div>
         </main>
+
+        <Footer />
       </div>
     </div>
   );

@@ -15,6 +15,7 @@ import {
 } from "../services/authService";
 import { UNAUTHORIZED_EVENT } from "../services/api";
 import { clearDashboardCache } from "../services/dashboardCache";
+import { clearEmpresasCache } from "../services/empresasCache";
 
 interface User {
   id: number;
@@ -82,6 +83,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(null);
       localStorage.removeItem("mercadito_user");
       clearDashboardCache();
+      clearEmpresasCache();
     };
     window.addEventListener(UNAUTHORIZED_EVENT, clearSession);
     return () => window.removeEventListener(UNAUTHORIZED_EVENT, clearSession);
@@ -121,6 +123,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       hasVerified.current = false; // permite re-verificación en próximo login
       localStorage.removeItem("mercadito_user");
       clearDashboardCache();
+      clearEmpresasCache();
       setLoading(false);
     }
   };
