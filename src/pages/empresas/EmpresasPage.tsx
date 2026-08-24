@@ -7,6 +7,7 @@ import PageHeader from "../../components/ui/PageHeader";
 import { getEmpresasByCliente } from "../../services/empresaService";
 import { useCarrito } from "../../contexts/CarritoContext";
 import { getEmpresasCache, setEmpresasCache, EMPRESAS_CACHE_TTL_MS } from "../../services/empresasCache";
+import EmptyStateBadge from "../../components/illustrations/EmptyStateBadge";
 import type { Empresa } from "../../models/Empresa";
 
 function EmpresaSkeleton() {
@@ -111,11 +112,11 @@ export default function EmpresasPage() {
         </div>
       ) : empresas.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-brand-neutral-100 flex items-center justify-center">
-            <svg className="w-8 h-8 text-brand-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <EmptyStateBadge>
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} className="w-full h-full">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
             </svg>
-          </div>
+          </EmptyStateBadge>
           <p className="text-brand-neutral-500 font-medium">No tienes empresas asignadas.</p>
         </div>
       ) : (

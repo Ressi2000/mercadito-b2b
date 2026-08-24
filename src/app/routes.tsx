@@ -24,6 +24,7 @@ const CarritoPage = lazy(() => import("../pages/carrito/CarritoPage"));
 const ConfirmacionPage = lazy(() => import("../pages/carrito/ConfirmacionPage"));
 const PedidosPage = lazy(() => import("../pages/pedidos/PedidosPage"));
 const PerfilPage = lazy(() => import("../pages/perfil/PerfilPage"));
+const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 
 function PageFallback() {
   return (
@@ -102,8 +103,10 @@ export const router = createBrowserRouter([
       // Redirigir /empresas a /inicio por compatibilidad
       { path: "/empresas",     element: <Navigate to="/inicio" replace /> },
 
-      // Cualquier ruta desconocida dentro del área protegida → dashboard
-      { path: "*",             element: <Navigate to="/dashboard" replace /> },
+      // Cualquier ruta desconocida dentro del área protegida → 404 propia
+      // (antes rebotaba en silencio a /dashboard, sin avisar que la URL
+      // estaba mal).
+      { path: "*",             element: lazyPage(NotFoundPage), errorElement: <RouteErrorBoundary /> },
     ],
   },
 ]);

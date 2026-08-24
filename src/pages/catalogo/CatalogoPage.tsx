@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import PageHeader from "../../components/ui/PageHeader";
 import Breadcrumb from "../../components/ui/Breadcrumb";
 import ProductCard from "./ProductCard";
+import EmptyStateBadge from "../../components/illustrations/EmptyStateBadge";
 import FiltrosCatalogo, { type FiltrosState } from "./FiltrosCatalogo";
 import { useCatalogo } from "../../contexts/CatalogoContext";
 import { useCarrito } from "../../contexts/CarritoContext";
@@ -256,17 +257,11 @@ export default function CatalogoPage() {
 
         /* Estado vacío */
         <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-brand-neutral-100 flex items-center justify-center">
-            <svg
-              className="w-8 h-8 text-brand-neutral-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.5}
-            >
+          <EmptyStateBadge>
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} className="w-full h-full">
               <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 15.803a7.5 7.5 0 0 0 10.607 0z" />
             </svg>
-          </div>
+          </EmptyStateBadge>
           <p className="text-brand-neutral-500 font-medium">
             {search
               ? `Sin resultados para "${search}"`

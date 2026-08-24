@@ -1,6 +1,7 @@
 // src/components/RouteErrorBoundary.tsx
 import { Link, useRouteError, isRouteErrorResponse } from "react-router-dom";
 import Button from "./ui/Button";
+import ErrorIllustration from "./illustrations/ErrorIllustration";
 
 // errorElement de React Router: reemplaza SOLO el <Outlet/> de la ruta
 // donde se declara (o toda la app si se pone en la raíz), sin tirar
@@ -20,12 +21,8 @@ export default function RouteErrorBoundary() {
       : null;
 
   return (
-    <div className="min-h-[50vh] flex flex-col items-center justify-center gap-5 text-center px-6 py-16 animate-fade-in">
-      <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center">
-        <svg className="w-7 h-7 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-        </svg>
-      </div>
+    <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3 text-center px-6 py-16 animate-fade-in">
+      <ErrorIllustration size={148} />
 
       <div className="space-y-1.5">
         <h2 className="text-lg font-bold text-brand-neutral-900">Algo salió mal</h2>
