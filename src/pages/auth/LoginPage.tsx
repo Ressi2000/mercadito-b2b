@@ -51,9 +51,9 @@ export default function LoginPage() {
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-brand-primary-500 to-transparent opacity-70" />
 
           <img
-            src="/logo/gesrutas-iclient-trimmed.png"
+            src="/logo/GRiCt.png"
             alt="GesRutas iClient"
-            className="h-16 w-auto mx-auto mb-4 drop-shadow-[0_4px_16px_rgba(0,0,0,0.45)]"
+            className="h-18 w-auto mx-auto mb-4 drop-shadow-[0_4px_16px_rgba(0,0,0,0.45)]"
           />
 
           <p className="text-sm text-brand-neutral-400">
