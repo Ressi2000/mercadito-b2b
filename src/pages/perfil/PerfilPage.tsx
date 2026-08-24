@@ -278,7 +278,11 @@ export default function PerfilPage() {
           }}
         />
 
-        <div className="relative flex items-center gap-5 px-8 py-6">
+        {/* En mobile, avatar + nombre + insignia "Activo" no entran en una
+            sola fila sin que el nombre quede exprimido a un puñado de
+            caracteres — la insignia pasa a su propia línea debajo. */}
+        <div className="relative flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 px-6 sm:px-8 py-6">
+        <div className="flex items-center gap-5 min-w-0">
           {/* Avatar grande */}
           <div className="shrink-0 relative">
             <div className="w-16 h-16 rounded-2xl bg-brand-primary-500/20 border-2 border-brand-primary-500/40 text-brand-primary-300 flex items-center justify-center font-bold text-2xl">
@@ -325,9 +329,10 @@ export default function PerfilPage() {
               )}
             </div>
           </div>
+        </div>
 
           {/* Badge estado */}
-          <div className="shrink-0">
+          <div className="shrink-0 sm:ml-auto">
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-primary-500/20 border border-brand-primary-500/30 text-brand-primary-300 text-xs font-semibold">
               <span className="w-1.5 h-1.5 rounded-full bg-brand-primary-400" />
               Activo

@@ -191,7 +191,11 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-neutral-900 via-brand-neutral-800 to-brand-neutral-900 px-6 sm:px-9 py-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+      {/* lg: en vez de sm: — a partir de md:(768px) el sidebar fijo come
+          ~256px reales; con sm:(640) esta fila ya estaba horizontal antes
+          de tener ese espacio, y el botón "Nuevo pedido" quedaba cortado
+          contra el borde del card (overflow-hidden). */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-neutral-900 via-brand-neutral-800 to-brand-neutral-900 px-6 sm:px-9 py-8 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         <div
           className="absolute inset-0 pointer-events-none bg-cover bg-center"
           style={{
@@ -232,8 +236,11 @@ export default function DashboardPage() {
         </Button>
       </div>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* KPIs — lg:/xl: en vez de sm:/lg: por la misma razón: con sidebar
+          fijo desde md:(768), 2 columnas ya apretaban las etiquetas
+          ("Pedidos abiertos", "Empresas activas"...) a un puñado de
+          caracteres en tablet. */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-5">
         <KpiCard
           featured
           label="Pedidos abiertos"
@@ -324,7 +331,7 @@ export default function DashboardPage() {
           </ModuleCard>
 
           {/* Módulos futuros */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <ProximamenteWidget
               label="Facturas pendientes"
               fase="Fase 4 — Cuentas y Pagos"
@@ -395,40 +402,6 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* ── Vista previa: colores gradiente para cards ── */}
-      {/* Solo para evaluar — no es un componente final todavía. */}
-      <div className="space-y-3 pt-4 border-t border-dashed border-brand-neutral-200">
-        <p className="text-xs font-semibold text-brand-neutral-400 uppercase tracking-wide">
-          Vista previa — colores gradiente
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
-          <div className="rounded-2xl p-6 shadow-xl bg-gradient-to-br from-brand-primary-300 via-brand-primary-500 to-brand-primary-700">
-            <p className="text-xs font-semibold text-brand-neutral-900/70 uppercase tracking-wide">Dorado</p>
-            <p className="text-2xl font-display font-extrabold text-brand-neutral-900 mt-0.5">3</p>
-            <p className="text-xs text-brand-neutral-900/70 mt-0.5">Ejemplo de contenido</p>
-          </div>
-          <div className="rounded-2xl p-6 shadow-xl bg-gradient-to-br from-brand-primary-100 via-brand-primary-200 to-brand-primary-300">
-            <p className="text-xs font-semibold text-brand-neutral-700/70 uppercase tracking-wide">Dorado pálido</p>
-            <p className="text-2xl font-display font-extrabold text-brand-neutral-900 mt-0.5">3</p>
-            <p className="text-xs text-brand-neutral-700/70 mt-0.5">Ejemplo de contenido</p>
-          </div>
-          <div className="rounded-2xl p-6 shadow-xl bg-gradient-to-br from-emerald-400 via-emerald-600 to-emerald-800">
-            <p className="text-xs font-semibold text-white/70 uppercase tracking-wide">Verde</p>
-            <p className="text-2xl font-display font-extrabold text-white mt-0.5">3</p>
-            <p className="text-xs text-white/70 mt-0.5">Ejemplo de contenido</p>
-          </div>
-          <div className="rounded-2xl p-6 shadow-xl bg-gradient-to-br from-brand-accent-500 via-brand-accent-600 to-brand-accent-900">
-            <p className="text-xs font-semibold text-white/70 uppercase tracking-wide">Rojo</p>
-            <p className="text-2xl font-display font-extrabold text-white mt-0.5">3</p>
-            <p className="text-xs text-white/70 mt-0.5">Ejemplo de contenido</p>
-          </div>
-          <div className="rounded-2xl p-6 shadow-xl bg-gradient-to-br from-brand-neutral-700 via-brand-neutral-800 to-brand-neutral-900">
-            <p className="text-xs font-semibold text-brand-primary-300/80 uppercase tracking-wide">Azul</p>
-            <p className="text-2xl font-display font-extrabold text-white mt-0.5">3</p>
-            <p className="text-xs text-white/70 mt-0.5">Ejemplo de contenido</p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

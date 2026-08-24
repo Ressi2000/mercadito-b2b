@@ -201,7 +201,7 @@ export default function ProductCard({ material, empresaId, empresaNombre, style,
                 </div>
               )}
               <span className={`text-xl font-bold ${tieneDescuento ? "text-red-600" : "text-brand-primary-600"}`}>
-                {material.MonedaId ?? "$"} {material.PrecioNeto}
+                {material.MonedaId ?? "$"} {Number(material.PrecioNeto).toFixed(2)}
               </span>
               {material.UnidadMed && (
                 <p className="text-xs text-brand-neutral-400">por {material.UnidadMed}</p>

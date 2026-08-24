@@ -62,7 +62,11 @@ export default function FiltrosCatalogo({
         leftIcon={<SearchIcon />}
       />
 
-      <div className="flex flex-col sm:flex-row sm:items-end gap-5">
+      {/* lg: en vez de sm: — a partir de md:(768px) el sidebar fijo ya come
+          ~256px reales; con sm:(640) esta fila pasaba a horizontal antes de
+          tener espacio para Categoría + Rango(w-64) + Orden(w-52) +
+          Favoritos + Limpiar, y todo se apretaba/desbordaba en tablet. */}
+      <div className="flex flex-col lg:flex-row lg:items-end gap-5">
         {/* Categoría */}
         <div className="flex-1 min-w-0 space-y-1.5">
           <label htmlFor="filtro-categoria" className="block text-xs font-semibold text-brand-neutral-500 uppercase tracking-wide">
@@ -82,7 +86,7 @@ export default function FiltrosCatalogo({
         </div>
 
         {/* Rango de precio */}
-        <div className="sm:w-64 shrink-0 space-y-1.5">
+        <div className="lg:w-64 shrink-0 space-y-1.5">
           <label className="block text-xs font-semibold text-brand-neutral-500 uppercase tracking-wide">
             Rango de precio
           </label>
@@ -97,7 +101,7 @@ export default function FiltrosCatalogo({
         </div>
 
         {/* Orden */}
-        <div className="sm:w-52 shrink-0 space-y-1.5">
+        <div className="lg:w-52 shrink-0 space-y-1.5">
           <label htmlFor="filtro-orden" className="block text-xs font-semibold text-brand-neutral-500 uppercase tracking-wide">
             Ordenar por
           </label>
