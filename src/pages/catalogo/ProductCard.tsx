@@ -154,13 +154,15 @@ export default function ProductCard({ material, empresaId, empresaNombre, style,
           }}
           aria-label={isFavorito ? "Quitar de favoritos" : "Agregar a favoritos"}
           aria-pressed={isFavorito}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm shadow-sm flex items-center justify-center transition-transform duration-150 active:scale-90 hover:scale-105"
+          className={`absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm shadow-sm flex items-center justify-center transition-transform duration-150 active:scale-90 hover:scale-105 ${
+            isFavorito ? "text-red-600" : "text-brand-neutral-400"
+          }`}
         >
           <svg
             viewBox="0 0 24 24"
             className="w-4 h-4"
-            fill={isFavorito ? "#dc2626" : "none"}
-            stroke={isFavorito ? "#dc2626" : "#78716c"}
+            fill={isFavorito ? "currentColor" : "none"}
+            stroke="currentColor"
             strokeWidth={2}
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 21s-6.716-4.35-9.428-8.209C.688 10.075 1.5 6 5.25 5.25 7.5 4.8 9.6 5.7 12 8.4c2.4-2.7 4.5-3.6 6.75-3.15 3.75.75 4.562 4.825 2.678 7.541C18.716 16.65 12 21 12 21z" />
