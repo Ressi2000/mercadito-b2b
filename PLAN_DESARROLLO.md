@@ -890,3 +890,45 @@ Seguir el patrón existente:
   "errors": { "campo": ["Validación fallida"] }
 }
 ```
+
+---
+
+## Migración de dominio (CSRF)
+
+Hoy el frontend (Render) y GesRutasApi (AKS) viven en dominios distintos,
+así que el CSRF real de Laravel está temporalmente desactivado para todo
+`/mercadito/*` (`VerifyCsrfToken::$except` y `validateCsrfTokens(except:)`
+en `bootstrap/app.php` de GesRutasApi) — el navegador no deja que el JS de
+un dominio lea la cookie `XSRF-TOKEN` de otro, así que el SPA no puede
+armar el header `X-XSRF-TOKEN`. Mientras tanto, un middleware
+(`origen.mercadito` / `ValidarOrigenMercadito`) mitiga validando el header
+`Origin`/`Referer` contra `CORS_ALLOWED_ORIGINS` en cada request mutante
+— no es CSRF real, pero no depende de compartir dominio.
+
+Cuando Mercadito pase a compartir dominio con la API en AKS:
+
+- [ ] Sacar `'api/mercadito/*'` de `validateCsrfTokens(except:)` en
+      `bootstrap/app.php` (GesRutasApi).
+- [ ] Sacar `'mercadito/*'` de `VerifyCsrfToken::$except` (GesRutasApi).
+- [ ] Revisar `SESSION_SAME_SITE` en el `.env` de producción — hoy tiene
+      que ser `none` (+ `SESSION_SECURE_COOKIE=true`) para que la cookie
+      cruce dominios distintos; compartiendo dominio puede pasar a `lax`,
+      que es más restrictivo y preferible cuando no hace falta `none`.
+- [ ] Revisar `SESSION_DOMAIN` en el `.env` de producción — si API y
+      frontend quedan en subdominios del mismo dominio raíz (ej.
+      `api.sindoni.com` / `mercadito.sindoni.com`), tiene que apuntar al
+      dominio raíz compartido (`.sindoni.com`) para que la cookie sea
+      visible en ambos.
+- [ ] Actualizar `CORS_ALLOWED_ORIGINS` con el dominio nuevo del frontend
+      (también usado por `origen.mercadito`, que puede quedarse activo
+      como defensa en profundidad — no hace falta sacarlo).
+- [ ] Probar el flujo completo (login → agregar al carrito → confirmar
+      pedido) después del corte: es la primera vez que el header
+      `X-XSRF-TOKEN` real viaja de punta a punta en este código — el
+      axios del frontend ya está listo (`withXSRFToken: true` en
+      `services/api.ts`), pero nunca se ejerció en producción.
+- [ ] Aviso para QA/Postman: `origen.mercadito` rechaza con 403 cualquier
+      POST/PATCH/PUT/DELETE a `/mercadito/*` sin header `Origin` u origen
+      no listado en `CORS_ALLOWED_ORIGINS` — pruebas manuales por fuera
+      del navegador (Postman, curl) necesitan mandar `Origin` a mano.
+```
