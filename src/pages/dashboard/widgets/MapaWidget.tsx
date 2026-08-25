@@ -12,13 +12,20 @@ interface MapaWidgetProps {
 // antes se pagaba el costo igual en cada carga del dashboard.
 const MapaLeaflet = lazy(() => import("./MapaLeaflet"));
 
+const PinIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+  </svg>
+);
+
 export default function MapaWidget({ ubicacion, loading }: MapaWidgetProps) {
   const lat = ubicacion?.latitud ? Number(ubicacion.latitud) : null;
   const lon = ubicacion?.longitud ? Number(ubicacion.longitud) : null;
   const tieneCoordenadas = lat !== null && lon !== null && !Number.isNaN(lat) && !Number.isNaN(lon) && lat !== 0 && lon !== 0;
 
   return (
-    <ModuleCard title="Ubicación" tricolor>
+    <ModuleCard title="Ubicación" icon={<PinIcon />} iconAccent="red" iconSize="sm">
       {loading ? (
         <div className="h-52 rounded-xl bg-brand-neutral-100 animate-pulse" />
       ) : tieneCoordenadas ? (

@@ -6,12 +6,19 @@ interface CreditoWidgetProps {
   loading: boolean;
 }
 
+const CreditoIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-5 h-5">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0018.75 4.5H5.25A2.25 2.25 0 003 6.75v10.5A2.25 2.25 0 005.25 19.5z" />
+  </svg>
+);
+
 export default function CreditoWidget({ creditos, loading }: CreditoWidgetProps) {
   return (
     <ModuleCard
       title="Estado de cuenta"
-      titleRight={<span className="text-xs font-medium text-brand-neutral-400">Crédito disponible por empresa</span>}
-      tricolor
+      icon={<CreditoIcon />}
+      iconAccent="navy"
+      titleRight={<span className="text-xs font-medium text-brand-neutral-400 hidden xl:inline shrink-0">Por empresa</span>}
     >
       {loading ? (
         <div className="space-y-4 animate-pulse">

@@ -16,7 +16,7 @@ interface FavoritosWidgetProps {
 /** Widget lateral: lista vertical y compacta de favoritos (sin agrupar por empresa) — "a un ladito", como pidió la usuaria. */
 export default function FavoritosWidget({ favoritos, onSelect }: FavoritosWidgetProps) {
   return (
-    <ModuleCard title="Tus favoritos" titleRight={<span className="text-red-500"><HeartIcon /></span>}>
+    <ModuleCard title="Tus favoritos" icon={<HeartIcon />} iconAccent="red" iconSize="sm">
       {favoritos.length === 0 ? (
         <p className="text-sm text-brand-neutral-400">Aún no marcaste productos como favoritos.</p>
       ) : (
