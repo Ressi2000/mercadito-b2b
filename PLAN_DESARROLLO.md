@@ -79,9 +79,9 @@
 - ✅ Indicador de origen del pedido (`origen`: móvil/escritorio/cliente) en `pedidos_web`, código `PC-...` para pedidos de cliente en la tabla `pedidos`
 - ✅ Notificaciones reales al cliente: tabla `notificaciones_cliente`, endpoint interno Plus→Api (token compartido), endpoints cliente (`index`/`marcarLeida`/`marcarTodasLeidas`), campana del header conectada (`NotificacionContext` con polling cada 60s, `NotificacionDropdown`)
 - ✅ `PedidosPage` actualizada con los nuevos estados (`aprobado_vendedor`, `modificado`) y detalle de pedido con vendedor/N.° SAP/seguimiento
+- ✅ Gestión de `ClienteWebUser` desde GesRutasPlus (módulo "Clientes Web": alta con cliente+email+password, activar/desactivar, reset de contraseña, actividad — último acceso y pedidos realizados)
 
 **Pendiente:**
-- ⬜ Gestión de `ClienteWebUser` desde GesRutasPlus (alta/edición de credenciales del portal)
 - ⬜ Módulo de reclamos (Fase 5)
 
 ---
@@ -505,9 +505,9 @@ GesRutas iClient (frontend)
 | `src/pages/perfil/PerfilPage.tsx` | Rediseñar en secciones con tabs o acordeón |
 | `src/models/Perfil.ts` | **Crear**. Interfaces para datos expandidos |
 
-### 3.2 Gestión de clientes web en GesRutasPlus
+### 3.2 Gestión de clientes web en GesRutasPlus — ✅ Completo
 
-**Nuevo módulo** en el panel admin para crear y administrar usuarios del portal GesRutas iClient.
+Módulo `clientes-web` en el panel admin para crear y administrar usuarios del portal GesRutas iClient (`ClienteWebController`, permiso `ver_clientes_web`).
 
 #### Funcionalidades
 
