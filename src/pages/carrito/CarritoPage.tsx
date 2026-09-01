@@ -137,7 +137,14 @@ function CarritoItemRow({ item, empresaId }: { item: CarritoItem; empresaId: num
         </div>
 
         <button
-          onClick={() => eliminar(item.id)}
+          onClick={() => {
+            // Cancelar cualquier ajuste de cantidad pendiente de ESTE ítem
+            // (p. ej. venía de bajar con "-") antes de eliminarlo — si no,
+            // ese PATCH podía llegar después del DELETE, sobre un ítem que
+            // ya no existe (404 sin manejar).
+            updater.current.cancel(item.id);
+            eliminar(item.id);
+          }}
           className="shrink-0 w-8 h-8 rounded-lg hover:bg-red-50 flex items-center justify-center transition-colors duration-150 group disabled:opacity-40"
           title="Eliminar producto"
         >

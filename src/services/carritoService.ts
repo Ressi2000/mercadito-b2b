@@ -67,6 +67,9 @@ export async function vaciarCarrito(empresaId: number): Promise<void> {
 
 export interface ActualizadorDebounced {
   schedule: (itemId: number, cantidad: number) => void;
+  /** Cancela el ajuste pendiente de UN ítem — usar antes de eliminarlo, para
+   *  no mandar un PATCH de cantidad después de que el ítem ya no existe. */
+  cancel: (itemId: number) => void;
   cancelAll: () => void;
   flushAll: () => void;
 }
@@ -123,6 +126,17 @@ export function crearActualizadorDebounced(
     timers[itemId] = setTimeout(() => enviar(itemId, pendientes[itemId] ?? cantidad), delayMs);
   };
 
+  // Cancela el ajuste pendiente de UN ítem — usar justo antes de eliminarlo
+  // (llegó a cantidad 0). Sin esto, un PATCH de cantidad ya programado (o a
+  // punto de mandarse por el "primer click instantáneo" de arriba) podía
+  // llegar al backend DESPUÉS del DELETE, sobre un ítem que ya no existe —
+  // el backend respondía con un 404 sin manejar (ModelNotFoundException).
+  const cancel = (itemId: number) => {
+    if (timers[itemId]) clearTimeout(timers[itemId]);
+    delete timers[itemId];
+    delete pendientes[itemId];
+  };
+
   const cancelAll = () => {
     Object.values(timers).forEach(clearTimeout);
     Object.keys(timers).forEach((k) => delete timers[+k]);
@@ -144,5 +158,5 @@ export function crearActualizadorDebounced(
     });
   };
 
-  return { schedule, cancelAll, flushAll };
+  return { schedule, cancel, cancelAll, flushAll };
 }

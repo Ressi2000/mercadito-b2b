@@ -102,6 +102,10 @@ export default function ProductCard({ material, empresaId, empresaNombre, style,
   const handleRestar = () => {
     if (!itemEnCarrito) return;
     if (itemEnCarrito.cantidad === 1) {
+      // Cancelar cualquier ajuste de cantidad pendiente de ESTE ítem antes
+      // de eliminarlo — si no, un PATCH ya programado podía llegar después
+      // del DELETE, sobre un ítem que ya no existe (404 sin manejar).
+      updater.current.cancel(itemEnCarrito.id);
       eliminar(itemEnCarrito.id);
     } else {
       const nueva = itemEnCarrito.cantidad - 1;
