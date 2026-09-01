@@ -1,6 +1,7 @@
 // src/components/ui/AgregarRapidoButton.tsx
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCarrito } from "../../contexts/CarritoContext";
+import { crearActualizadorDebounced } from "../../services/carritoService";
 import type { CarritoItem } from "../../models/Carrito";
 
 type SnapshotMaterial = Pick<
@@ -35,18 +36,52 @@ const SpinnerIcon = () => (
  * completo de ProductCard. Solo suma — para bajar cantidad o quitar el
  * ítem, el catálogo/carrito de siempre. Muestra cuántos ya hay en el
  * carrito de esa empresa como una píldora al lado.
+ *
+ * Mismo patrón optimista que el stepper de ProductCard: una vez que el
+ * ítem ya existe en el carrito, cada click suma en el estado LOCAL al
+ * toque (actualizarLocal) y sincroniza con el servidor de fondo con
+ * debounce — nunca espera la red ni deshabilita el botón. Antes esto
+ * esperaba cada POST antes de dejar clickear de nuevo, lo cual se sentía
+ * lento; ahora solo el primer click (crear el ítem, necesita el id real
+ * que devuelve el backend) espera — de ahí en más es instantáneo.
  */
 export default function AgregarRapidoButton({ empresaId, materialId, snapshot, disabled }: AgregarRapidoButtonProps) {
-  const { carrito, carritosPorEmpresa, agregar } = useCarrito();
+  const { carrito, carritosPorEmpresa, agregar, actualizarLocal, sincronizarTotales, iniciarSync, terminarSync } = useCarrito();
   const [agregando, setAgregando] = useState(false);
 
+  const updater = useRef(
+    crearActualizadorDebounced(
+      500,
+      (_, totales) => sincronizarTotales(empresaId, totales.total_estimado, totales.desglose),
+      { onStart: iniciarSync, onFinally: terminarSync }
+    )
+  );
+  useEffect(() => () => updater.current.flushAll(), []);
+
   const carritoActivo = carrito?.mercancia_id === empresaId ? carrito : carritosPorEmpresa[empresaId];
-  const cantidadEnCarrito = carritoActivo?.items.find((i) => i.material_id === materialId)?.cantidad ?? 0;
+  const itemEnCarrito = carritoActivo?.items.find((i) => i.material_id === materialId) ?? null;
 
   const handleClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (disabled || agregando) return;
+    if (disabled) return;
+
+    // Ya está en el carrito: sumar en local ya mismo, sin esperar red.
+    if (itemEnCarrito) {
+      const nueva = itemEnCarrito.cantidad + 1;
+      actualizarLocal(itemEnCarrito.id, nueva);
+      // Solo hacer request si el id ya es real (positivo) — igual que en
+      // ProductCard: mientras el primer POST sigue en vuelo, estos clicks
+      // quedan en local y se reconcilian solos cuando ese POST resuelve.
+      if (itemEnCarrito.id > 0) {
+        updater.current.schedule(itemEnCarrito.id, nueva);
+      }
+      return;
+    }
+
+    // Primera vez para este producto: sí hay que esperar el POST, porque
+    // recién ahí se consigue el id real del ítem. Pasa una sola vez.
+    if (agregando) return;
     setAgregando(true);
     try {
       await agregar(empresaId, materialId, 1, snapshot);
@@ -56,6 +91,8 @@ export default function AgregarRapidoButton({ empresaId, materialId, snapshot, d
       setAgregando(false);
     }
   };
+
+  const cantidadEnCarrito = itemEnCarrito?.cantidad ?? 0;
 
   return (
     <div className="flex items-center gap-1 shrink-0">
