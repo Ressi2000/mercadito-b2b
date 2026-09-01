@@ -70,6 +70,8 @@ export interface ProductoDescuento {
   porc_descuento: number;
   moneda: string;
   unidad_medida: string;
+  /** % de impuesto del material — para agregar directo al carrito desde el carrusel. */
+  porc_impuesto: number;
   empresa_id: number;
   empresa_nombre: string | null;
 }

@@ -1,5 +1,6 @@
 import ModuleCard from "../../../components/ui/ModuleCard";
 import CarouselVertical from "../../../components/ui/CarouselVertical";
+import AgregarRapidoButton from "../../../components/ui/AgregarRapidoButton";
 import type { FavoritoSnapshot } from "../../../hooks/useFavoritos";
 
 const HeartIcon = () => (
@@ -22,28 +23,40 @@ export default function FavoritosWidget({ favoritos, onSelect }: FavoritosWidget
       ) : (
         <CarouselVertical>
           {favoritos.map((f) => (
-            <button
-              key={f.id}
-              onClick={() => onSelect(f)}
-              className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-brand-neutral-50 transition-colors duration-150 text-left group"
-            >
-              <div className="w-10 h-10 rounded-lg shrink-0 bg-gradient-to-br from-brand-neutral-100 to-brand-neutral-200 flex items-center justify-center overflow-hidden">
-                {f.foto ? (
-                  <img src={f.foto} alt={f.nombre} loading="lazy" decoding="async" className="h-full w-full object-cover" />
-                ) : (
-                  <span className="text-xs font-bold text-brand-primary-600">{f.nombre.charAt(0).toUpperCase()}</span>
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-brand-neutral-900 line-clamp-1 group-hover:text-brand-primary-700 transition-colors">
-                  {f.nombre}
-                </p>
-                <p className="text-xs text-brand-neutral-400 line-clamp-1">{f.empresaNombre}</p>
-              </div>
+            <div key={f.id} className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-brand-neutral-50 transition-colors duration-150 group">
+              <button onClick={() => onSelect(f)} className="flex items-center gap-3 min-w-0 flex-1 text-left">
+                <div className="w-10 h-10 rounded-lg shrink-0 bg-gradient-to-br from-brand-neutral-100 to-brand-neutral-200 flex items-center justify-center overflow-hidden">
+                  {f.foto ? (
+                    <img src={f.foto} alt={f.nombre} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="text-xs font-bold text-brand-primary-600">{f.nombre.charAt(0).toUpperCase()}</span>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-brand-neutral-900 line-clamp-1 group-hover:text-brand-primary-700 transition-colors">
+                    {f.nombre}
+                  </p>
+                  <p className="text-xs text-brand-neutral-400 line-clamp-1">{f.empresaNombre}</p>
+                </div>
+              </button>
               <p className="text-xs font-bold text-brand-primary-600 shrink-0 tabular-nums">
                 {f.precio != null ? `${f.moneda} ${f.precio.toFixed(2)}` : "—"}
               </p>
-            </button>
+              <AgregarRapidoButton
+                empresaId={f.empresaId}
+                materialId={f.id}
+                disabled={f.precio == null}
+                snapshot={{
+                  nombre: f.nombre,
+                  codigo: f.materialId,
+                  foto: f.foto,
+                  precio_unitario: f.precio ?? 0,
+                  unidad_medida: f.unidadMedida,
+                  moneda: f.moneda,
+                  porc_impuesto: f.porcImpuesto ?? 0,
+                }}
+              />
+            </div>
           ))}
         </CarouselVertical>
       )}

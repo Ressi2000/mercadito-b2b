@@ -11,6 +11,9 @@ export interface FavoritoSnapshot {
   moneda: string;
   foto: string | null;
   unidadMedida: string;
+  /** % de impuesto del material — para agregar directo al carrito desde el widget.
+   *  Opcional: favoritos guardados en localStorage antes de este campo no lo tienen. */
+  porcImpuesto?: number;
   empresaId: number;
   empresaNombre: string;
 }

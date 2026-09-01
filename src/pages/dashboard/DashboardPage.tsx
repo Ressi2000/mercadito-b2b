@@ -18,6 +18,7 @@ import Button from "../../components/ui/Button";
 import GoldRing from "../../components/ui/GoldRing";
 import Carousel from "../../components/ui/Carousel";
 import SplitText from "../../components/ui/SplitText";
+import AgregarRapidoButton from "../../components/ui/AgregarRapidoButton";
 
 const CoinIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
@@ -63,34 +64,70 @@ function EmpresaCarouselCard({
   );
 }
 
+/**
+ * Ya no es un solo <button> completo: el botón de agregar rápido va
+ * superpuesto sobre la imagen, y un botón dentro de otro botón no es
+ * válido — la imagen y el texto son botones hermanos, ambos navegan al
+ * catálogo de la empresa.
+ */
 function ProductoMiniCard({
   nombre,
   foto,
   onClick,
   children,
+  materialId,
+  empresaId,
+  codigo,
+  precioUnitario,
+  unidadMedida,
+  moneda,
+  porcImpuesto,
 }: {
   nombre: string;
   foto: string | null;
   onClick: () => void;
   children: React.ReactNode;
+  materialId: number;
+  empresaId: number;
+  codigo: string;
+  precioUnitario: number;
+  unidadMedida: string;
+  moneda: string;
+  porcImpuesto: number;
 }) {
   return (
-    <button
-      onClick={onClick}
-      className="shrink-0 w-40 snap-start text-left rounded-xl border border-brand-neutral-200 hover:border-brand-primary-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden bg-white group"
-    >
-      <div className="h-24 bg-gradient-to-br from-brand-neutral-100 to-brand-neutral-200 flex items-center justify-center overflow-hidden">
-        {foto ? (
-          <img src={foto} alt={nombre} loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
-        ) : (
-          <span className="text-lg font-bold text-brand-primary-600">{nombre.charAt(0).toUpperCase()}</span>
-        )}
+    <div className="shrink-0 w-40 snap-start rounded-xl border border-brand-neutral-200 hover:border-brand-primary-300 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden bg-white group">
+      <div className="relative">
+        <button onClick={onClick} className="block w-full text-left" aria-label={`Ver ${nombre} en el catálogo`}>
+          <div className="h-24 bg-gradient-to-br from-brand-neutral-100 to-brand-neutral-200 flex items-center justify-center overflow-hidden">
+            {foto ? (
+              <img src={foto} alt={nombre} loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+            ) : (
+              <span className="text-lg font-bold text-brand-primary-600">{nombre.charAt(0).toUpperCase()}</span>
+            )}
+          </div>
+        </button>
+        <div className="absolute bottom-2 right-2">
+          <AgregarRapidoButton
+            empresaId={empresaId}
+            materialId={materialId}
+            snapshot={{
+              nombre,
+              codigo,
+              foto,
+              precio_unitario: precioUnitario,
+              unidad_medida: unidadMedida,
+              moneda,
+              porc_impuesto: porcImpuesto,
+            }}
+          />
+        </div>
       </div>
-      <div className="p-3">
+      <button onClick={onClick} className="block w-full text-left p-3">
         <p className="text-sm font-semibold text-brand-neutral-900 line-clamp-1">{nombre}</p>
         {children}
-      </div>
-    </button>
+      </button>
+    </div>
   );
 }
 
@@ -303,6 +340,13 @@ export default function DashboardPage() {
                       nombre={p.nombre}
                       foto={p.foto}
                       onClick={() => navigate(`/catalogo/${p.empresa_id}`)}
+                      materialId={p.id}
+                      empresaId={p.empresa_id}
+                      codigo={p.material_id}
+                      precioUnitario={p.precio_neto}
+                      unidadMedida={p.unidad_medida}
+                      moneda={p.moneda}
+                      porcImpuesto={p.porc_impuesto}
                     >
                       <div className="flex items-center gap-1.5 mt-1">
                         <span className="text-[10px] text-brand-neutral-400 line-through">

@@ -148,6 +148,7 @@ export default function ProductCard({ material, empresaId, empresaNombre, style,
               moneda: material.MonedaId ?? "$",
               foto: material.foto?.foto ?? null,
               unidadMedida: material.UnidadMed ?? "und",
+              porcImpuesto: material.PorcImpuesto ?? 0,
               empresaId,
               empresaNombre,
             });
