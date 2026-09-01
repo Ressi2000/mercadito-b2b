@@ -23,6 +23,12 @@ const PlusIcon = () => (
   </svg>
 );
 
+const MinusIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-3 h-3">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
+  </svg>
+);
+
 const SpinnerIcon = () => (
   <svg className="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -31,22 +37,22 @@ const SpinnerIcon = () => (
 );
 
 /**
- * Botón compacto de "agregar 1 al carrito" para usar en cards chicas
- * (carruseles de descuentos, favoritos) donde no entra el stepper +/-
- * completo de ProductCard. Solo suma — para bajar cantidad o quitar el
- * ítem, el catálogo/carrito de siempre. Muestra cuántos ya hay en el
- * carrito de esa empresa como una píldora al lado.
+ * Control compacto de cantidad para cards chicas (carruseles de
+ * descuentos, favoritos) donde no entra el stepper +/- completo de
+ * ProductCard: mientras el producto no está en el carrito, un botón
+ * "+" solo; en cuanto entra, se convierte en el mismo mini-stepper
+ * (−, cantidad, +) — para poder corregir un click de más sin tener que
+ * ir al catálogo o al carrito.
  *
- * Mismo patrón optimista que el stepper de ProductCard: una vez que el
- * ítem ya existe en el carrito, cada click suma en el estado LOCAL al
- * toque (actualizarLocal) y sincroniza con el servidor de fondo con
- * debounce — nunca espera la red ni deshabilita el botón. Antes esto
- * esperaba cada POST antes de dejar clickear de nuevo, lo cual se sentía
- * lento; ahora solo el primer click (crear el ítem, necesita el id real
- * que devuelve el backend) espera — de ahí en más es instantáneo.
+ * Mismo patrón optimista que ProductCard: cada click suma/resta en el
+ * estado LOCAL al toque (actualizarLocal) y sincroniza con el servidor
+ * de fondo con debounce — nunca espera la red ni deshabilita el botón.
+ * Solo el primer "+" de un producto nuevo espera (necesita el id real
+ * que devuelve el backend); de ahí en más todo es instantáneo, incluido
+ * bajar la cantidad o llegar a 0 (elimina el ítem).
  */
 export default function AgregarRapidoButton({ empresaId, materialId, snapshot, disabled }: AgregarRapidoButtonProps) {
-  const { carrito, carritosPorEmpresa, agregar, actualizarLocal, sincronizarTotales, iniciarSync, terminarSync } = useCarrito();
+  const { carrito, carritosPorEmpresa, agregar, actualizarLocal, eliminar, sincronizarTotales, iniciarSync, terminarSync } = useCarrito();
   const [agregando, setAgregando] = useState(false);
 
   const updater = useRef(
@@ -61,18 +67,14 @@ export default function AgregarRapidoButton({ empresaId, materialId, snapshot, d
   const carritoActivo = carrito?.mercancia_id === empresaId ? carrito : carritosPorEmpresa[empresaId];
   const itemEnCarrito = carritoActivo?.items.find((i) => i.material_id === materialId) ?? null;
 
-  const handleClick = async (e: React.MouseEvent) => {
+  const handleSumar = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (disabled) return;
 
-    // Ya está en el carrito: sumar en local ya mismo, sin esperar red.
     if (itemEnCarrito) {
       const nueva = itemEnCarrito.cantidad + 1;
       actualizarLocal(itemEnCarrito.id, nueva);
-      // Solo hacer request si el id ya es real (positivo) — igual que en
-      // ProductCard: mientras el primer POST sigue en vuelo, estos clicks
-      // quedan en local y se reconcilian solos cuando ese POST resuelve.
       if (itemEnCarrito.id > 0) {
         updater.current.schedule(itemEnCarrito.id, nueva);
       }
@@ -92,25 +94,61 @@ export default function AgregarRapidoButton({ empresaId, materialId, snapshot, d
     }
   };
 
-  const cantidadEnCarrito = itemEnCarrito?.cantidad ?? 0;
+  const handleRestar = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!itemEnCarrito) return;
+
+    if (itemEnCarrito.cantidad === 1) {
+      eliminar(itemEnCarrito.id);
+      return;
+    }
+
+    const nueva = itemEnCarrito.cantidad - 1;
+    actualizarLocal(itemEnCarrito.id, nueva);
+    if (itemEnCarrito.id > 0) {
+      updater.current.schedule(itemEnCarrito.id, nueva);
+    }
+  };
+
+  if (itemEnCarrito) {
+    return (
+      <div className="flex items-center gap-1 shrink-0">
+        <button
+          type="button"
+          onClick={handleRestar}
+          aria-label="Restar uno"
+          title="Restar uno"
+          className="w-6 h-6 shrink-0 rounded-full bg-brand-neutral-100 hover:bg-brand-neutral-200 flex items-center justify-center text-brand-neutral-700 transition-transform duration-150 active:scale-90"
+        >
+          <MinusIcon />
+        </button>
+        <span className="text-[11px] font-bold text-brand-primary-600 tabular-nums w-4 text-center">
+          {itemEnCarrito.cantidad}
+        </span>
+        <button
+          type="button"
+          onClick={handleSumar}
+          aria-label="Sumar uno"
+          title="Sumar uno"
+          className="w-6 h-6 shrink-0 rounded-full bg-brand-primary-600 hover:bg-brand-primary-700 shadow-md flex items-center justify-center text-white transition-transform duration-150 active:scale-90"
+        >
+          <PlusIcon />
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex items-center gap-1 shrink-0">
-      {cantidadEnCarrito > 0 && (
-        <span className="text-[10px] font-bold text-brand-primary-600 bg-brand-primary-50 rounded-full px-1.5 py-0.5 tabular-nums">
-          {cantidadEnCarrito}
-        </span>
-      )}
-      <button
-        type="button"
-        onClick={handleClick}
-        disabled={disabled || agregando}
-        aria-label="Agregar al carrito"
-        title="Agregar al carrito"
-        className="w-7 h-7 shrink-0 rounded-full bg-brand-primary-600 hover:bg-brand-primary-700 disabled:opacity-40 disabled:cursor-not-allowed shadow-md flex items-center justify-center text-white transition-transform duration-150 active:scale-90 hover:scale-105"
-      >
-        {agregando ? <SpinnerIcon /> : <PlusIcon />}
-      </button>
-    </div>
+    <button
+      type="button"
+      onClick={handleSumar}
+      disabled={disabled || agregando}
+      aria-label="Agregar al carrito"
+      title="Agregar al carrito"
+      className="w-7 h-7 shrink-0 rounded-full bg-brand-primary-600 hover:bg-brand-primary-700 disabled:opacity-40 disabled:cursor-not-allowed shadow-md flex items-center justify-center text-white transition-transform duration-150 active:scale-90 hover:scale-105"
+    >
+      {agregando ? <SpinnerIcon /> : <PlusIcon />}
+    </button>
   );
 }
