@@ -135,6 +135,10 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
   const cacheRef = useRef<Record<number, { timestamp: number }>>({});
   const tempIdRef = useRef(-1);
   const carritoRef = useRef(carrito);
+  // Claves "empresaId:material_id" quitadas con eliminar() MIENTRAS su
+  // agregar() original todavía no había resuelto (id todavía temporal,
+  // negativo). Ver nota completa en eliminar() y en el try de agregar().
+  const pendingDeleteRef = useRef<Set<string>>(new Set());
 
   // Dedup de requests en vuelo por empresa (mismo motivo que en
   // CatalogoContext): el chequeo de caché no evita una segunda llamada
@@ -358,6 +362,22 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
       try {
         const resp = await agregarItem(empresaId, material_id, cantidad);
 
+        // El usuario le dio "quitar" (o bajó a 0) sobre el ítem optimista
+        // ANTES de que este POST resolviera — eliminar() ya lo sacó del
+        // estado local (no tenía id real todavía para poder borrarlo en el
+        // servidor). Ahora que el servidor SÍ lo creó, hay que borrarlo ahí
+        // también — si no, queda un ítem fantasma que reaparece en la
+        // próxima carga del carrito aunque acá nunca se llegue a ver.
+        const pendingDeleteKey = `${empresaId}:${material_id}`;
+        if (pendingDeleteRef.current.has(pendingDeleteKey)) {
+          pendingDeleteRef.current.delete(pendingDeleteKey);
+          eliminarItem(resp.item.id).catch(() => {
+            // Best-effort: si esto falla, el próximo fetch del carrito lo
+            // muestra de nuevo y el usuario puede quitarlo a mano.
+          });
+          return;
+        }
+
         // Reemplazar ítem optimista (por material_id) con el real (con id
         // positivo). OJO: mientras este POST seguía en vuelo, el usuario
         // pudo haber seguido tocando +/- sobre el ítem optimista (temp id) —
@@ -499,6 +519,33 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
     const empresaId = Object.keys(prevMap)
       .map(Number)
       .find((k) => prevMap[k].items.some((i) => i.id === itemId));
+
+    // Ítem optimista (id temporal, todavía sin id real del servidor porque
+    // su agregar() original sigue en vuelo) — no hay nada que borrar en el
+    // backend TODAVÍA. Se saca del estado local igual (mismo feedback
+    // inmediato) y se marca por material_id para que agregar() lo borre en
+    // el servidor apenas tenga el id real — si no, quedaba un ítem
+    // fantasma creado en el servidor que el usuario nunca pidió quitar
+    // exitosamente, y encima el DELETE con id negativo explotaba (no
+    // existe, ni va a existir, ese id en la base de datos).
+    if (itemId <= 0) {
+      if (empresaId !== undefined) {
+        const item = prevMap[empresaId].items.find((i) => i.id === itemId);
+        if (item) pendingDeleteRef.current.add(`${empresaId}:${item.material_id}`);
+      }
+      const pct = retencionPctRef.current;
+      setCarrito((prev) => prev ? aplicarEliminacion(prev, itemId, pct) : prev);
+      setCarritosPorEmpresa((prev) => {
+        const next = { ...prev };
+        Object.keys(next).forEach((k) => {
+          if (next[+k].items.some((i) => i.id === itemId)) {
+            next[+k] = aplicarEliminacion(next[+k], itemId, pct);
+          }
+        });
+        return next;
+      });
+      return;
+    }
 
     const pct = retencionPctRef.current;
     setCarrito((prev) => prev ? aplicarEliminacion(prev, itemId, pct) : prev);
