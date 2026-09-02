@@ -1,6 +1,6 @@
 // src/services/dashboardService.ts
 import api from "./api";
-import type { DashboardData, TasaBcv, VisitaComercial, ProximaVisita, ProductoDescuento } from "../models/Dashboard";
+import type { DashboardData, TasaBcv, VisitaComercial, ProximaVisita, ProductoDescuento, PedidoRapidoEmpresa } from "../models/Dashboard";
 
 interface ApiResponse<T = null> {
   success: boolean;
@@ -48,5 +48,11 @@ export const getProximaVisita = async (signal?: AbortSignal): Promise<ProximaVis
 /** Top productos con descuento SAP vigente, entre todas las empresas del cliente */
 export const getDescuentos = async (signal?: AbortSignal): Promise<ProductoDescuento[]> => {
   const response = await api.get<ApiResponse<ProductoDescuento[]>>("/mercadito/dashboard/descuentos", { signal });
+  return response.data.data ?? [];
+};
+
+/** Productos que sueles pedir (aprobados y subidos a SAP, últimos 90 días), agrupados por empresa */
+export const getPedidoRapido = async (signal?: AbortSignal): Promise<PedidoRapidoEmpresa[]> => {
+  const response = await api.get<ApiResponse<PedidoRapidoEmpresa[]>>("/mercadito/dashboard/pedido-rapido", { signal });
   return response.data.data ?? [];
 };

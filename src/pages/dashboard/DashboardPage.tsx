@@ -2,10 +2,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { getDashboard, getUltimasVisitas, getProximaVisita, getDescuentos } from "../../services/dashboardService";
+import { getDashboard, getUltimasVisitas, getProximaVisita, getDescuentos, getPedidoRapido } from "../../services/dashboardService";
 import type { DashboardData, VisitaComercial, ProximaVisita, ProductoDescuento } from "../../models/Dashboard";
 import { getDashboardCache, setDashboardCache, DASHBOARD_CACHE_TTL_MS, type DashboardSnapshot } from "../../services/dashboardCache";
 import { useFavoritos } from "../../hooks/useFavoritos";
+import { useCarrito } from "../../contexts/CarritoContext";
 import MisPedidosWidget from "./widgets/MisPedidosWidget";
 import CreditoWidget from "./widgets/CreditoWidget";
 import MapaWidget from "./widgets/MapaWidget";
@@ -166,11 +167,57 @@ export default function DashboardPage() {
   const [descuentos, setDescuentos] = useState<ProductoDescuento[]>(cached?.data.descuentos ?? []);
   const [loading, setLoading] = useState(!cached);
   const { listaFavoritos } = useFavoritos();
+  const { agregar, setCarritoActivo } = useCarrito();
+  const [pedidoRapidoCargando, setPedidoRapidoCargando] = useState(false);
+  const [pedidoRapidoMensaje, setPedidoRapidoMensaje] = useState<string | null>(null);
 
   const descuentosPorEmpresa = useMemo(
     () => agruparPorEmpresa(descuentos, (d) => d.empresa_id, (d) => d.empresa_nombre ?? ""),
     [descuentos]
   );
+
+  // "Pedido rápido": trae los productos que el cliente pide seguido
+  // (aprobados y subidos a SAP, ver nota del backend) y los agrega
+  // directo a los carritos de cada empresa correspondiente, para que
+  // solo tenga que revisar/ajustar cantidades antes de confirmar — no
+  // arranca desde cero navegando el catálogo.
+  const handlePedidoRapido = async () => {
+    setPedidoRapidoMensaje(null);
+    setPedidoRapidoCargando(true);
+    try {
+      const grupos = await getPedidoRapido();
+
+      if (grupos.length === 0) {
+        setPedidoRapidoMensaje("Todavía no tenés suficiente historial de pedidos aprobados como para sugerir un pedido rápido.");
+        return;
+      }
+
+      for (const grupo of grupos) {
+        for (const item of grupo.items) {
+          await agregar(grupo.empresa_id, item.material_id, item.cantidad_sugerida, {
+            nombre: item.nombre,
+            codigo: item.codigo,
+            foto: item.foto,
+            precio_unitario: item.precio_unitario,
+            unidad_medida: item.unidad_medida,
+            moneda: item.moneda,
+            porc_impuesto: item.porc_impuesto,
+          });
+        }
+      }
+
+      // Deja activo el carrito de la empresa con más productos sugeridos
+      // — si hay más de una, el selector del header permite pasar a las
+      // demás (mismo patrón que cuando hay varios carritos con ítems).
+      const empresaConMasItems = grupos.reduce((a, b) => (b.items.length > a.items.length ? b : a));
+      setCarritoActivo(empresaConMasItems.empresa_id);
+      navigate("/carrito");
+    } catch {
+      setPedidoRapidoMensaje("No se pudo armar el pedido rápido. Intenta de nuevo.");
+    } finally {
+      setPedidoRapidoCargando(false);
+    }
+  };
 
   const aplicarSnapshot = (data: DashboardSnapshot) => {
     setDashboard(data.dashboard);
@@ -267,16 +314,28 @@ export default function DashboardPage() {
           pedido + empresas activas, antes 3 piezas separadas) + Estado de
           cuenta — lo primero que un cliente B2B quiere saber al entrar. */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-3">
           <MisPedidosWidget
-            pedidosAbiertos={dashboard?.pedidos_abiertos ?? 0}
+            pedidosPorEstado={dashboard?.pedidos_por_estado ?? { pendiente: 0, aprobado_vendedor: 0, aprobado: 0, rechazado: 0 }}
             empresasActivas={dashboard?.empresas_activas ?? 0}
+            productosPorEmpresa={dashboard?.productos_por_empresa ?? []}
             ultimoPedido={dashboard?.ultimo_pedido ?? null}
             loading={loading}
+            pedidoRapidoCargando={pedidoRapidoCargando}
             onVerTodos={() => navigate("/pedidos")}
-            onClickPedidosAbiertos={() => navigate("/pedidos")}
             onClickEmpresasActivas={() => navigate("/inicio")}
+            onClickEmpresaCatalogo={(empresaId) => navigate(`/catalogo/${empresaId}`)}
+            onNuevoPedido={() => navigate("/inicio")}
+            onPedidoRapido={handlePedidoRapido}
           />
+          {pedidoRapidoMensaje && (
+            <div className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl bg-brand-primary-50 border border-brand-primary-100 text-sm text-brand-primary-700 animate-fade-in">
+              <span>{pedidoRapidoMensaje}</span>
+              <button onClick={() => setPedidoRapidoMensaje(null)} className="text-brand-primary-500 hover:text-brand-primary-700 shrink-0" aria-label="Cerrar">
+                ✕
+              </button>
+            </div>
+          )}
         </div>
         <CreditoWidget creditos={dashboard?.creditos ?? []} loading={loading} />
       </div>

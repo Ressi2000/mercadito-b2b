@@ -15,8 +15,21 @@ export interface UltimoPedido {
   empresa: string;
   total: number;
   moneda: string;
-  status: "pendiente" | "aprobado" | "rechazado";
+  status: "pendiente" | "aprobado_vendedor" | "aprobado" | "rechazado" | "modificado";
   fecha: string;
+}
+
+export interface PedidosPorEstado {
+  pendiente: number;
+  aprobado_vendedor: number;
+  aprobado: number;
+  rechazado: number;
+}
+
+export interface ProductosPorEmpresa {
+  empresa_id: number;
+  empresa_nombre: string;
+  cantidad: number;
 }
 
 export interface UbicacionCliente {
@@ -35,6 +48,8 @@ export interface ClienteInfo {
 export interface DashboardData {
   creditos: CreditoResumen[];
   pedidos_abiertos: number;
+  pedidos_por_estado: PedidosPorEstado;
+  productos_por_empresa: ProductosPorEmpresa[];
   ultimo_pedido: UltimoPedido | null;
   empresas_activas: number;
   cliente: ClienteInfo | null;
@@ -74,4 +89,24 @@ export interface ProductoDescuento {
   porc_impuesto: number;
   empresa_id: number;
   empresa_nombre: string | null;
+}
+
+export interface PedidoRapidoItem {
+  material_id: number;
+  codigo: string;
+  nombre: string;
+  foto: string | null;
+  cantidad_sugerida: number;
+  /** Cuántos de tus últimos pedidos aprobados incluyeron este producto. */
+  veces_pedido: number;
+  precio_unitario: number;
+  unidad_medida: string;
+  moneda: string;
+  porc_impuesto: number;
+}
+
+export interface PedidoRapidoEmpresa {
+  empresa_id: number;
+  empresa_nombre: string | null;
+  items: PedidoRapidoItem[];
 }
