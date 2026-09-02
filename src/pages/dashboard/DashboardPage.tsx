@@ -2,11 +2,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { getDashboard, getTasaBcv, getUltimasVisitas, getProximaVisita, getDescuentos } from "../../services/dashboardService";
-import type { DashboardData, TasaBcv, VisitaComercial, ProximaVisita, ProductoDescuento } from "../../models/Dashboard";
+import { getDashboard, getUltimasVisitas, getProximaVisita, getDescuentos } from "../../services/dashboardService";
+import type { DashboardData, VisitaComercial, ProximaVisita, ProductoDescuento } from "../../models/Dashboard";
 import { getDashboardCache, setDashboardCache, DASHBOARD_CACHE_TTL_MS, type DashboardSnapshot } from "../../services/dashboardCache";
 import { useFavoritos } from "../../hooks/useFavoritos";
-import StatChip from "../../components/ui/StatChip";
 import MisPedidosWidget from "./widgets/MisPedidosWidget";
 import CreditoWidget from "./widgets/CreditoWidget";
 import MapaWidget from "./widgets/MapaWidget";
@@ -19,18 +18,6 @@ import GoldRing from "../../components/ui/GoldRing";
 import Carousel from "../../components/ui/Carousel";
 import SplitText from "../../components/ui/SplitText";
 import AgregarRapidoButton from "../../components/ui/AgregarRapidoButton";
-
-const CoinIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-);
-
-const CalendarIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-  </svg>
-);
 
 const TagIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
@@ -154,16 +141,14 @@ function agruparPorEmpresa<T>(
 }
 
 async function fetchDashboardSnapshot(signal?: AbortSignal): Promise<DashboardSnapshot> {
-  const [dashRes, tasaRes, visitasRes, proximaRes, descuentosRes] = await Promise.allSettled([
+  const [dashRes, visitasRes, proximaRes, descuentosRes] = await Promise.allSettled([
     getDashboard(signal),
-    getTasaBcv(signal),
     getUltimasVisitas(signal),
     getProximaVisita(signal),
     getDescuentos(signal),
   ]);
   return {
     dashboard: dashRes.status === "fulfilled" ? dashRes.value : null,
-    tasa: tasaRes.status === "fulfilled" ? tasaRes.value : null,
     visitas: visitasRes.status === "fulfilled" ? visitasRes.value : [],
     proximaVisita: proximaRes.status === "fulfilled" ? proximaRes.value : null,
     descuentos: descuentosRes.status === "fulfilled" ? descuentosRes.value : [],
@@ -176,7 +161,6 @@ export default function DashboardPage() {
 
   const cached = getDashboardCache();
   const [dashboard, setDashboard] = useState<DashboardData | null>(cached?.data.dashboard ?? null);
-  const [tasa, setTasa] = useState<TasaBcv | null>(cached?.data.tasa ?? null);
   const [visitas, setVisitas] = useState<VisitaComercial[]>(cached?.data.visitas ?? []);
   const [proximaVisita, setProximaVisita] = useState<ProximaVisita | null>(cached?.data.proximaVisita ?? null);
   const [descuentos, setDescuentos] = useState<ProductoDescuento[]>(cached?.data.descuentos ?? []);
@@ -190,7 +174,6 @@ export default function DashboardPage() {
 
   const aplicarSnapshot = (data: DashboardSnapshot) => {
     setDashboard(data.dashboard);
-    setTasa(data.tasa);
     setVisitas(data.visitas);
     setProximaVisita(data.proximaVisita);
     setDescuentos(data.descuentos);
@@ -278,26 +261,6 @@ export default function DashboardPage() {
         >
           Nuevo pedido →
         </Button>
-      </div>
-
-      {/* Franja de utilidad: Tasa BCV y Próxima visita — no son métricas de
-          la cuenta, son datos de referencia, así que no compiten en tamaño
-          con "Mis Pedidos" como antes lo hacían siendo KPI cards iguales. */}
-      <div className="flex flex-wrap items-center gap-3">
-        <StatChip
-          icon={<CoinIcon />}
-          iconAccent="green"
-          label="Tasa BCV"
-          value={tasa ? `Bs. ${tasa.tasa.toLocaleString("es-VE", { minimumFractionDigits: 2 })}` : "—"}
-          hint={tasa ? new Date(tasa.fecha).toLocaleDateString("es-VE") : "No disponible"}
-        />
-        <StatChip
-          icon={<CalendarIcon />}
-          iconAccent="gold"
-          label="Próxima visita"
-          value={proximaVisita ? new Date(proximaVisita.fecha).toLocaleDateString("es-VE", { day: "2-digit", month: "short" }) : "—"}
-          hint={proximaVisita?.vendedor ?? "No agendada"}
-        />
       </div>
 
       {/* Fila principal: Mis Pedidos (fusiona pedidos abiertos + último

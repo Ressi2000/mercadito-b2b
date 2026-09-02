@@ -1,9 +1,8 @@
 // src/services/dashboardCache.ts
-import type { DashboardData, TasaBcv, VisitaComercial, ProximaVisita, ProductoDescuento } from "../models/Dashboard";
+import type { DashboardData, VisitaComercial, ProximaVisita, ProductoDescuento } from "../models/Dashboard";
 
 export interface DashboardSnapshot {
   dashboard: DashboardData | null;
-  tasa: TasaBcv | null;
   visitas: VisitaComercial[];
   proximaVisita: ProximaVisita | null;
   descuentos: ProductoDescuento[];

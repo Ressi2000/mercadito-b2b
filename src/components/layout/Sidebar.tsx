@@ -133,23 +133,27 @@ export default function Sidebar({ collapsed, mobileOpen, onCloseMobile, onExpand
 
   const content = (
     <nav className="relative z-10 flex flex-col h-full">
-      {/* Logo */}
+      {/* Logo — mismo asset que en el login (GRiCt.png), en vez del ícono +
+          texto de antes. Es un isologo ancho (wordmark), no un ícono
+          cuadrado — solo entra bien expandido; colapsado (76px) se
+          mantiene el ícono compacto de siempre, si no quedaría cortado a
+          la mitad. */}
       <button
         onClick={() => handleNavigate("/dashboard")}
         className="flex items-center gap-3 px-4 pt-4 pb-3 shrink-0 group"
       >
-        <div className="w-9 h-9 rounded-xl bg-brand-primary-500/20 border border-brand-primary-500/30 flex items-center justify-center shrink-0">
-          <svg className="w-5 h-5 text-brand-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
-          </svg>
-        </div>
-        {!isCollapsedDesktop && (
-          <div className="text-left overflow-hidden">
-            <h1 className="text-sm font-display font-extrabold text-white leading-tight tracking-tight group-hover:text-brand-primary-300 transition-colors whitespace-nowrap">
-              GesRutas iClient
-            </h1>
-            <p className="text-[11px] text-brand-primary-400 leading-tight whitespace-nowrap">Portal empresarial</p>
+        {isCollapsedDesktop ? (
+          <div className="w-9 h-9 rounded-xl bg-brand-primary-500/20 border border-brand-primary-500/30 flex items-center justify-center shrink-0">
+            <svg className="w-5 h-5 text-brand-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+            </svg>
           </div>
+        ) : (
+          <img
+            src="/logo/GRiCt.png"
+            alt="GesRutas iClient"
+            className="h-10 w-auto object-contain transition-opacity group-hover:opacity-90"
+          />
         )}
       </button>
 

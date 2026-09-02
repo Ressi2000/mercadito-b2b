@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useMatch } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useCarrito } from "../../contexts/CarritoContext";
+import { getTasaBcv } from "../../services/dashboardService";
+import type { TasaBcv } from "../../models/Dashboard";
 import NotificacionDropdown from "./NotificacionDropdown";
 
 interface HeaderProps {
@@ -11,6 +13,12 @@ interface HeaderProps {
   onToggleCollapsed: () => void;
   onOpenMobile: () => void;
 }
+
+const CoinIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
 
 export default function Header({ collapsed, onToggleCollapsed, onOpenMobile }: HeaderProps) {
   const { user } = useAuth();
@@ -21,8 +29,18 @@ export default function Header({ collapsed, onToggleCollapsed, onOpenMobile }: H
 
   const [carritoOpen, setCarritoOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [tasa, setTasa] = useState<TasaBcv | null>(null);
 
   const initial = user?.email?.charAt(0).toUpperCase() ?? "U";
+
+  // Vive acá (y no en el Dashboard) porque el navbar está en TODAS las
+  // páginas — es un dato de referencia útil en cualquier pantalla, no solo
+  // en el resumen de inicio.
+  useEffect(() => {
+    const controller = new AbortController();
+    getTasaBcv(controller.signal).then(setTasa);
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -79,6 +97,28 @@ export default function Header({ collapsed, onToggleCollapsed, onOpenMobile }: H
               <path strokeLinecap="round" d="M9 4.5v15" />
             </svg>
           </button>
+
+          {/* Tasa BCV — antes vivía como chip arriba del Dashboard; se
+              movió acá porque el navbar está en todas las páginas, y es
+              un dato de referencia útil en cualquier pantalla. Oculto en
+              mobile (hidden sm:flex) para no competir con el resto de los
+              íconos en una barra ya angosta. */}
+          {tasa && (
+            <>
+              <div className="hidden sm:block w-px h-6 bg-brand-neutral-200" />
+              <div className="hidden sm:flex items-center gap-2" title={`Actualizado ${new Date(tasa.fecha).toLocaleDateString("es-VE")}`}>
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-emerald-100 text-emerald-700 shrink-0">
+                  <CoinIcon />
+                </div>
+                <div className="leading-tight">
+                  <p className="text-[10px] font-semibold text-brand-neutral-500 uppercase tracking-wide">Tasa BCV</p>
+                  <p className="text-[13px] font-bold text-brand-neutral-900 tabular-nums">
+                    Bs. {tasa.tasa.toLocaleString("es-VE", { minimumFractionDigits: 2 })}
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="flex items-center gap-3">
