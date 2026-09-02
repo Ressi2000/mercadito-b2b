@@ -140,7 +140,7 @@ export default function Sidebar({ collapsed, mobileOpen, onCloseMobile, onExpand
           la mitad. */}
       <button
         onClick={() => handleNavigate("/dashboard")}
-        className="flex items-center gap-3 px-4 pt-4 pb-3 shrink-0 group"
+        className="flex items-center justify-center gap-3 px-4 pt-4 pb-3 shrink-0 group"
       >
         {isCollapsedDesktop ? (
           <div className="w-9 h-9 rounded-xl bg-brand-primary-500/20 border border-brand-primary-500/30 flex items-center justify-center shrink-0">
@@ -152,7 +152,7 @@ export default function Sidebar({ collapsed, mobileOpen, onCloseMobile, onExpand
           <img
             src="/logo/GRiCt.png"
             alt="GesRutas iClient"
-            className="h-14 w-auto object-contain transition-opacity group-hover:opacity-90"
+            className="h-auto w-auto object-contain mx-auto transition-opacity group-hover:opacity-90"
           />
         )}
       </button>
