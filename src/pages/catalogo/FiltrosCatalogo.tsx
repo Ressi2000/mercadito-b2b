@@ -62,13 +62,16 @@ export default function FiltrosCatalogo({
         leftIcon={<SearchIcon />}
       />
 
-      {/* lg: en vez de sm: — a partir de md:(768px) el sidebar fijo ya come
-          ~256px reales; con sm:(640) esta fila pasaba a horizontal antes de
-          tener espacio para Categoría + Rango(w-64) + Orden(w-52) +
-          Favoritos + Limpiar, y todo se apretaba/desbordaba en tablet. */}
-      <div className="flex flex-col lg:flex-row lg:items-end gap-5">
+      {/* xl: (1280px), no lg: (1024px) — con el sidebar fijo comiendo
+          ~256px reales, a 1024px (ej. iPad Pro en portrait) solo quedan
+          ~700px de contenido, insuficientes para Categoría + Rango(w-64) +
+          Orden(w-52) + Favoritos + Limpiar en una fila: Categoría (flex-1)
+          quedaba aplastada a casi 0px y su label se superponía con la de
+          Rango de precio. Ya se había movido esto de sm: a lg: por el
+          mismo motivo — a 1024px seguía sin alcanzar. */}
+      <div className="flex flex-col xl:flex-row xl:items-end gap-5">
         {/* Categoría */}
-        <div className="flex-1 min-w-0 space-y-1.5">
+        <div className="flex-1 min-w-[160px] space-y-1.5">
           <label htmlFor="filtro-categoria" className="block text-xs font-semibold text-brand-neutral-500 uppercase tracking-wide">
             Categoría
           </label>
@@ -86,7 +89,7 @@ export default function FiltrosCatalogo({
         </div>
 
         {/* Rango de precio */}
-        <div className="lg:w-64 shrink-0 space-y-1.5">
+        <div className="xl:w-64 shrink-0 space-y-1.5">
           <label className="block text-xs font-semibold text-brand-neutral-500 uppercase tracking-wide">
             Rango de precio
           </label>
@@ -101,7 +104,7 @@ export default function FiltrosCatalogo({
         </div>
 
         {/* Orden */}
-        <div className="lg:w-52 shrink-0 space-y-1.5">
+        <div className="xl:w-52 shrink-0 space-y-1.5">
           <label htmlFor="filtro-orden" className="block text-xs font-semibold text-brand-neutral-500 uppercase tracking-wide">
             Ordenar por
           </label>
@@ -120,16 +123,16 @@ export default function FiltrosCatalogo({
         </div>
 
         {/* Solo favoritos */}
-        {/* self-start lg:self-auto: por debajo de lg: el contenedor es
+        {/* self-start xl:self-auto: por debajo de xl: el contenedor es
             flex-col, y sin esto el stretch por defecto de flexbox estira
             este botón (pensado como píldora compacta) a todo el ancho de
-            la card. lg:self-auto restaura el items-end del padre (mismo
+            la card. xl:self-auto restaura el items-end del padre (mismo
             alineado con el borde inferior de los selects) en desktop. */}
         <button
           type="button"
           onClick={() => onChange({ ...filtros, soloFavoritos: !filtros.soloFavoritos })}
           aria-pressed={filtros.soloFavoritos}
-          className={`self-start lg:self-auto shrink-0 h-[42px] px-4 rounded-xl text-sm font-medium border flex items-center gap-2 transition-colors duration-200 ${
+          className={`self-start xl:self-auto shrink-0 h-[42px] px-4 rounded-xl text-sm font-medium border flex items-center gap-2 transition-colors duration-200 ${
             filtros.soloFavoritos
               ? "bg-red-50 border-red-200 text-red-600"
               : "border-brand-neutral-300 text-brand-neutral-600 hover:bg-brand-neutral-50"
@@ -149,7 +152,7 @@ export default function FiltrosCatalogo({
           disabled={!activo}
           aria-hidden={!activo}
           tabIndex={activo ? 0 : -1}
-          className={`self-start lg:self-auto shrink-0 h-[42px] px-4 rounded-xl text-sm font-medium border border-transparent transition-colors duration-200 ${
+          className={`self-start xl:self-auto shrink-0 h-[42px] px-4 rounded-xl text-sm font-medium border border-transparent transition-colors duration-200 ${
             activo
               ? "text-brand-primary-600 hover:bg-brand-primary-50 hover:border-brand-primary-100"
               : "opacity-0 pointer-events-none"
