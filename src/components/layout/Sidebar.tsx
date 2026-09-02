@@ -152,7 +152,7 @@ export default function Sidebar({ collapsed, mobileOpen, onCloseMobile, onExpand
           <img
             src="/logo/GRiCt.png"
             alt="GesRutas iClient"
-            className="h-10 w-auto object-contain transition-opacity group-hover:opacity-90"
+            className="h-30 w-auto object-contain transition-opacity group-hover:opacity-90"
           />
         )}
       </button>
