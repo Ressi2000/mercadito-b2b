@@ -120,11 +120,16 @@ export default function FiltrosCatalogo({
         </div>
 
         {/* Solo favoritos */}
+        {/* self-start lg:self-auto: por debajo de lg: el contenedor es
+            flex-col, y sin esto el stretch por defecto de flexbox estira
+            este botón (pensado como píldora compacta) a todo el ancho de
+            la card. lg:self-auto restaura el items-end del padre (mismo
+            alineado con el borde inferior de los selects) en desktop. */}
         <button
           type="button"
           onClick={() => onChange({ ...filtros, soloFavoritos: !filtros.soloFavoritos })}
           aria-pressed={filtros.soloFavoritos}
-          className={`shrink-0 h-[42px] px-4 rounded-xl text-sm font-medium border flex items-center gap-2 transition-colors duration-200 ${
+          className={`self-start lg:self-auto shrink-0 h-[42px] px-4 rounded-xl text-sm font-medium border flex items-center gap-2 transition-colors duration-200 ${
             filtros.soloFavoritos
               ? "bg-red-50 border-red-200 text-red-600"
               : "border-brand-neutral-300 text-brand-neutral-600 hover:bg-brand-neutral-50"
@@ -144,7 +149,7 @@ export default function FiltrosCatalogo({
           disabled={!activo}
           aria-hidden={!activo}
           tabIndex={activo ? 0 : -1}
-          className={`shrink-0 h-[42px] px-4 rounded-xl text-sm font-medium border border-transparent transition-colors duration-200 ${
+          className={`self-start lg:self-auto shrink-0 h-[42px] px-4 rounded-xl text-sm font-medium border border-transparent transition-colors duration-200 ${
             activo
               ? "text-brand-primary-600 hover:bg-brand-primary-50 hover:border-brand-primary-100"
               : "opacity-0 pointer-events-none"
