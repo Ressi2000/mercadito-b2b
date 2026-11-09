@@ -12,7 +12,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import api from "./api";
-import type { Carrito, CarritoItem } from "../models/Carrito";
+import type { Carrito, CarritoItem, DesgloseCarrito } from "../models/Carrito";
 
 // Respuesta del nuevo agregarItem del backend
 interface AgregarItemResponse {
@@ -21,6 +21,12 @@ interface AgregarItemResponse {
   codigo_pedido_web: string;
   total_estimado: number;
   mercancia_id: number;
+  desglose: DesgloseCarrito | null;
+}
+
+export interface TotalesCarrito {
+  total_estimado: number;
+  desglose: DesgloseCarrito | null;
 }
 
 export async function getCarrito(empresaId: number): Promise<Carrito> {
@@ -43,12 +49,14 @@ export async function agregarItem(
 export async function actualizarCantidad(
   itemId: number,
   cantidad: number
-): Promise<void> {
-  await api.patch(`/mercadito/carrito/items/${itemId}`, { cantidad });
+): Promise<TotalesCarrito> {
+  const response = await api.patch(`/mercadito/carrito/items/${itemId}`, { cantidad });
+  return response.data.data;
 }
 
-export async function eliminarItem(itemId: number): Promise<void> {
-  await api.delete(`/mercadito/carrito/items/${itemId}`);
+export async function eliminarItem(itemId: number): Promise<TotalesCarrito> {
+  const response = await api.delete(`/mercadito/carrito/items/${itemId}`);
+  return response.data.data;
 }
 
 export async function vaciarCarrito(empresaId: number): Promise<void> {
@@ -59,29 +67,96 @@ export async function vaciarCarrito(empresaId: number): Promise<void> {
 
 export interface ActualizadorDebounced {
   schedule: (itemId: number, cantidad: number) => void;
+  /** Cancela el ajuste pendiente de UN ítem — usar antes de eliminarlo, para
+   *  no mandar un PATCH de cantidad después de que el ítem ya no existe. */
+  cancel: (itemId: number) => void;
   cancelAll: () => void;
+  flushAll: () => void;
 }
 
-export function crearActualizadorDebounced(delayMs = 600): ActualizadorDebounced {
+export interface HooksSincronizacion {
+  // Se llaman alrededor del request real (no del delay de debounce en sí),
+  // para que un indicador de "sincronizando" en la UI refleje cuándo hay
+  // de verdad una petición en vuelo.
+  onStart?: () => void;
+  onFinally?: () => void;
+}
+
+export function crearActualizadorDebounced(
+  delayMs = 600,
+  onSuccess?: (itemId: number, totales: TotalesCarrito) => void,
+  hooks?: HooksSincronizacion
+): ActualizadorDebounced {
   const timers: Record<number, ReturnType<typeof setTimeout>> = {};
+  // Última cantidad programada por ítem — se necesita aparte del timer para
+  // poder enviarla de inmediato en flushAll() en vez de esperar el delay.
+  const pendientes: Record<number, number> = {};
+  // Instante del último envío real por ítem — permite que el PRIMER ajuste
+  // después de estar quieto se sienta instantáneo (se manda ya), y solo los
+  // clicks repetidos justo después se agrupen en un debounce normal. Antes,
+  // hasta el primer click esperaba el delay completo.
+  const ultimoEnvio: Record<number, number> = {};
+
+  const enviar = async (itemId: number, cantidad: number) => {
+    delete timers[itemId];
+    delete pendientes[itemId];
+    ultimoEnvio[itemId] = Date.now();
+    hooks?.onStart?.();
+    try {
+      const totales = await actualizarCantidad(itemId, cantidad);
+      onSuccess?.(itemId, totales);
+    } catch {
+      if (import.meta.env.DEV) {
+        console.warn(`[carritoService] Error sincronizando ítem ${itemId}`);
+      }
+    } finally {
+      hooks?.onFinally?.();
+    }
+  };
 
   const schedule = (itemId: number, cantidad: number) => {
+    pendientes[itemId] = cantidad;
     if (timers[itemId]) clearTimeout(timers[itemId]);
-    timers[itemId] = setTimeout(async () => {
-      delete timers[itemId];
-      try {
-        await actualizarCantidad(itemId, cantidad);
-      } catch {
-        if (import.meta.env.DEV) {
-          console.warn(`[carritoService] Error sincronizando ítem ${itemId}`);
-        }
-      }
-    }, delayMs);
+
+    const tiempoDesdeUltimoEnvio = Date.now() - (ultimoEnvio[itemId] ?? -Infinity);
+    if (tiempoDesdeUltimoEnvio >= delayMs) {
+      enviar(itemId, cantidad);
+      return;
+    }
+    timers[itemId] = setTimeout(() => enviar(itemId, pendientes[itemId] ?? cantidad), delayMs);
+  };
+
+  // Cancela el ajuste pendiente de UN ítem — usar justo antes de eliminarlo
+  // (llegó a cantidad 0). Sin esto, un PATCH de cantidad ya programado (o a
+  // punto de mandarse por el "primer click instantáneo" de arriba) podía
+  // llegar al backend DESPUÉS del DELETE, sobre un ítem que ya no existe —
+  // el backend respondía con un 404 sin manejar (ModelNotFoundException).
+  const cancel = (itemId: number) => {
+    if (timers[itemId]) clearTimeout(timers[itemId]);
+    delete timers[itemId];
+    delete pendientes[itemId];
   };
 
   const cancelAll = () => {
     Object.values(timers).forEach(clearTimeout);
+    Object.keys(timers).forEach((k) => delete timers[+k]);
+    Object.keys(pendientes).forEach((k) => delete pendientes[+k]);
   };
 
-  return { schedule, cancelAll };
+  // Envía YA cualquier cambio de cantidad que estuviera esperando el debounce,
+  // en vez de descartarlo. Se usa al desmontar la fila del carrito (navegar
+  // fuera de /carrito) para no perder el último ajuste del usuario — antes
+  // cancelAll() lo tiraba sin enviarlo si el desmontaje caía dentro de la
+  // ventana de debounce.
+  const flushAll = () => {
+    Object.keys(timers).forEach((key) => {
+      const itemId = Number(key);
+      clearTimeout(timers[itemId]);
+      const cantidad = pendientes[itemId];
+      delete timers[itemId];
+      if (cantidad !== undefined) enviar(itemId, cantidad);
+    });
+  };
+
+  return { schedule, cancel, cancelAll, flushAll };
 }

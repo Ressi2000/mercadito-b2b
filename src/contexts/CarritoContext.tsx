@@ -27,13 +27,15 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
-import type { Carrito, CarritoItem } from "../models/Carrito";
+import type { Carrito, CarritoItem, DesgloseCarrito } from "../models/Carrito";
 import {
   getCarrito,
   agregarItem,
+  actualizarCantidad,
   eliminarItem,
   vaciarCarrito,
 } from "../services/carritoService";
+import { calcularTotal, calcularDesgloseLocal } from "../utils/carritoCalculos";
 
 // ── Tipos ─────────────────────────────────────────────────────────────────────
 
@@ -45,15 +47,24 @@ interface CarritoContextType {
   loadingEmpresaId: number | null;
   error: string | null;
   totalItemsGlobal: number;
+  // true mientras el total_estimado/desglose mostrados son el cálculo local
+  // (instantáneo) y todavía hay al menos una cantidad esperando que el
+  // servidor la confirme — para mostrar un indicador sutil en vez de que
+  // el total simplemente cambie sin aviso cuando la confirmación llega.
+  sincronizando: boolean;
+  iniciarSync: () => void;
+  terminarSync: () => void;
 
   fetchCarrito: (empresaId: number, force?: boolean) => Promise<void>;
   fetchTodosLosCarritos: (empresas: { id: number; nombre: string }[]) => Promise<void>;
   setCarritoActivo: (empresaId: number) => void;
   agregar: (empresaId: number, material_id: number, cantidad?: number, materialSnapshot?: Partial<CarritoItem>) => Promise<void>;
   actualizarLocal: (itemId: number, cantidad: number) => void;
+  sincronizarTotales: (empresaId: number, total_estimado: number, desglose: DesgloseCarrito | null) => void;
   eliminar: (itemId: number) => Promise<void>;
   vaciar: (empresaId: number) => Promise<void>;
   clearCarrito: () => void;
+  limpiarCarritoConfirmado: (empresaId: number) => void;
   clearError: () => void;
 }
 
@@ -82,23 +93,21 @@ function restaurarDeSession(): Record<number, Carrito> {
 const CACHE_TTL_MS = 30_000;
 
 // ── Helpers puros ─────────────────────────────────────────────────────────────
+// calcularTotal/calcularDesgloseLocal viven en utils/carritoCalculos.ts
+// (importados abajo) para poder testearlos sin montar el Context.
 
-function calcularTotal(items: CarritoItem[]): number {
-  return items.reduce((acc, i) => acc + i.subtotal, 0);
-}
-
-function aplicarActualizacion(c: Carrito, itemId: number, cantidad: number): Carrito {
+function aplicarActualizacion(c: Carrito, itemId: number, cantidad: number, retencionPct: number): Carrito {
   const items = c.items.map((i) =>
     i.id === itemId
       ? { ...i, cantidad, subtotal: +(cantidad * i.precio_unitario).toFixed(2) }
       : i
   );
-  return { ...c, items, total_estimado: calcularTotal(items) };
+  return { ...c, items, total_estimado: calcularTotal(items), desglose: calcularDesgloseLocal(items, retencionPct) };
 }
 
-function aplicarEliminacion(c: Carrito, itemId: number): Carrito {
+function aplicarEliminacion(c: Carrito, itemId: number, retencionPct: number): Carrito {
   const items = c.items.filter((i) => i.id !== itemId);
-  return { ...c, items, total_estimado: calcularTotal(items) };
+  return { ...c, items, total_estimado: calcularTotal(items), desglose: calcularDesgloseLocal(items, retencionPct) };
 }
 
 // ── Contexto ──────────────────────────────────────────────────────────────────
@@ -116,10 +125,47 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
   const [loadingEmpresaId, setLoadingEmpresaId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Contador (no boolean) porque puede haber varios ítems sincronizando su
+  // cantidad a la vez — "sincronizando" debe seguir en true hasta que el
+  // ÚLTIMO termine. Ver iniciarSync/terminarSync más abajo.
+  const [syncsEnVuelo, setSyncsEnVuelo] = useState(0);
+  const iniciarSync = useCallback(() => setSyncsEnVuelo((n) => n + 1), []);
+  const terminarSync = useCallback(() => setSyncsEnVuelo((n) => Math.max(0, n - 1)), []);
+
   const cacheRef = useRef<Record<number, { timestamp: number }>>({});
   const tempIdRef = useRef(-1);
   const carritoRef = useRef(carrito);
+  // Claves "empresaId:material_id" quitadas con eliminar() MIENTRAS su
+  // agregar() original todavía no había resuelto (id todavía temporal,
+  // negativo). Ver nota completa en eliminar() y en el try de agregar().
+  const pendingDeleteRef = useRef<Set<string>>(new Set());
+
+  // Dedup de requests en vuelo por empresa (mismo motivo que en
+  // CatalogoContext): el chequeo de caché no evita una segunda llamada
+  // que se dispara antes de que la primera haya respondido — típicamente
+  // por el doble-montaje de React StrictMode en desarrollo.
+  const enVueloRef = useRef<Record<number, Promise<Carrito>>>({});
+  const fetchCarritoRemoto = (empresaId: number): Promise<Carrito> => {
+    if (!enVueloRef.current[empresaId]) {
+      enVueloRef.current[empresaId] = getCarrito(empresaId).finally(() => {
+        delete enVueloRef.current[empresaId];
+      });
+    }
+    return enVueloRef.current[empresaId];
+  };
   const carritosPorEmpresaRef = useRef(carritosPorEmpresa);
+  // % de retención del cliente, derivado de la última respuesta real del
+  // backend (no viaja por ítem) — se usa para el recálculo local instantáneo.
+  const retencionPctRef = useRef(0);
+
+  const actualizarRetencionCache = useCallback((desglose: DesgloseCarrito | null | undefined) => {
+    if (!desglose) return;
+    const totalConIva =
+      desglose.subtotal_16 + desglose.subtotal_8 + desglose.subtotal_exento + desglose.iva_16 + desglose.iva_8;
+    if (totalConIva > 0) {
+      retencionPctRef.current = (desglose.retencion / totalConIva) * 100;
+    }
+  }, []);
 
   useEffect(() => { carritoRef.current = carrito; }, [carrito]);
   useEffect(() => {
@@ -141,10 +187,11 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
     const enriched = nombre ? { ...data, nombre_mercancia: nombre } : data;
     setCarrito(enriched);
     setCarritosPorEmpresa((prev) => ({ ...prev, [data.mercancia_id]: enriched }));
+    actualizarRetencionCache(data.desglose);
     if (data.id) { // solo marcar caché si el carrito existe en BD
       cacheRef.current[data.mercancia_id] = { timestamp: Date.now() };
     }
-  }, []);
+  }, [actualizarRetencionCache]);
 
   // ── setCarritoActivo ──────────────────────────────────────────────────────
 
@@ -188,7 +235,7 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
     setLoadingCarrito(true);
     setError(null);
     try {
-      const data = await getCarrito(empresaId);
+      const data = await fetchCarritoRemoto(empresaId);
       const nombre = carritosPorEmpresaRef.current[empresaId]?.nombre_mercancia;
       syncCarrito(data, nombre);
     } catch {
@@ -225,7 +272,7 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
       if (pendientes.length === 0) return;
 
       try {
-        const results = await Promise.allSettled(pendientes.map((e) => getCarrito(e.id)));
+        const results = await Promise.allSettled(pendientes.map((e) => fetchCarritoRemoto(e.id)));
         setCarritosPorEmpresa((prev) => {
           const next = { ...prev };
           results.forEach((r, i) => {
@@ -277,6 +324,7 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
         subtotal: +(cantidad * (materialSnapshot?.precio_unitario ?? 0)).toFixed(2),
         unidad_medida: materialSnapshot?.unidad_medida ?? "",
         moneda: materialSnapshot?.moneda ?? "$",
+        porc_impuesto: materialSnapshot?.porc_impuesto ?? 0,
       };
 
       const aplicarOptimista = (c: Carrito): Carrito => {
@@ -292,7 +340,7 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
         } else {
           items = [...c.items, itemOptimista];
         }
-        return { ...c, items, total_estimado: calcularTotal(items) };
+        return { ...c, items, total_estimado: calcularTotal(items), desglose: calcularDesgloseLocal(items, retencionPctRef.current) };
       };
 
       const carritoBase: Carrito = carritosPorEmpresaRef.current[empresaId] ?? {
@@ -314,27 +362,77 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
       try {
         const resp = await agregarItem(empresaId, material_id, cantidad);
 
-        // Reemplazar ítem optimista (por material_id) con el real (con id positivo)
+        // El usuario le dio "quitar" (o bajó a 0) sobre el ítem optimista
+        // ANTES de que este POST resolviera — eliminar() ya lo sacó del
+        // estado local (no tenía id real todavía para poder borrarlo en el
+        // servidor). Ahora que el servidor SÍ lo creó, hay que borrarlo ahí
+        // también — si no, queda un ítem fantasma que reaparece en la
+        // próxima carga del carrito aunque acá nunca se llegue a ver.
+        const pendingDeleteKey = `${empresaId}:${material_id}`;
+        if (pendingDeleteRef.current.has(pendingDeleteKey)) {
+          pendingDeleteRef.current.delete(pendingDeleteKey);
+          eliminarItem(resp.item.id).catch(() => {
+            // Best-effort: si esto falla, el próximo fetch del carrito lo
+            // muestra de nuevo y el usuario puede quitarlo a mano.
+          });
+          return;
+        }
+
+        // Reemplazar ítem optimista (por material_id) con el real (con id
+        // positivo). OJO: mientras este POST seguía en vuelo, el usuario
+        // pudo haber seguido tocando +/- sobre el ítem optimista (temp id) —
+        // esos clicks solo tocaron el estado local (actualizarLocal), el
+        // backend no los vio. Si acá pisamos con resp.item tal cual, esa
+        // cantidad "manda" y los clicks posteriores desaparecen en silencio.
+        // Por eso se parte del estado MÁS RECIENTE (no del snapshot
+        // "carritoOptimista" congelado al inicio de esta función) y, si la
+        // cantidad local diverge de la que se envió, se preserva la local y
+        // se reconcilia con el backend aparte.
+        //
+        // Tampoco se usa resp.total_estimado/resp.desglose para el carrito
+        // completo: es una foto tomada por el backend en el instante de ESTE
+        // request puntual, y con varios productos agregándose casi a la vez
+        // (mismo motivo que sincronizarTotales, ver esa nota) puede llegar
+        // desactualizada respecto a otros ítems ya confirmados. El total y
+        // el desglose se recalculan siempre en local a partir de los ítems
+        // finales — resp.desglose solo se usa para refinar el % de
+        // retención cacheado.
+        let cantidadDivergente: number | null = null;
         const reemplazarConReal = (c: Carrito): Carrito => {
-          const items = c.items.map((i) =>
-            i.material_id === material_id ? resp.item : i
-          );
-          return {
-            ...c,
-            id: resp.carrito_id,
-            codigo_pedido_web: resp.codigo_pedido_web,
-            total_estimado: resp.total_estimado,
-            items,
-          };
+          const items = c.items.map((i) => {
+            if (i.material_id !== material_id) return i;
+            if (i.id !== tempId || i.cantidad === cantidad) return resp.item;
+            cantidadDivergente = i.cantidad;
+            return { ...resp.item, cantidad: i.cantidad, subtotal: +(i.cantidad * resp.item.precio_unitario).toFixed(2) };
+          });
+          return { ...c, id: resp.carrito_id, codigo_pedido_web: resp.codigo_pedido_web, items };
         };
 
+        actualizarRetencionCache(resp.desglose);
+        const pct = retencionPctRef.current;
         const nombre = carritosPorEmpresaRef.current[empresaId]?.nombre_mercancia;
-        const carritoReal = reemplazarConReal(carritoOptimista);
-        const carritoRealConNombre = nombre ? { ...carritoReal, nombre_mercancia: nombre } : carritoReal;
+        const baseActual = carritosPorEmpresaRef.current[empresaId] ?? carritoOptimista;
+        const carritoReal = reemplazarConReal(baseActual);
+        const carritoRealConNombre: Carrito = {
+          ...carritoReal,
+          total_estimado: calcularTotal(carritoReal.items),
+          desglose: calcularDesgloseLocal(carritoReal.items, pct),
+          ...(nombre ? { nombre_mercancia: nombre } : {}),
+        };
 
         setCarrito(carritoRealConNombre);
         setCarritosPorEmpresa((prev) => ({ ...prev, [empresaId]: carritoRealConNombre }));
         cacheRef.current[empresaId] = { timestamp: Date.now() };
+
+        // Reconciliar con el backend la cantidad que quedó pendiente (ver
+        // nota arriba) — recién ahora el ítem tiene id real para poder hacerlo.
+        if (cantidadDivergente !== null) {
+          iniciarSync();
+          actualizarCantidad(resp.item.id, cantidadDivergente).then(
+            (totales) => sincronizarTotales(empresaId, totales.total_estimado, totales.desglose),
+            () => { /* silencioso: la próxima edición manual reintenta via el debounce normal */ }
+          ).finally(terminarSync);
+        }
       } catch (err: any) {
         // Revertir
         setCarrito(carritoBase.id === 0 ? null : carritoBase);
@@ -345,37 +443,117 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
       } finally {
         setLoadingEmpresaId(null);
       }
+      // sincronizarTotales se declara más abajo en este mismo componente
+      // pero es estable (useCallback con deps constantes) — no hace falta
+      // en el array de deps, y agregarla rompería con un ReferenceError
+      // por orden de declaración (TDZ) en el array evaluado en este punto.
     },
-    []
+    [actualizarRetencionCache, iniciarSync, terminarSync] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   // ── actualizarLocal ───────────────────────────────────────────────────────
 
   const actualizarLocal = useCallback((itemId: number, cantidad: number) => {
-    setCarrito((prev) => prev ? aplicarActualizacion(prev, itemId, cantidad) : prev);
+    const pct = retencionPctRef.current;
+    setCarrito((prev) => prev ? aplicarActualizacion(prev, itemId, cantidad, pct) : prev);
     setCarritosPorEmpresa((prev) => {
       const next = { ...prev };
       Object.keys(next).forEach((k) => {
         if (next[+k].items.some((i) => i.id === itemId)) {
-          next[+k] = aplicarActualizacion(next[+k], itemId, cantidad);
+          next[+k] = aplicarActualizacion(next[+k], itemId, cantidad, pct);
         }
       });
       return next;
     });
   }, []);
 
+  // ── sincronizarTotales ────────────────────────────────────────────────────
+  // Aplica un total_estimado/desglose recién calculado por el backend (tras
+  // agregar/actualizar/eliminar un ítem) al carrito en memoria, para que el
+  // resumen fiscal nunca quede desactualizado respecto al servidor (corrige
+  // cualquier redondeo del recálculo local optimista).
+
+  // No se aplica el total_estimado/desglose que devuelve el servidor tal
+  // cual: cada request de UN ítem (agregar, actualizar cantidad) devuelve
+  // una foto del carrito ENTERO tomada en el instante en que el backend
+  // procesó ESE request puntual. Con varios productos cambiando casi al
+  // mismo tiempo (backend serializado + red lenta), esas fotos llegan
+  // desordenadas — la última en aplicarse no es necesariamente la que
+  // refleja el estado real, y el total/desglose termina mostrando una
+  // mezcla de instantes distintos (visto en producción: ítems con la
+  // cantidad correcta pero un total que no correspondía a la suma).
+  // En su lugar, la respuesta del servidor solo se usa para refinar el %
+  // de retención cacheado; el total y el desglose se recalculan SIEMPRE
+  // en local a partir de los ítems actuales — única fuente de verdad,
+  // sin ventana para una carrera entre requests.
+  const sincronizarTotales = useCallback(
+    (empresaId: number, _total_estimado: number, desgloseServidor: DesgloseCarrito | null) => {
+      actualizarRetencionCache(desgloseServidor);
+      const pct = retencionPctRef.current;
+      setCarrito((prev) =>
+        prev && prev.mercancia_id === empresaId
+          ? { ...prev, total_estimado: calcularTotal(prev.items), desglose: calcularDesgloseLocal(prev.items, pct) }
+          : prev
+      );
+      setCarritosPorEmpresa((prev) => {
+        const actual = prev[empresaId];
+        if (!actual) return prev;
+        return {
+          ...prev,
+          [empresaId]: {
+            ...actual,
+            total_estimado: calcularTotal(actual.items),
+            desglose: calcularDesgloseLocal(actual.items, pct),
+          },
+        };
+      });
+    },
+    [actualizarRetencionCache]
+  );
+
   // ── eliminar ──────────────────────────────────────────────────────────────
 
   const eliminar = useCallback(async (itemId: number) => {
     const prevCarrito = carritoRef.current;
     const prevMap = carritosPorEmpresaRef.current;
+    const empresaId = Object.keys(prevMap)
+      .map(Number)
+      .find((k) => prevMap[k].items.some((i) => i.id === itemId));
 
-    setCarrito((prev) => prev ? aplicarEliminacion(prev, itemId) : prev);
+    // Ítem optimista (id temporal, todavía sin id real del servidor porque
+    // su agregar() original sigue en vuelo) — no hay nada que borrar en el
+    // backend TODAVÍA. Se saca del estado local igual (mismo feedback
+    // inmediato) y se marca por material_id para que agregar() lo borre en
+    // el servidor apenas tenga el id real — si no, quedaba un ítem
+    // fantasma creado en el servidor que el usuario nunca pidió quitar
+    // exitosamente, y encima el DELETE con id negativo explotaba (no
+    // existe, ni va a existir, ese id en la base de datos).
+    if (itemId <= 0) {
+      if (empresaId !== undefined) {
+        const item = prevMap[empresaId].items.find((i) => i.id === itemId);
+        if (item) pendingDeleteRef.current.add(`${empresaId}:${item.material_id}`);
+      }
+      const pct = retencionPctRef.current;
+      setCarrito((prev) => prev ? aplicarEliminacion(prev, itemId, pct) : prev);
+      setCarritosPorEmpresa((prev) => {
+        const next = { ...prev };
+        Object.keys(next).forEach((k) => {
+          if (next[+k].items.some((i) => i.id === itemId)) {
+            next[+k] = aplicarEliminacion(next[+k], itemId, pct);
+          }
+        });
+        return next;
+      });
+      return;
+    }
+
+    const pct = retencionPctRef.current;
+    setCarrito((prev) => prev ? aplicarEliminacion(prev, itemId, pct) : prev);
     setCarritosPorEmpresa((prev) => {
       const next = { ...prev };
       Object.keys(next).forEach((k) => {
         if (next[+k].items.some((i) => i.id === itemId)) {
-          next[+k] = aplicarEliminacion(next[+k], itemId);
+          next[+k] = aplicarEliminacion(next[+k], itemId, pct);
         }
       });
       return next;
@@ -383,7 +561,10 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
     setLoadingItemId(itemId);
 
     try {
-      await eliminarItem(itemId);
+      const totales = await eliminarItem(itemId);
+      if (empresaId !== undefined) {
+        sincronizarTotales(empresaId, totales.total_estimado, totales.desglose);
+      }
     } catch {
       if (prevCarrito) setCarrito(prevCarrito);
       setCarritosPorEmpresa(prevMap);
@@ -391,7 +572,7 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoadingItemId(null);
     }
-  }, []);
+  }, [sincronizarTotales]);
 
   // ── vaciar ────────────────────────────────────────────────────────────────
 
@@ -423,6 +604,22 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
     sessionStorage.removeItem(SESSION_KEY); // limpiar al cerrar sesión
   }, []);
 
+  // ── limpiarCarritoConfirmado ──────────────────────────────────────────────
+  // Igual que clearCarrito pero solo para UNA empresa — se usa al confirmar
+  // un pedido. clearCarrito() (logout) borraba TODOS los carritos en memoria,
+  // incluyendo los de otras empresas que el cliente tuviera en armado.
+
+  const limpiarCarritoConfirmado = useCallback((empresaId: number) => {
+    setCarrito((prev) => (prev && prev.mercancia_id === empresaId ? null : prev));
+    setCarritosPorEmpresa((prev) => {
+      if (!(empresaId in prev)) return prev;
+      const next = { ...prev };
+      delete next[empresaId];
+      return next;
+    });
+    cacheRef.current[empresaId] = { timestamp: 0 };
+  }, []);
+
   const clearError = useCallback(() => setError(null), []);
 
   return (
@@ -435,14 +632,19 @@ export function CarritoProvider({ children }: { children: ReactNode }) {
         loadingEmpresaId,
         error,
         totalItemsGlobal,
+        sincronizando: syncsEnVuelo > 0,
+        iniciarSync,
+        terminarSync,
         fetchCarrito,
         fetchTodosLosCarritos,
         setCarritoActivo,
         agregar,
         actualizarLocal,
+        sincronizarTotales,
         eliminar,
         vaciar,
         clearCarrito,
+        limpiarCarritoConfirmado,
         clearError,
       }}
     >

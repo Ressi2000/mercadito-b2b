@@ -5,53 +5,57 @@ export default {
     extend: {
       colors: {
         brand: {
-          // Paleta sofisticada basada en minerales naturales
-          slate: {
-            50: '#f8fafc',
-            100: '#f1f5f9',
-            200: '#e2e8f0',
-            300: '#cbd5e1',
-            400: '#94a3b8',
-            500: '#64748b',
-            600: '#475569',
-            700: '#334155',
-            800: '#1e293b',
-            900: '#0f172a',
+          // Paleta corporativa GesRutas iClient / Sindoni — azul profundo,
+          // dorado y un acento rojo italiano (bandera), extraída del
+          // empaque real de producto (fondo navy, cinta dorada, ribete negro).
+          neutral: {
+            50: '#f3f5f9',
+            100: '#e8ecf5',
+            200: '#e3e7f0',
+            300: '#c7cee0',
+            400: '#9aa6c2',
+            500: '#6b7690',
+            600: '#4d5876',
+            700: '#334066',
+            800: '#123059',
+            900: '#0a1a35',
           },
-          teal: {
-            50: '#f0fdfa',
-            100: '#ccfbf1',
-            200: '#99f6e4',
-            300: '#5eead4',
-            400: '#2dd4bf',
-            500: '#14b8a6',
-            600: '#0d9488',
-            700: '#0f766e',
-            800: '#115e59',
-            900: '#134e4a',
+          primary: {
+            // Dorado brillante — evita el tono oliva/opaco de la v1.
+            50: '#fffbea',
+            100: '#fff3c4',
+            200: '#ffe588',
+            300: '#ffd24d',
+            400: '#ffbe0b',
+            500: '#f2a900',
+            600: '#d99500',
+            700: '#b37a00',
+            800: '#8a5f00',
+            900: '#614300',
           },
-          amber: {
-            50: '#fffbeb',
-            100: '#fef3c7',
-            200: '#fde68a',
-            300: '#fcd34d',
-            400: '#fbbf24',
-            500: '#f59e0b',
-            600: '#d97706',
-            700: '#b45309',
-            800: '#92400e',
-            900: '#78350f',
-          }
+          accent: {
+            50: '#fdecee',
+            100: '#fad0d4',
+            200: '#f2a3ab',
+            300: '#e8747f',
+            400: '#dc4a56',
+            500: '#ce2b37',
+            600: '#b32029',
+            700: '#8f1922',
+            800: '#6e141b',
+            900: '#521015',
+          },
         },
       },
       fontFamily: {
-        display: ['Inter Variable', 'system-ui', 'sans-serif'],
+        display: ['Bricolage Grotesque', 'Inter Variable', 'system-ui', 'sans-serif'],
         body: ['Inter Variable', 'system-ui', 'sans-serif'],
       },
       animation: {
         'fade-in': 'fadeIn 0.6s ease-out',
         'slide-up': 'slideUp 0.5s ease-out',
         'float': 'float 3s ease-in-out infinite',
+        'split-word': 'splitWord 0.85s cubic-bezier(0.22,1,0.36,1) both',
       },
       keyframes: {
         fadeIn: {
@@ -65,6 +69,10 @@ export default {
         float: {
           '0%, 100%': { transform: 'translateY(0px)' },
           '50%': { transform: 'translateY(-10px)' },
+        },
+        splitWord: {
+          '0%': { transform: 'translateY(100%)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
         },
       },
     },

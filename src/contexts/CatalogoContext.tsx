@@ -54,6 +54,22 @@ export function CatalogoProvider({ children }: { children: ReactNode }) {
   const empresaActivaIdRef = useRef<number | null>(null);
   useEffect(() => { empresaActivaIdRef.current = empresaActivaId; }, [empresaActivaId]);
 
+  // Dedup de requests en vuelo por empresa: si dos llamadas a fetchCatalogo
+  // para la misma empresa se solapan (StrictMode monta el efecto dos veces
+  // en desarrollo, o dos componentes piden lo mismo casi a la vez), la
+  // segunda reutiliza la MISMA promesa en vez de disparar otra petición —
+  // el chequeo de caché por sí solo no alcanza porque ambas llamadas pasan
+  // por él antes de que la primera respuesta haya vuelto.
+  const enVueloRef = useRef<Record<number, Promise<Material[]>>>({});
+  const fetchMateriales = (empresaId: number): Promise<Material[]> => {
+    if (!enVueloRef.current[empresaId]) {
+      enVueloRef.current[empresaId] = getMaterialesByEmpresa(empresaId).finally(() => {
+        delete enVueloRef.current[empresaId];
+      });
+    }
+    return enVueloRef.current[empresaId];
+  };
+
   const fetchCatalogo = useCallback(
     async (empresaId: number, force = false) => {
       setError(null);
@@ -74,7 +90,7 @@ export function CatalogoProvider({ children }: { children: ReactNode }) {
         setMateriales(cached.materiales);
         setRefreshing(true);
         try {
-          const data = await getMaterialesByEmpresa(empresaId);
+          const data = await fetchMateriales(empresaId);
           cacheRef.current[empresaId] = { materiales: data, timestamp: Date.now() };
           // Comparar con ref (no con el state del closure)
           if (empresaActivaIdRef.current === empresaId) {
@@ -92,7 +108,7 @@ export function CatalogoProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       setMateriales([]);
       try {
-        const data = await getMaterialesByEmpresa(empresaId);
+        const data = await fetchMateriales(empresaId);
         cacheRef.current[empresaId] = { materiales: data, timestamp: Date.now() };
         setMateriales(data);
       } catch {

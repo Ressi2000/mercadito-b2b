@@ -7,9 +7,53 @@ export interface ItemPedidoWeb {
   nombre: string;
   cantidad: number;
   precio_unitario: number;
+  precio_bruto?: number | null;
+  porc_descuento?: number | null;
   subtotal: number;
   unidad_medida?: string;
   moneda?: string;
+}
+
+export type PedidoWebStatus = "pendiente" | "aprobado_vendedor" | "aprobado" | "rechazado" | "modificado";
+
+export interface HistorialPedidoWeb {
+  status_anterior: string;
+  status_nuevo: string;
+  actor_tipo: "vendedor" | "admin" | "cliente" | "sistema";
+  motivo?: string | null;
+  fecha: string;
+}
+
+export interface DesglosePedidoWeb {
+  subtotal_16: number;
+  subtotal_8: number;
+  subtotal_exento: number;
+  iva_16: number;
+  iva_8: number;
+  retencion: number;
+  total_retencion: number;
+}
+
+export interface PaginacionMeta {
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+}
+
+export interface ContadoresPedidos {
+  todos: number;
+  pendiente: number;
+  aprobado_vendedor: number;
+  aprobado: number;
+  rechazado: number;
+  modificado: number;
+}
+
+export interface PedidosPaginados {
+  pedidos: PedidoWeb[];
+  meta: PaginacionMeta;
+  counts: ContadoresPedidos;
 }
 
 export interface PedidoWeb {
@@ -19,9 +63,13 @@ export interface PedidoWeb {
   mercancia_id: number;
   total: number;
   moneda?: string;
-  status: "pendiente" | "aprobado" | "rechazado";
+  status: PedidoWebStatus;
   observaciones?: string;
   motivo_rechazo?: string;
+  vendedor?: string | null;
+  pedido_sap?: string | null;
   fecha: string;
   items?: ItemPedidoWeb[];
+  historial?: HistorialPedidoWeb[];
+  desglose?: DesglosePedidoWeb | null;
 }

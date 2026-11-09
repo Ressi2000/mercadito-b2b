@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: mercadito-b2b
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      # No es secreto, pero varía según a qué API apunte cada deploy (QA de
+      # AKS ahora; más adelante quizás otro entorno) — se completa a mano
+      # en el dashboard de Render en vez de quedar fijo en este archivo.
+      - key: VITE_API_BASE_URL
+        sync: false
+    routes:
+      # SPA con rutas del lado del cliente (React Router). Sin este rewrite,
+      # refrescar en /catalogo/3 o /pedidos devuelve 404 en un static site.
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable

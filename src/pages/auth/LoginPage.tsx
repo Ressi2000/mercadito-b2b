@@ -1,7 +1,7 @@
 // src/pages/auth/LoginPage.tsx
 import { useForm } from "react-hook-form";
 import { useAuth } from "../../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 
@@ -23,7 +23,7 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginForm) => {
     try {
       await login(data);
-      navigate("/empresas");
+      navigate("/dashboard");
     } catch {
       // El error ya está manejado en el contexto
     }
@@ -48,34 +48,15 @@ export default function LoginPage() {
         <div className="relative px-8 pt-10 pb-8 text-center overflow-hidden">
 
           {/* Línea de acento superior */}
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-brand-teal-500 to-transparent opacity-70" />
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-brand-primary-500 to-transparent opacity-70" />
 
-          {/* Ícono mineral */}
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-5"
-            style={{
-              background: "rgba(13, 148, 136, 0.15)",
-              border: "1px solid rgba(13, 148, 136, 0.30)",
-            }}
-          >
-            <svg
-              className="w-7 h-7 text-brand-teal-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.5}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"
-              />
-            </svg>
-          </div>
+          <img
+            src="/logo/GRiCt.png"
+            alt="GesRutas iClient"
+            className="h-18 w-auto mx-auto mb-4 drop-shadow-[0_4px_16px_rgba(0,0,0,0.45)]"
+          />
 
-          <h1 className="text-2xl font-bold text-white tracking-tight">
-            B2B Minerals
-          </h1>
-          <p className="text-sm text-brand-slate-400 mt-1">
+          <p className="text-sm text-brand-neutral-400">
             Portal de pedidos empresariales
           </p>
         </div>
@@ -101,19 +82,29 @@ export default function LoginPage() {
               })}
             />
 
-            <Input
-              type="password"
-              placeholder="••••••••"
-              label="Contraseña"
-              error={errors.password?.message}
-              {...register("password", {
-                required: "La contraseña es requerida",
-                minLength: {
-                  value: 6,
-                  message: "Mínimo 6 caracteres",
-                },
-              })}
-            />
+            <div className="space-y-2">
+              <Input
+                type="password"
+                placeholder="••••••••"
+                label="Contraseña"
+                error={errors.password?.message}
+                {...register("password", {
+                  required: "La contraseña es requerida",
+                  minLength: {
+                    value: 6,
+                    message: "Mínimo 6 caracteres",
+                  },
+                })}
+              />
+              <div className="text-right">
+                <Link
+                  to="/recuperar-password"
+                  className="text-xs font-medium text-brand-primary-400 hover:text-brand-primary-300 transition-colors"
+                >
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
+            </div>
 
             {/* Error global */}
             {error && (
@@ -145,8 +136,8 @@ export default function LoginPage() {
       </div>
 
       {/* ── Footer ── */}
-      <p className="text-center text-xs text-brand-slate-600">
-        © {new Date().getFullYear()} Gesindoni. Todos los derechos reservados.
+      <p className="text-center text-xs text-brand-neutral-600">
+        © {new Date().getFullYear()} Sindoni. Todos los derechos reservados.
       </p>
 
     </div>

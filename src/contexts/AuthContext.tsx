@@ -13,6 +13,9 @@ import {
   checkAuth,
   type LoginPayload,
 } from "../services/authService";
+import { UNAUTHORIZED_EVENT } from "../services/api";
+import { clearDashboardCache } from "../services/dashboardCache";
+import { clearEmpresasCache } from "../services/empresasCache";
 
 interface User {
   id: number;
@@ -23,6 +26,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
+  authChecked: boolean;
   loading: boolean;
   error: string | null;
   login: (data: LoginPayload) => Promise<void>;
@@ -33,7 +37,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser]     = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  // authChecked: solo el chequeo de sesión inicial (una vez, al montar la app).
+  // loading: solo acciones explícitas del usuario (login/logout en curso).
+  // Separados para que GuestRoute/ProtectedRoute no confundan un login en
+  // curso con "todavía no sé si hay sesión" y reemplacen el formulario.
+  const [authChecked, setAuthChecked] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError]   = useState<string | null>(null);
 
   // useRef evita que React StrictMode ejecute verifyAuth dos veces
@@ -58,11 +67,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
         localStorage.removeItem("mercadito_user");
       } finally {
-        setLoading(false);
+        setAuthChecked(true);
       }
     };
 
     verifyAuth();
+  }, []);
+
+  // Cuando cualquier request autenticado recibe 401 (sesión expirada, cookie
+  // invalidada por otra app en el mismo host, etc.), api.ts dispara este
+  // evento en vez de navegar él mismo — así el estado se limpia primero y
+  // ProtectedRoute redirige solo, sin pisarse con GuestRoute.
+  useEffect(() => {
+    const clearSession = () => {
+      setUser(null);
+      localStorage.removeItem("mercadito_user");
+      clearDashboardCache();
+      clearEmpresasCache();
+    };
+    window.addEventListener(UNAUTHORIZED_EVENT, clearSession);
+    return () => window.removeEventListener(UNAUTHORIZED_EVENT, clearSession);
   }, []);
 
   // ── Login ──────────────────────────────────────────────────────────
@@ -98,12 +122,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(null);
       hasVerified.current = false; // permite re-verificación en próximo login
       localStorage.removeItem("mercadito_user");
+      clearDashboardCache();
+      clearEmpresasCache();
       setLoading(false);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, loading, error, login, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, authChecked, loading, error, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

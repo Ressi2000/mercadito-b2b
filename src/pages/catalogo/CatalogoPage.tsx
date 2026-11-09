@@ -1,25 +1,38 @@
 // src/pages/catalogo/CatalogoPage.tsx
 
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import Input from "../../components/ui/Input";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
+import PageHeader from "../../components/ui/PageHeader";
+import Breadcrumb from "../../components/ui/Breadcrumb";
 import ProductCard from "./ProductCard";
+import EmptyStateBadge from "../../components/illustrations/EmptyStateBadge";
+import FiltrosCatalogo, { type FiltrosState } from "./FiltrosCatalogo";
 import { useCatalogo } from "../../contexts/CatalogoContext";
 import { useCarrito } from "../../contexts/CarritoContext";
+import { useFavoritos } from "../../hooks/useFavoritos";
+import type { MaterialCategoria } from "../../models/Material";
+
+const FILTROS_INICIALES: FiltrosState = {
+  categoriaId: null,
+  precioMin: null,
+  precioMax: null,
+  orden: "relevancia",
+  soloFavoritos: false,
+};
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 
 function ProductSkeleton() {
   return (
     <div className="rounded-2xl bg-white/60 border border-white/20 shadow-xl p-6 space-y-4 animate-pulse">
-      <div className="h-44 rounded-xl bg-brand-slate-200" />
+      <div className="h-44 rounded-xl bg-brand-neutral-200" />
       <div className="space-y-2">
-        <div className="h-4 bg-brand-slate-200 rounded w-3/4" />
-        <div className="h-3 bg-brand-slate-100 rounded w-1/3" />
+        <div className="h-4 bg-brand-neutral-200 rounded w-3/4" />
+        <div className="h-3 bg-brand-neutral-100 rounded w-1/3" />
       </div>
-      <div className="flex justify-between items-center pt-2 border-t border-brand-slate-100">
-        <div className="h-6 bg-brand-slate-200 rounded w-1/3" />
-        <div className="h-9 bg-brand-slate-100 rounded-xl w-24" />
+      <div className="flex justify-between items-center pt-2 border-t border-brand-neutral-100">
+        <div className="h-6 bg-brand-neutral-200 rounded w-1/3" />
+        <div className="h-9 bg-brand-neutral-100 rounded-xl w-24" />
       </div>
     </div>
   );
@@ -29,7 +42,6 @@ function ProductSkeleton() {
 
 export default function CatalogoPage() {
   const { empresaId } = useParams<{ empresaId: string }>();
-  const navigate = useNavigate();
   const empresaIdNum = Number(empresaId);
 
   const {
@@ -44,9 +56,12 @@ export default function CatalogoPage() {
     fetchCarrito,
     setCarritoActivo,
     loadingCarrito,
+    carritosPorEmpresa,
   } = useCarrito();
 
   const [search, setSearch] = useState("");
+  const [filtros, setFiltros] = useState<FiltrosState>(FILTROS_INICIALES);
+  const { esFavorito, toggleFavorito } = useFavoritos();
 
   useEffect(() => {
     if (!empresaIdNum) return;
@@ -63,59 +78,144 @@ export default function CatalogoPage() {
   }, [empresaIdNum]); // eslint-disable-line react-hooks/exhaustive-deps
   // Nota: [] intencional — solo re-ejecutar si cambia la empresa
 
-  const filteredMateriales = materiales.filter(
-    (m) =>
-      m.TextoMaterial.toLowerCase().includes(search.toLowerCase()) ||
-      m.MaterialId.toLowerCase().includes(search.toLowerCase())
-  );
+  // Categorías disponibles a partir de los materiales cargados
+  const categorias = useMemo(() => {
+    const mapa = new Map<number, MaterialCategoria>();
+    materiales.forEach((m) => {
+      if (m.categoria) mapa.set(m.categoria.id, m.categoria);
+    });
+    return Array.from(mapa.values()).sort((a, b) => a.nombre.localeCompare(b.nombre));
+  }, [materiales]);
+
+  // Rango de precios disponible en el catálogo cargado.
+  // PrecioNeto puede llegar como string desde el backend (columnas DECIMAL
+  // de SAP sin cast numérico) — Number() lo normaliza en vez de descartarlo.
+  const bounds = useMemo(() => {
+    const precios = materiales
+      .map((m) => Number(m.PrecioNeto))
+      .filter((p) => !isNaN(p));
+    if (precios.length === 0) return { min: 0, max: 0 };
+    return { min: Math.floor(Math.min(...precios)), max: Math.ceil(Math.max(...precios)) };
+  }, [materiales]);
+
+  const moneda = materiales.find((m) => m.MonedaId)?.MonedaId ?? "USD";
+
+  const filtrosActivos =
+    filtros.categoriaId !== null ||
+    (filtros.precioMin !== null && filtros.precioMin > bounds.min) ||
+    (filtros.precioMax !== null && filtros.precioMax < bounds.max) ||
+    filtros.orden !== "relevancia" ||
+    filtros.soloFavoritos;
+
+  const limpiarFiltros = () => setFiltros(FILTROS_INICIALES);
+
+  const filteredMateriales = useMemo(() => {
+    const min = filtros.precioMin;
+    const max = filtros.precioMax;
+
+    let resultado = materiales.filter((m) => {
+      const coincideBusqueda =
+        m.TextoMaterial.toLowerCase().includes(search.toLowerCase()) ||
+        m.MaterialId.toLowerCase().includes(search.toLowerCase());
+      if (!coincideBusqueda) return false;
+
+      if (filtros.categoriaId !== null && m.categoria?.id !== filtros.categoriaId) return false;
+      if (filtros.soloFavoritos && !esFavorito(m.id)) return false;
+
+      const precio = m.PrecioNeto !== undefined && m.PrecioNeto !== null ? Number(m.PrecioNeto) : null;
+      if (min !== null && (precio === null || isNaN(precio) || precio < min)) return false;
+      if (max !== null && (precio === null || isNaN(precio) || precio > max)) return false;
+
+      return true;
+    });
+
+    switch (filtros.orden) {
+      case "nombre_asc":
+        resultado = [...resultado].sort((a, b) => a.TextoMaterial.localeCompare(b.TextoMaterial));
+        break;
+      case "nombre_desc":
+        resultado = [...resultado].sort((a, b) => b.TextoMaterial.localeCompare(a.TextoMaterial));
+        break;
+      case "precio_asc":
+        resultado = [...resultado].sort((a, b) => Number(a.PrecioNeto ?? 0) - Number(b.PrecioNeto ?? 0));
+        break;
+      case "precio_desc":
+        resultado = [...resultado].sort((a, b) => Number(b.PrecioNeto ?? 0) - Number(a.PrecioNeto ?? 0));
+        break;
+    }
+
+    return resultado;
+  }, [materiales, search, filtros, esFavorito]);
+
+  // ── Scroll infinito ─────────────────────────────────────────────────────
+  // El catálogo ya vive entero en memoria (filtrado/ordenado arriba) — no
+  // hay ida y vuelta al backend acá, solo se revela de a tandas mientras
+  // se scrollea, para no renderizar cientos de cards de una sola vez.
+  const BATCH_SIZE = 24;
+  const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  // Reiniciar la tanda visible cuando cambia QUÉ se está viendo (búsqueda,
+  // filtros o empresa) — no cuando cambia algo que no afecta el conjunto
+  // resultante (ej. togglear un favorito), para no "colapsar" la grilla
+  // de golpe debajo del usuario mientras navega.
+  useEffect(() => {
+    setVisibleCount(BATCH_SIZE);
+  }, [search, filtros, empresaIdNum]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((prev) => Math.min(prev + BATCH_SIZE, filteredMateriales.length));
+        }
+      },
+      { rootMargin: "600px" } // disparar antes de que el sentinel entre en pantalla, para que no se note el corte
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [filteredMateriales.length]);
+
+  const materialesVisibles = filteredMateriales.slice(0, visibleCount);
+  const hayMasPorMostrar = visibleCount < filteredMateriales.length;
 
   return (
     <div className="space-y-10 animate-fade-in">
 
-      {/* ── Encabezado ── */}
-      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-        <div className="flex flex-col gap-1">
-          <button
-            onClick={() => navigate("/inicio")}
-            className="flex items-center gap-1.5 text-xs font-semibold text-brand-teal-600 hover:text-brand-teal-700 uppercase tracking-widest transition-colors duration-200 w-fit"
-          >
-            <svg
-              className="w-3.5 h-3.5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2.5}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-            </svg>
-            Inicio
-          </button>
+      <PageHeader
+        breadcrumb={<Breadcrumb items={[{ label: "Inicio", to: "/inicio" }, { label: "Catálogo" }]} />}
+        icon={
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 3h5.17a2 2 0 011.42.59l8.82 8.82a2 2 0 010 2.82l-6.76 6.76a2 2 0 01-2.82 0l-8.82-8.82A2 2 0 013 11.17V6a3 3 0 013-3z" />
+            <circle cx="8.5" cy="8.5" r="1.1" fill="currentColor" stroke="none" />
+          </svg>
+        }
+        title="Catálogo de Productos"
+        subtitle="Agrega productos a tu pedido directamente desde aquí."
+        titleExtra={
+          refreshing && (
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-primary-50 border border-brand-primary-100 text-[11px] font-medium text-brand-primary-600 animate-fade-in">
+              <span className="w-2.5 h-2.5 rounded-full border-2 border-brand-primary-400 border-t-transparent animate-spin" />
+              Actualizando
+            </span>
+          )
+        }
+      />
 
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold text-brand-slate-900">Catálogo de Productos</h1>
-            {/* Indicador de refresco silencioso — no interrumpe al usuario */}
-            {refreshing && (
-              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-teal-50 border border-brand-teal-100 text-[11px] font-medium text-brand-teal-600 animate-fade-in">
-                <span className="w-2.5 h-2.5 rounded-full border-2 border-brand-teal-400 border-t-transparent animate-spin" />
-                Actualizando
-              </span>
-            )}
-          </div>
-
-          <p className="text-brand-slate-500 mt-1">
-            Agrega productos a tu pedido directamente desde aquí.
-          </p>
-        </div>
-
-        {/* Buscador */}
-        <div className="w-full md:w-80 shrink-0">
-          <Input
-            placeholder="Buscar por nombre o código..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-      </div>
+      {/* ── Filtros ── */}
+      <FiltrosCatalogo
+        search={search}
+        onSearchChange={setSearch}
+        categorias={categorias}
+        filtros={filtros}
+        onChange={setFiltros}
+        activo={filtrosActivos}
+        onLimpiar={limpiarFiltros}
+        bounds={bounds}
+        moneda={moneda}
+      />
 
       {/* ── Error ── */}
       {error && (
@@ -157,28 +257,27 @@ export default function CatalogoPage() {
 
         /* Estado vacío */
         <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-brand-slate-100 flex items-center justify-center">
-            <svg
-              className="w-8 h-8 text-brand-slate-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.5}
-            >
+          <EmptyStateBadge>
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} className="w-full h-full">
               <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 15.803a7.5 7.5 0 0 0 10.607 0z" />
             </svg>
-          </div>
-          <p className="text-brand-slate-500 font-medium">
+          </EmptyStateBadge>
+          <p className="text-brand-neutral-500 font-medium">
             {search
               ? `Sin resultados para "${search}"`
-              : "No hay productos disponibles."}
+              : filtrosActivos
+                ? "Ningún producto coincide con los filtros aplicados."
+                : "No hay productos disponibles."}
           </p>
-          {search && (
+          {(search || filtrosActivos) && (
             <button
-              onClick={() => setSearch("")}
-              className="text-sm text-brand-teal-600 hover:text-brand-teal-700 font-medium transition-colors"
+              onClick={() => {
+                setSearch("");
+                limpiarFiltros();
+              }}
+              className="text-sm text-brand-primary-600 hover:text-brand-primary-700 font-medium transition-colors"
             >
-              Limpiar búsqueda
+              Limpiar búsqueda y filtros
             </button>
           )}
         </div>
@@ -188,29 +287,48 @@ export default function CatalogoPage() {
         /* Grid de productos */
         <>
           <div className="flex items-center justify-between -mt-4">
-            <p className="text-sm text-brand-slate-400">
-              {filteredMateriales.length}{" "}
-              {filteredMateriales.length === 1 ? "producto encontrado" : "productos encontrados"}
-            </p>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 text-white text-xs font-semibold shadow-sm shadow-emerald-700/30">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
+                <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" />
+                <rect x="13.5" y="3.5" width="7" height="7" rx="1.5" />
+                <rect x="3.5" y="13.5" width="7" height="7" rx="1.5" />
+                <rect x="13.5" y="13.5" width="7" height="7" rx="1.5" />
+              </svg>
+              {hayMasPorMostrar
+                ? `Mostrando ${materialesVisibles.length} de ${filteredMateriales.length} productos`
+                : `${filteredMateriales.length} ${filteredMateriales.length === 1 ? "producto encontrado" : "productos encontrados"}`}
+            </span>
             {/* Indicador de carga del carrito — solo informativo, no bloquea */}
             {loadingCarrito && (
-              <p className="text-xs text-brand-slate-400 flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full border-2 border-brand-slate-300 border-t-transparent animate-spin" />
+              <p className="text-xs text-brand-neutral-400 flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full border-2 border-brand-neutral-300 border-t-transparent animate-spin" />
                 Cargando carrito…
               </p>
             )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredMateriales.map((material, i) => (
+            {materialesVisibles.map((material, i) => (
               <ProductCard
                 key={material.id}
                 material={material}
                 empresaId={empresaIdNum}
-                style={{ animationDelay: `${i * 60}ms` }}
+                empresaNombre={carritosPorEmpresa[empresaIdNum]?.nombre_mercancia ?? ""}
+                style={{ animationDelay: `${(i % BATCH_SIZE) * 60}ms` }}
+                isFavorito={esFavorito(material.id)}
+                onToggleFavorito={toggleFavorito}
               />
             ))}
           </div>
+
+          {/* Sentinel del scroll infinito: al acercarse acá se revela la
+              siguiente tanda. rootMargin ya dispara con anticipación, así
+              que esto casi nunca llega a verse. */}
+          {hayMasPorMostrar && (
+            <div ref={sentinelRef} className="flex justify-center py-8">
+              <span className="w-2.5 h-2.5 rounded-full border-2 border-brand-neutral-300 border-t-transparent animate-spin" />
+            </div>
+          )}
         </>
       )}
     </div>
